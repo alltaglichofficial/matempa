@@ -3,780 +3,690 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MA.TEMPA - WATCH</title>
+  <title>MA.TEMPA - SETTINGS</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#f6f7f9">
+  <meta name="theme-color" content="#dbe7ee">
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       -webkit-tap-highlight-color: transparent;
     }
+
     body {
-      background-color: #f6f7f9;
+      background: linear-gradient(180deg, #d3e4ed 0%, #e9edf1 100%);
       color: #121212;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 0.8rem 1rem 3rem 1rem;
+      padding: 1.2rem 1.2rem 3rem 1.2rem;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: pan-y;
-      position: relative;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
     }
 
-    .top-header {
-      width: 310px;
+    .app-screen {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 내비 바 */
+    .header-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1.2rem;
+      padding: 0 4px;
     }
-    .home-btn {
-      background: #ffffff;
-      color: #3a3a3c;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      font-size: 0.75rem;
+
+    .nav-circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-      transition: all 0.15s ease;
-    }
-    .home-btn:active { 
-      background: #f0f0f2;
-      transform: scale(0.94);
-    }
-
-    h1 { 
-      font-size: 0.95rem; 
-      letter-spacing: 1.5px; 
-      margin: 0; 
-      color: #1a1a1a; 
-      font-weight: 800;
-    }
-    .header-placeholder { width: 34px; }
-
-    .watch-case {
-      width: 310px;
-      height: 380px;
-      background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
-      border-radius: 42px;
-      padding: 22px 20px 20px 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      margin-bottom: 0.9rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .watch-top-info {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.7rem;
-      color: #8e8e93;
-      letter-spacing: 1px;
-      font-weight: 700;
-      padding: 0 4px;
-    }
-    .watch-top-info .zone-badge {
-      color: #8e8e93;
-      font-size: 0.72rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 2px 8px;
-      border-radius: 6px;
-    }
-    .watch-top-info .zone-badge b {
-      color: #ffffff;
       font-size: 0.85rem;
+      color: #2c2c2e;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s ease;
+    }
+    .nav-circle-btn:active { transform: scale(0.92); }
+
+    .nav-title {
+      text-align: center;
+      line-height: 1.15;
+    }
+    .nav-title h2 {
+      font-size: 1.15rem;
       font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.5px;
+    }
+    .nav-title span {
+      font-size: 1.15rem;
+      font-weight: 500;
+      font-style: italic;
+      color: #111111;
+      font-family: serif;
       margin-left: 2px;
     }
 
-    .rolling-bpm-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: ns-resize;
-      touch-action: none;
-      width: 100%;
+    /* 카드 스택 컨테이너 */
+    .card-stack {
       position: relative;
-      margin-top: -6px;
-      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .rolling-bpm-wrap.dragging {
-      transform: scale(1.05);
-    }
-
-    .bpm-display {
-      font-size: 6.8rem;
-      font-weight: 800;
-      line-height: 0.92;
-      color: #ffffff;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -3px;
-      filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.12));
-    }
-    .roll-arrows {
-      font-size: 0.8rem;
-      color: #545458;
-      margin-left: 8px;
-      line-height: 1.2;
-      user-select: none;
-    }
-
-    .watch-pill-group {
+      width: 100%;
+      border-radius: 36px;
       display: flex;
-      gap: 8px;
-      margin-top: -4px;
-    }
-    .watch-pill {
-      padding: 5px 14px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      line-height: 1.2;
-      backdrop-filter: blur(10px);
-    }
-    .pill-green {
-      background: rgba(52, 199, 89, 0.12);
-      color: #34c759;
-      border: 1px solid rgba(52, 199, 89, 0.25);
-    }
-    .pill-yellow {
-      background: rgba(255, 214, 10, 0.12);
-      color: #ffd60a;
-      border: 1px solid rgba(255, 214, 10, 0.25);
-      min-width: 66px;
-      text-align: center;
-      font-size: 0.72rem;
-      letter-spacing: 0px;
+      flex-direction: column;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
     }
 
-    .watch-timer-capsule {
-      background: rgba(255, 255, 255, 0.06);
-      width: 180px;
-      height: 38px;
-      border-radius: 19px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 1.15rem;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      margin-top: 4px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .watch-indicators {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 2px;
-    }
-    .watch-ind-step {
-      width: 20px;
-      height: 3.5px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.1);
-      transition: background 0.08s, box-shadow 0.08s;
-    }
-    .watch-ind-step.active {
-      background: #34c759;
-      box-shadow: 0 0 10px rgba(52, 199, 89, 0.8);
-    }
-
-    .btn-action-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      width: 310px;
-      margin-bottom: 0.8rem;
-    }
-    .btn-action-group button {
-      height: 42px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      border-radius: 21px;
+    /* 공통 카드 스타일 */
+    .stack-card {
+      width: 100%;
+      border-radius: 34px;
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      overflow: hidden;
       cursor: pointer;
+      position: relative;
+    }
+
+    .card-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.15rem 1.4rem;
+    }
+
+    .card-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .card-header-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      border: 1px solid transparent;
-      transition: transform 0.12s ease, opacity 0.12s ease, background 0.15s ease;
-    }
-    .btn-action-group button:active { 
-      transform: scale(0.96); 
-      opacity: 0.85;
+      gap: 8px;
     }
 
-    .btn-main-start {
-      flex: 1.25;
-      background: #111111;
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
-      letter-spacing: 0.5px;
-    }
-    .btn-main-start.stop { 
-      background: #ff3b30; 
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(255, 59, 48, 0.25);
-    }
-
-    .btn-main-reset {
-      flex: 0.85;
-      background: #ffffff;
-      color: #8e8e93;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-    }
-    .btn-sub-add {
-      flex: 0.95;
-      background: #ffffff;
+    /* 헤더 인라인 복사 버튼: 펼쳐졌을 때만 표시 */
+    .header-copy-btn {
+      display: none;
+      background: #f0f2f5;
       color: #111111;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-    }
-    .btn-sub-update {
-      flex: 0.8;
-      background: #eef1f4;
-      color: #3a3a3c;
-    }
-
-    .slider-box {
-      width: 310px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 22px;
-      padding: 14px 16px;
-      margin-bottom: 0.8rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-    }
-    .slider-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.72rem;
-      color: #8e8e93;
+      padding: 3px 9px;
+      border-radius: 8px;
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .slider-row:last-child { margin-bottom: 0; }
-    .slider-row input[type="range"] {
-      width: 160px;
-      height: 4px;
-      border-radius: 2px;
-      accent-color: #111111;
-      outline: none;
-      background: #e9ebed;
-    }
-
-    .row-group { 
-      display: flex; 
-      gap: 0.4rem; 
-      margin-bottom: 0.55rem; 
-      align-items: center; 
-      justify-content: space-between; 
-      width: 310px; 
-    }
-    .row-label { 
-      font-size: 0.75rem; 
-      color: #8e8e93; 
-      width: 28px; 
-      flex-shrink: 0; 
-      font-weight: 700; 
-    }
-
-    .sound-chip-wrap {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      justify-content: space-between;
-      flex: 1;
-      width: calc(310px - 32px);
-    }
-    .sound-chip-btn {
-      flex: 1;
-      background: #ffffff;
-      color: #505054;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      padding: 7px 0;
-      text-align: center;
-      border-radius: 12px;
-      font-size: 0.68rem;
-      font-weight: 600;
       cursor: pointer;
-      line-height: 1;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: all 0.12s ease;
-      white-space: nowrap;
-    }
-    .sound-chip-btn:active { transform: scale(0.96); }
-    .sound-chip-btn.selected { 
-      background: #111111; 
-      color: #ffffff; 
-      border-color: #111111; 
-      font-weight: 700; 
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .meter-chip-wrap {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      justify-content: space-between;
-      flex: 1;
-      width: calc(310px - 32px);
-    }
-    .meter-chip-btn {
-      flex: 1;
-      background: #ffffff;
-      color: #505054;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      padding: 8px 0;
-      text-align: center;
-      font-size: 0.68rem;
-      letter-spacing: -1.2px;
-      border-radius: 12px;
-      white-space: nowrap;
-      cursor: pointer;
-      line-height: 1;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: all 0.12s ease;
-    }
-    .meter-chip-btn:active { transform: scale(0.96); }
-    .meter-chip-btn.selected { 
-      background: #111111; 
-      color: #ffffff; 
-      border-color: #111111; 
-      font-weight: 700; 
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .time-chip-wrap {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      justify-content: flex-end;
-      flex: 1;
-      width: calc(310px - 32px);
-    }
-    .time-chip-btn {
-      flex: 1;
-      background: #ffffff;
-      color: #505054;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      padding: 7px 0;
-      text-align: center;
-      border-radius: 12px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      cursor: pointer;
-      line-height: 1;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: all 0.12s ease;
-    }
-    .time-chip-btn:active { transform: scale(0.96); }
-    .time-chip-btn.selected { 
-      background: #111111; 
-      color: #ffffff; 
-      border-color: #111111; 
-      font-weight: 700; 
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .sec-input-box {
-      display: flex;
       align-items: center;
       gap: 3px;
-    }
-    .sec-input {
-      width: 58px;
-      height: 31px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      color: #111111;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 10px;
-      text-align: center;
-      outline: none;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: border-color 0.15s ease;
-    }
-    .sec-input:focus { border-color: #111111; }
-    .sec-unit { 
-      font-size: 0.72rem; 
-      color: #8e8e93; 
-      font-weight: 600;
-    }
-
-    .routine-list-box {
-      display: none;
-      width: 310px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 22px;
-      padding: 14px 16px;
-      font-size: 0.8rem;
-      margin-top: 0.4rem;
-      margin-bottom: 0.8rem;
-      animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .routine-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #f2f3f5;
-    }
-    .routine-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex: 1;
-    }
-    .routine-title-display {
-      color: #111111;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .routine-title-display:hover { opacity: 0.7; }
-    .edit-pencil-icon {
-      font-size: 0.65rem;
-      color: #8e8e93;
-    }
-    .routine-title-input {
-      display: none;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border: 1px solid #111111;
-      border-radius: 6px;
-      padding: 2px 6px;
-      outline: none;
-      color: #111111;
-      width: 140px;
-      background: #fafafa;
-    }
-
-    .routine-header-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    .steps-scroll-area {
-      max-height: 160px;
-      overflow-y: auto;
-      padding-right: 2px;
-    }
-    .steps-scroll-area::-webkit-scrollbar { width: 4px; }
-    .steps-scroll-area::-webkit-scrollbar-thumb {
-      background: #e2e4e8;
-      border-radius: 4px;
-    }
-
-    .step-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f8f9fa;
-      padding: 10px 12px;
-      border-radius: 14px;
-      margin-bottom: 7px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border: 1px solid rgba(0, 0, 0, 0.03);
       transition: all 0.15s ease;
-      touch-action: pan-y;
-      position: relative;
     }
-    .step-item:active { transform: scale(0.98); }
-    .step-item.selected-edit {
-      border: 1.5px solid #111111;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    .stack-card.expanded .header-copy-btn {
+      display: inline-flex;
     }
-    .step-item.running-now {
-      background: #f4fbf7;
-      border-color: #34c759;
+    .header-copy-btn:active {
+      transform: scale(0.92);
+      background: #e2e4e8;
     }
-    .step-item.dragging-active {
-      opacity: 0.85;
-      transform: scale(1.02);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      background: #ffffff;
-      border-color: #111111;
+
+    .card-summary-tag {
+      font-size: 0.74rem;
+      font-weight: 700;
+      opacity: 0.82;
+      letter-spacing: 0.2px;
+      transition: opacity 0.2s ease;
+    }
+    .stack-card.expanded .card-summary-tag {
+      display: none;
+    }
+
+    /* 4단 전용 요약 박스 그룹 */
+    .summary-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .stack-card.expanded .summary-badge-group {
+      display: none;
+    }
+
+    .summary-box {
+      background: #f1f3f5;
+      color: #444446;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-arrow-icon {
+      font-size: 0.95rem;
+      transition: transform 0.3s ease;
+    }
+    .stack-card.expanded .card-arrow-icon {
+      transform: rotate(90deg);
+    }
+
+    .card-expand-body {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+      padding: 0 1.4rem;
+    }
+    .stack-card.expanded .card-expand-body {
+      max-height: 540px;
+      opacity: 1;
+      padding: 0 1.4rem 1.6rem 1.4rem;
+    }
+
+    /* 1단: 검정 카드 (Cadence & Time) */
+    .card-black {
+      background: #111315;
+      color: #ffffff;
       z-index: 10;
     }
-    .step-item.drag-over-target {
-      border-top: 2px dashed #111111 !important;
+    .card-black .card-summary-tag {
+      color: #34c759;
     }
 
-    .step-details { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-    .step-specs { font-size: 0.68rem; color: #8e8e93; font-weight: 500; }
-    
+    .black-subhead-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .black-reset-pill {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.12s ease;
+    }
+    .black-reset-pill:active { transform: scale(0.92); }
+
+    .black-bpm-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.8rem 0;
+      cursor: ns-resize;
+      touch-action: none;
+    }
+    .bpm-display-num {
+      font-size: 6.8rem;
+      font-weight: 900;
+      line-height: 0.88;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -4px;
+    }
+    .bpm-label-sub {
+      font-size: 0.72rem;
+      color: #8e8e93;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      margin-top: 8px;
+    }
+
+    .black-time-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 1.2rem;
+    }
+    .time-chip-quick {
+      background: rgba(255, 255, 255, 0.08);
+      color: #d1d1d6;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .time-chip-quick.selected {
+      background: #ffffff;
+      color: #111111;
+      font-weight: 800;
+    }
+    .black-sec-input {
+      width: 65px;
+      height: 33px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+    }
+
+    .black-action-capsule {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px;
+      gap: 8px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+    }
+    .capsule-btn {
+      flex: 1;
+      height: 42px;
+      border-radius: 19px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease;
+    }
+    .capsule-btn:active { transform: scale(0.94); }
+    .btn-capsule-test { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+    .btn-capsule-test.playing { background: #34c759; color: #ffffff; }
+    .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+    .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
+
+    /* 2단: 주황 카드 (Sound & Tuning) */
+    .card-orange {
+      background: #e89553;
+      color: #111111;
+      margin-top: -20px;
+      z-index: 9;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    }
+    .card-orange .card-summary-tag {
+      color: #2c1a0b;
+    }
+
+    .slider-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .slider-item input[type="range"] {
+      width: 170px;
+      height: 5px;
+      border-radius: 3px;
+      accent-color: #111111;
+      background: rgba(0, 0, 0, 0.14);
+      outline: none;
+    }
+
+    .sound-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .sound-btn {
+      background: rgba(255, 255, 255, 0.4);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 8px 0;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .sound-btn.selected {
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 3단: 민트 카드 (Rhythm Meter) */
+    .card-mint {
+      background: #a5c8c5;
+      color: #111111;
+      margin-top: -20px;
+      z-index: 8;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+    }
+    .card-mint .card-summary-tag {
+      color: #1b2f2d;
+      letter-spacing: -0.5px;
+    }
+
+    .meter-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .meter-btn {
+      background: rgba(255, 255, 255, 0.4);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 9px 0;
+      border-radius: 12px;
+      font-size: 0.68rem;
+      letter-spacing: -1.2px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .meter-btn.selected {
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 4단: 화이트 카드 (Intervals & Presets) */
+    .card-white {
+      background: #ffffff;
+      color: #111111;
+      margin-top: -20px;
+      z-index: 7;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .steps-list-wrap {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 14px;
+      padding-right: 2px;
+      touch-action: pan-y;
+    }
+    .steps-list-wrap::-webkit-scrollbar { width: 3px; }
+    .steps-list-wrap::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+
+    .step-card-item {
+      background: #f7f8fa;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      padding: 10px 12px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      position: relative;
+      touch-action: pan-y;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .step-card-item.selected {
+      border: 1.5px solid #111111;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .step-card-item.dragging-active {
+      opacity: 0.88;
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      border-color: #111111;
+      z-index: 20;
+    }
+    .step-card-item.drag-over-target {
+      border-top: 2.5px dashed #111111 !important;
+    }
+
     .step-btn-group {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
       margin-left: 6px;
     }
-    .step-icon-btn {
+    .step-icon-btn.delete {
+      font-size: 1.25rem;
+      color: #c7c7cc;
       cursor: pointer;
-      font-size: 0.95rem;
-      color: #8e8e93;
       padding: 2px 4px;
-      border-radius: 4px;
       transition: color 0.1s ease;
     }
-    .step-icon-btn:hover { color: #111111; }
-    .step-icon-btn.delete { font-size: 1.15rem; color: #c7c7cc; }
     .step-icon-btn.delete:hover { color: #ff3b30; }
 
-    .preset-inline-section {
-      width: 310px;
-      margin-top: 0.4rem;
+    .preset-scroll-row {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .preset-section-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.72rem;
-      color: #8e8e93;
-      font-weight: 700;
-      margin-bottom: 8px;
-      padding: 0 4px;
-    }
-    .preset-inline-scroll {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 70px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 24px;
+      gap: 6px;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      padding: 4px 0;
       scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
-      cursor: grab;
-      padding: 0 10px;
-      gap: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     }
-    .preset-inline-scroll:active { cursor: grabbing; }
-    .preset-inline-scroll::-webkit-scrollbar { display: none; }
-
-    .preset-circle-item {
-      flex: 0 0 46px;
-      height: 46px;
+    .preset-scroll-row::-webkit-scrollbar { display: none; }
+    .preset-chip-dot {
+      flex: 0 0 38px;
+      height: 38px;
       border-radius: 50%;
-      background: #f7f8fa;
-      color: #505054;
+      background: #f2f3f5;
+      color: #555555;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 800;
-      scroll-snap-align: center;
       cursor: pointer;
-      border: 1px solid rgba(0, 0, 0, 0.04);
-      user-select: none;
-      transition: all 0.15s ease;
     }
-    .preset-circle-item:active { transform: scale(0.92); }
-    .preset-circle-item.active {
+    .preset-chip-dot.active {
       background: #111111;
       color: #ffffff;
-      border-color: #111111;
-      transform: scale(1.04);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .preset-circle-label {
-      font-size: 0.46rem;
-      margin-top: -2px;
-      text-transform: uppercase;
-      font-weight: 800;
+
+    /* 하단 START RUN 버튼 */
+    .start-run-bar {
+      margin-top: 1.4rem;
+      width: 100%;
+      height: 54px;
+      background: #111111;
+      color: #ffffff;
+      border: none;
+      border-radius: 27px;
+      font-size: 1rem;
+      font-weight: 900;
       letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      transition: transform 0.12s ease;
     }
+    .start-run-bar:active { transform: scale(0.96); }
   </style>
 </head>
 <body>
 
-  <div class="top-header">
-    <button class="home-btn" onclick="window.location.href='index.html'">◀</button>
-    <h1>MA.TEMPA</h1>
-    <div class="header-placeholder"></div>
-  </div>
+  <div class="app-screen">
 
-  <div class="watch-case">
-    <div class="watch-top-info">
-      <span>CADENCE</span>
-      <span class="zone-badge">ZONE.<b id="zoneNum">1</b></span>
-    </div>
-
-    <div class="rolling-bpm-wrap" id="rollingBpmWrap">
-      <div class="bpm-display" id="bpm">180</div>
-      <div class="roll-arrows">▲<br>▼</div>
-    </div>
-
-    <div class="watch-pill-group">
-      <div class="watch-pill pill-green" id="pillSoundType">WOOD</div>
-      <div class="watch-pill pill-yellow" id="pillMeter">●●●●</div>
-    </div>
-
-    <div class="watch-timer-capsule" id="timer">0:00:00:00</div>
-
-    <div class="watch-indicators">
-      <div class="watch-ind-step" id="ind-0"></div>
-      <div class="watch-ind-step" id="ind-1"></div>
-      <div class="watch-ind-step" id="ind-2"></div>
-      <div class="watch-ind-step" id="ind-3"></div>
-    </div>
-  </div>
-
-  <div class="btn-action-group">
-    <button class="btn-main-start" id="startBtn">START</button>
-    <button class="btn-main-reset" id="resetBtn">RESET</button>
-    <button class="btn-sub-add" id="addPresetBtn">+ 추가</button>
-    <button class="btn-sub-update" id="updatePresetBtn">수정</button>
-  </div>
-
-  <div class="slider-box">
-    <div class="slider-row">
-      <span>PITCH</span>
-      <input type="range" id="pitchSlider" min="200" max="1000" step="20" value="600">
-    </div>
-    <div class="slider-row">
-      <span>VOLUME</span>
-      <input type="range" id="volSlider" min="0.1" max="1" step="0.05" value="0.8">
-    </div>
-  </div>
-
-  <div class="row-group">
-    <span class="row-label">소리</span>
-    <div class="sound-chip-wrap">
-      <button class="sound-chip-btn selected" id="s-wood">우드</button>
-      <button class="sound-chip-btn" id="s-bass">베이스</button>
-      <button class="sound-chip-btn" id="s-drum">드럼</button>
-      <button class="sound-chip-btn" id="s-beep">비프</button>
-      <button class="sound-chip-btn" id="s-click">클릭</button>
-    </div>
-  </div>
-
-  <div class="row-group">
-    <span class="row-label">박자</span>
-    <div class="meter-chip-wrap">
-      <button class="meter-chip-btn selected" id="m-p1">●●●●</button>
-      <button class="meter-chip-btn" id="m-p2">●○●○</button>
-      <button class="meter-chip-btn" id="m-p3">●○●●</button>
-      <button class="meter-chip-btn" id="m-p4">●●○●</button>
-      <button class="meter-chip-btn" id="m-p5">●●●○</button>
-    </div>
-  </div>
-
-  <div class="row-group">
-    <span class="row-label">시간</span>
-    <div class="time-chip-wrap">
-      <button class="time-chip-btn selected" id="t-60" onclick="setQuickTime(60)">60</button>
-      <button class="time-chip-btn" id="t-300" onclick="setQuickTime(300)">300</button>
-      <button class="time-chip-btn" id="t-600" onclick="setQuickTime(600)">600</button>
-      <div class="sec-input-box">
-        <input type="number" class="sec-input" id="durationSecInput" value="60" min="1" max="99999">
-        <span class="sec-unit">초</span>
+    <!-- 상단 내비 바 -->
+    <div class="header-nav">
+      <button class="nav-circle-btn" onclick="window.location.href='index.html'">←</button>
+      <div class="nav-title">
+        <h2>Make<span>your tempo</span></h2>
       </div>
+      <button class="nav-circle-btn" onclick="triggerHaptic(15)">//</button>
     </div>
-  </div>
 
-  <div class="routine-list-box" id="routineListBox">
-    <div class="routine-header">
-      <div class="routine-title-wrap">
-        <span class="routine-title-display" id="routineTitleDisplay" title="클릭하여 이름 변경">
-          <span id="currentRoutineSlotText">루틴 #1 구간 목록</span>
-          <span class="edit-pencil-icon">✎</span>
-        </span>
-        <input type="text" class="routine-title-input" id="routineTitleInput" maxlength="24">
-      </div>
-      <div class="routine-header-actions">
-        <span style="cursor:pointer; text-decoration: underline; color: #8e8e93;" id="clearRoutinesBtn">모두 삭제</span>
-        <span style="cursor:pointer; font-weight: bold; padding: 0 4px; color: #8e8e93;" id="closeRoutineListBtn">✕</span>
-      </div>
-    </div>
-    <div class="steps-scroll-area" id="stepsContainer"></div>
-  </div>
+    <!-- 4단 스택 레이아웃 -->
+    <div class="card-stack">
 
-  <div class="preset-inline-section">
-    <div class="preset-section-header">
-      <span>PRESET</span>
-      <span style="font-size:0.65rem; color:#8e8e93;">좌우로 스와이프 ↔</span>
+      <!-- 1단: 검정 영역 (Cadence & Time) -->
+      <div class="stack-card card-black expanded" id="cardBlack" onclick="openCadenceManually()">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Cadence</span>
+            </div>
+            <span class="card-summary-tag" id="summaryCadence">180 BPM · 60s</span>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+
+        <div class="card-expand-body" onclick="event.stopPropagation()">
+          <div class="black-subhead-row">
+            <span style="font-size:0.75rem; color:#8e8e93; font-weight:700;" id="activeSlotBadge">ROUTINE #1</span>
+            <button class="black-reset-pill" id="resetBtn">
+              <span>Reset</span>
+              <span style="font-size:0.8rem;">↻</span>
+            </button>
+          </div>
+
+          <div class="black-bpm-hero" id="bpmDialWrap">
+            <div class="bpm-display-num" id="bpmDisplay">180</div>
+            <div class="bpm-label-sub">TARGET SPM (ROLL ▲▼)</div>
+          </div>
+
+          <div class="black-time-row">
+            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
+            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
+            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
+            <input type="number" class="black-sec-input" id="durationSecInput" value="60" min="1" max="99999">
+          </div>
+
+          <!-- TEST / 추가 / 수정 -->
+          <div class="black-action-capsule">
+            <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST ♪</button>
+            <button class="capsule-btn btn-capsule-add" id="addStepBtn">+ 추가</button>
+            <button class="capsule-btn btn-capsule-mod" id="updateStepBtn">수정</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2단: 주황색 카드 (Sound & Tuning) -->
+      <div class="stack-card card-orange" id="cardOrange" onclick="toggleSubCard('cardOrange')">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Sound & Tuning</span>
+            </div>
+            <span class="card-summary-tag" id="summarySound">WOOD · P600 · V80%</span>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+        <div class="card-expand-body" onclick="event.stopPropagation()">
+          <div class="slider-item">
+            <span>PITCH</span>
+            <input type="range" id="pitchSlider" min="200" max="1000" step="20" value="600">
+          </div>
+          <div class="slider-item">
+            <span>VOLUME</span>
+            <input type="range" id="volSlider" min="0.1" max="1" step="0.05" value="0.8">
+          </div>
+          <div class="sound-chips-grid">
+            <button class="sound-btn selected" id="s-wood" onclick="setSound('wood')">우드</button>
+            <button class="sound-btn" id="s-bass" onclick="setSound('bass')">베이스</button>
+            <button class="sound-btn" id="s-drum" onclick="setSound('drum')">드럼</button>
+            <button class="sound-btn" id="s-beep" onclick="setSound('beep')">비프</button>
+            <button class="sound-btn" id="s-click" onclick="setSound('click')">클릭</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3단: 민트 카드 (Rhythm Meter) -->
+      <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Rhythm Meter</span>
+            </div>
+            <span class="card-summary-tag" id="summaryMeter">●●●●</span>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+        <div class="card-expand-body" onclick="event.stopPropagation()">
+          <div class="meter-chips-grid">
+            <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
+            <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
+            <button class="meter-btn" id="m-p3" onclick="setMeter('p3')">●○●●</button>
+            <button class="meter-btn" id="m-p4" onclick="setMeter('p4')">●●○●</button>
+            <button class="meter-btn" id="m-p5" onclick="setMeter('p5')">●●●○</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4단: 화이트 카드 (Intervals & Presets) -->
+      <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Intervals & Presets</span>
+              <!-- 펼쳐졌을 때만 노출되는 복사 버튼 -->
+              <button class="header-copy-btn" onclick="event.stopPropagation(); duplicateSelectedStep();" title="선택된 구간 복제">복사 ⧉</button>
+            </div>
+            <!-- 요청된 3개 분리 뱃지 요약 박스: #1, zone3, 0:00:00 -->
+            <div class="summary-badge-group">
+              <span class="summary-box" id="sumBoxSlot">#1</span>
+              <span class="summary-box" id="sumBoxZone">zone 1</span>
+              <span class="summary-box" id="sumBoxTime">0:01:00</span>
+            </div>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+        <div class="card-expand-body" onclick="event.stopPropagation()">
+          <div class="steps-list-wrap" id="stepsListWrap"></div>
+          <div style="font-size:0.68rem; color:#8e8e93; font-weight:700; margin-bottom:6px;">PRESET SET SLOTS</div>
+          <div class="preset-scroll-row" id="presetScrollRow"></div>
+        </div>
+      </div>
+
     </div>
-    <div class="preset-inline-scroll" id="presetInlineScroll"></div>
+
+    <!-- 하단 START RUN 버튼 -->
+    <button class="start-run-bar" id="startRunBtn">START RUN ▶</button>
+
   </div>
 
   <script>
-    const MIN_BPM = 40;
-    const MAX_BPM = 260;
-
     let bpm = 180;
-    let isRunning = false;
-    let isInterrupted = false; // 전화/외부 미디어 인터럽트 상태 플래그
-    let currentBeatIndex = 0;
-    let currentStepIndex = 0;
-    let selectedEditIndex = 0;
-    let currentRoutineSlot = 0;
-
     let basePitch = 600;
     let masterGain = 0.8;
     let soundType = 'wood';
     let meterMode = 'p1';
-
-    let startTimeMs = 0;
-    let baseOffsetMs = 0;
-    let elapsedMs = 0;
-    let lastSecondReported = -1;
+    let durationSec = 60;
+    let selectedStepIndex = 0;
+    let currentRoutineSlot = 0;
 
     let audioCtx = null;
-    let beatTimer = null;
-    let clockTimer = null;
+    let testTimer = null;
+    let sliderSoundDebounce = null;
 
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
@@ -786,417 +696,304 @@
       'p5': { label: '●●●○', pattern: [1, 1, 1, 0] }
     };
 
-    const defaultRoutine = [
+    let routine = [
       { durationSec: 60, bpm: 180, pitch: 600, vol: 0.8, sound: 'wood', meter: 'p1' }
     ];
 
-    let routine = JSON.parse(JSON.stringify(defaultRoutine));
+    const cardBlack = document.getElementById('cardBlack');
+    const cardOrange = document.getElementById('cardOrange');
+    const cardMint = document.getElementById('cardMint');
+    const cardWhite = document.getElementById('cardWhite');
 
-    const bpmEl = document.getElementById('bpm');
-    const zoneNumEl = document.getElementById('zoneNum');
-    const rollingBpmWrap = document.getElementById('rollingBpmWrap');
-    const startBtn = document.getElementById('startBtn');
-    const timerEl = document.getElementById('timer');
-    const stepsContainer = document.getElementById('stepsContainer');
+    const bpmDisplay = document.getElementById('bpmDisplay');
+    const bpmDialWrap = document.getElementById('bpmDialWrap');
     const durationSecInput = document.getElementById('durationSecInput');
-    const routineListBox = document.getElementById('routineListBox');
-    const closeRoutineListBtn = document.getElementById('closeRoutineListBtn');
-    const pillSoundType = document.getElementById('pillSoundType');
-    const pillMeter = document.getElementById('pillMeter');
-    const presetInlineScroll = document.getElementById('presetInlineScroll');
+    const stepsListWrap = document.getElementById('stepsListWrap');
+    const presetScrollRow = document.getElementById('presetScrollRow');
+    const activeSlotBadge = document.getElementById('activeSlotBadge');
+    const testToneBtn = document.getElementById('testToneBtn');
 
-    const routineTitleDisplay = document.getElementById('routineTitleDisplay');
-    const currentRoutineSlotText = document.getElementById('currentRoutineSlotText');
-    const routineTitleInput = document.getElementById('routineTitleInput');
+    const summaryCadence = document.getElementById('summaryCadence');
+    const summarySound = document.getElementById('summarySound');
+    const summaryMeter = document.getElementById('summaryMeter');
 
-    function triggerHaptic(duration = 20) {
-      if (navigator.vibrate) {
-        navigator.vibrate(duration);
+    // 4단 요약 분리 박스들
+    const sumBoxSlot = document.getElementById('sumBoxSlot');
+    const sumBoxZone = document.getElementById('sumBoxZone');
+    const sumBoxTime = document.getElementById('sumBoxTime');
+
+    function triggerHaptic(ms = 20) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function formatTotalTimeHMS(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      return `${hours}:${mm}:${ss}`;
+    }
+
+    function updateSummaries() {
+      summaryCadence.textContent = `${bpm} BPM · ${durationSec}s`;
+      summarySound.textContent = `${soundType.toUpperCase()} · P${basePitch} · V${Math.round(masterGain * 100)}%`;
+      summaryMeter.textContent = METERS[meterMode] ? METERS[meterMode].label : '●●●●';
+
+      const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
+      const totalTimeFormatted = formatTotalTimeHMS(totalSec);
+
+      // 개별 박스에 값 배정: #1, zone3, 0:00:00
+      sumBoxSlot.textContent = `#${currentRoutineSlot + 1}`;
+      sumBoxZone.textContent = `zone ${routine.length}`;
+      sumBoxTime.textContent = totalTimeFormatted;
+    }
+
+    function openCadenceManually() {
+      if (!cardBlack.classList.contains('expanded')) {
+        triggerHaptic(15);
+        cardBlack.classList.add('expanded');
+        cardWhite.classList.remove('expanded');
+        updateSummaries();
       }
+    }
+
+    function toggleSubCard(cardId) {
+      triggerHaptic(15);
+      const targetCard = document.getElementById(cardId);
+      const isExpanded = targetCard.classList.contains('expanded');
+
+      cardOrange.classList.remove('expanded');
+      cardMint.classList.remove('expanded');
+
+      if (!isExpanded) {
+        targetCard.classList.add('expanded');
+      }
+      updateSummaries();
+    }
+
+    function toggleIntervalCard() {
+      triggerHaptic(15);
+      const isExpanded = cardWhite.classList.contains('expanded');
+
+      if (!isExpanded) {
+        cardWhite.classList.add('expanded');
+        cardBlack.classList.remove('expanded');
+        cardOrange.classList.remove('expanded');
+        cardMint.classList.remove('expanded');
+      } else {
+        cardWhite.classList.remove('expanded');
+        cardBlack.classList.add('expanded');
+      }
+      updateSummaries();
     }
 
     function initAudio() {
       if (!audioCtx) {
         const AudioClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioClass({ latencyHint: 'interactive' });
-
-        // 안드로이드 OS의 오디오 컨텍스트 상태 변화 감지
-        audioCtx.onstatechange = () => {
-          if (!isRunning) return;
-          if (audioCtx.state === 'suspended' && !isInterrupted) {
-            pauseAppByAudioEvent();
-          } else if (audioCtx.state === 'running' && isInterrupted) {
-            resumeAppByAudioEvent();
-          }
-        };
       }
-      if (audioCtx.state === 'suspended' && !isInterrupted) {
-        audioCtx.resume();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // 통화/영상 등으로 오디오 포커스를 잃었을 때 소리와 타이머 동시 정지
-    function pauseAppByAudioEvent() {
-      if (!isRunning || isInterrupted) return;
-      isInterrupted = true;
-
-      baseOffsetMs = elapsedMs;
-      clearAllTimers();
-      resetStepIndicators();
-
-      if (audioCtx && audioCtx.state === 'running') {
-        audioCtx.suspend();
-      }
-    }
-
-    // 통화/영상 종료 후 이전 ms 지점부터 소리와 타이머 동시 재개
-    function resumeAppByAudioEvent() {
-      if (!isRunning || !isInterrupted) return;
-      isInterrupted = false;
-
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
-      startTimeMs = performance.now();
-      clockTimer = setInterval(() => {
-        const now = performance.now();
-        elapsedMs = baseOffsetMs + (now - startTimeMs);
-        timerEl.textContent = formatPrecisionTimer(elapsedMs);
-
-        const currentSec = Math.floor(elapsedMs / 1000);
-        evaluateRoutine(currentSec);
-      }, 10);
-
-      syncBpmTimer();
-    }
-
-    // 화면 포커스 변경(통화 팝업, 인스타 등 미디어 앱 진입) 감지
-    window.addEventListener('blur', () => {
-      if (isRunning) pauseAppByAudioEvent();
-    });
-
-    window.addEventListener('focus', () => {
-      if (isRunning && isInterrupted) resumeAppByAudioEvent();
-    });
-
-    // Capacitor Telephony 플러그인(설치된 경우) 통화 감지 연동
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Telephony) {
-      window.Capacitor.Plugins.Telephony.addListener('callStateChanged', (state) => {
-        if (state.value === 'RINGING' || state.value === 'OFFHOOK') {
-          pauseAppByAudioEvent();
-        } else if (state.value === 'IDLE') {
-          resumeAppByAudioEvent();
-        }
-      });
-    }
-
-    function playDialTickSound() {
+    // 1박 테스트 사운드 (피치, 볼륨 조절 시 호출)
+    function playBeepSound() {
       initAudio();
       if (!audioCtx) return;
-
       const now = audioCtx.currentTime;
+
+      if (soundType === 'drum') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(Math.max(basePitch * 0.35, 120), now);
+        osc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
+        gain.gain.setValueAtTime(masterGain * 1.2, now);
+        gain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+        return;
+      }
+
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
+      let dur = 0.05;
+      let startFreq = basePitch;
+      let wave = 'triangle';
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1400, now);
-      gain.gain.setValueAtTime(masterGain * 0.15, now);
-      gain.gain.linearRampToValueAtTime(0.0001, now + 0.015);
+      if (soundType === 'bass') { wave = 'sine'; startFreq = basePitch * 0.3; dur = 0.08; }
+      else if (soundType === 'wood') { wave = 'triangle'; startFreq = basePitch; dur = 0.04; }
+      else if (soundType === 'beep') { wave = 'sine'; startFreq = basePitch; dur = 0.06; }
+      else { wave = 'square'; startFreq = basePitch; dur = 0.02; }
 
+      osc.type = wave;
+      osc.frequency.setValueAtTime(startFreq, now);
+      gain.gain.setValueAtTime(masterGain * 0.8, now);
+      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       osc.start(now);
-      osc.stop(now + 0.015);
+      osc.stop(now + dur);
     }
 
-    function setBpm(val) {
-      const clamped = Math.min(Math.max(Math.round(val), MIN_BPM), MAX_BPM);
-      if (clamped !== bpm) {
-        bpm = clamped;
-        bpmEl.textContent = bpm;
-        playDialTickSound();
-        triggerHaptic(8);
-        syncBpmTimer();
+    // 슬라이더 조작 시 1박 테스트 사운드 디바운스 트리거
+    function triggerSliderTone() {
+      if (sliderSoundDebounce) clearTimeout(sliderSoundDebounce);
+      sliderSoundDebounce = setTimeout(() => {
+        playBeepSound();
+        triggerHaptic(10);
+      }, 40);
+    }
+
+    // 4박자 완주 테스트
+    function runTestFourBeats() {
+      if (testTimer) {
+        clearInterval(testTimer);
+        testTimer = null;
       }
+
+      initAudio();
+      const activeMeter = METERS[meterMode] || METERS['p1'];
+      let count = 0;
+      const intervalMs = (60 / bpm) * 1000;
+
+      testToneBtn.classList.add('playing');
+      testToneBtn.textContent = '1/4';
+
+      const playBeat = () => {
+        if (count >= 4) {
+          clearInterval(testTimer);
+          testTimer = null;
+          testToneBtn.classList.remove('playing');
+          testToneBtn.textContent = 'TEST ♪';
+          return;
+        }
+
+        testToneBtn.textContent = `${count + 1}/4`;
+        if (activeMeter.pattern[count] === 1) {
+          playBeepSound();
+          triggerHaptic(15);
+        }
+
+        count++;
+      };
+
+      playBeat();
+      testTimer = setInterval(playBeat, intervalMs);
     }
 
-    function updateZoneDisplay(index) {
-      zoneNumEl.textContent = (index + 1);
-    }
-
-    routineTitleDisplay.onclick = () => {
-      routineTitleInput.value = currentRoutineSlotText.textContent;
-      routineTitleDisplay.style.display = 'none';
-      routineTitleInput.style.display = 'inline-block';
-      routineTitleInput.focus();
-      routineTitleInput.select();
-    };
-
-    function saveRoutineTitle() {
-      const newTitle = routineTitleInput.value.trim();
-      if (newTitle) {
-        currentRoutineSlotText.textContent = newTitle;
-        try {
-          localStorage.setItem(`matempa_routine_name_${currentRoutineSlot}`, newTitle);
-        } catch (e) {}
-      }
-      routineTitleInput.style.display = 'none';
-      routineTitleDisplay.style.display = 'flex';
-    }
-
-    routineTitleInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') saveRoutineTitle();
-      else if (e.key === 'Escape') {
-        routineTitleInput.style.display = 'none';
-        routineTitleDisplay.style.display = 'flex';
-      }
-    });
-    routineTitleInput.addEventListener('blur', saveRoutineTitle);
-
+    // BPM 다이얼 조작
     let isRolling = false;
     let startY = 0;
     let startBpm = 180;
-    const PIXELS_PER_BPM = 4.5;
+    const SENSITIVITY = 4.5;
 
-    function startRoll(clientY) {
-      isRolling = true;
-      startY = clientY;
-      startBpm = bpm;
-      rollingBpmWrap.classList.add('dragging');
-    }
-
-    function moveRoll(clientY) {
-      if (!isRolling) return;
-      const deltaY = startY - clientY;
-      const change = Math.round(deltaY / PIXELS_PER_BPM);
-      setBpm(startBpm + change);
-    }
-
-    function endRoll() {
-      if (isRolling) {
-        isRolling = false;
-        rollingBpmWrap.classList.remove('dragging');
+    function setBpm(val) {
+      const clamped = Math.min(Math.max(Math.round(val), 40), 260);
+      if (clamped !== bpm) {
+        bpm = clamped;
+        bpmDisplay.textContent = bpm;
+        updateSummaries();
+        triggerHaptic(8);
       }
     }
 
-    rollingBpmWrap.addEventListener('mousedown', (e) => startRoll(e.clientY));
-    window.addEventListener('mousemove', (e) => { if (isRolling) moveRoll(e.clientY); });
-    window.addEventListener('mouseup', endRoll);
-
-    rollingBpmWrap.addEventListener('touchstart', (e) => {
-      startRoll(e.touches[0].clientY);
-      e.preventDefault();
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (isRolling) {
-        moveRoll(e.touches[0].clientY);
-        e.preventDefault();
-      }
-    }, { passive: false });
-    window.addEventListener('touchend', endRoll);
-
-    let isScrollDragging = false;
-    let scrollStartX = 0;
-    let scrollLeftPos = 0;
-    let hasMovedMouse = false;
-
-    for (let i = 0; i < 12; i++) {
-      const circle = document.createElement('div');
-      circle.className = `preset-circle-item ${i === 0 ? 'active' : ''}`;
-      circle.id = `preset-circle-${i}`;
-      circle.innerHTML = `<span>${i + 1}</span><span class="preset-circle-label">SET</span>`;
-      
-      circle.onclick = (e) => {
-        e.stopPropagation();
-        if (hasMovedMouse) return;
-        triggerHaptic(25);
-        selectPresetSlot(i);
-      };
-      presetInlineScroll.appendChild(circle);
-    }
-
-    presetInlineScroll.addEventListener('wheel', (e) => {
-      if (e.deltaY !== 0) {
-        presetInlineScroll.scrollLeft += e.deltaY;
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    presetInlineScroll.addEventListener('mousedown', (e) => {
-      isScrollDragging = true;
-      hasMovedMouse = false;
-      scrollStartX = e.pageX - presetInlineScroll.offsetLeft;
-      scrollLeftPos = presetInlineScroll.scrollLeft;
-      presetInlineScroll.style.scrollSnapType = 'none';
+    bpmDialWrap.addEventListener('mousedown', (e) => {
+      isRolling = true; startY = e.clientY; startBpm = bpm;
     });
-
     window.addEventListener('mousemove', (e) => {
-      if (!isScrollDragging) return;
-      e.preventDefault();
-      const x = e.pageX - presetInlineScroll.offsetLeft;
-      const walk = (x - scrollStartX);
-      if (Math.abs(walk) > 5) hasMovedMouse = true;
-      presetInlineScroll.scrollLeft = scrollLeftPos - walk;
+      if (!isRolling) return;
+      setBpm(startBpm + Math.round((startY - e.clientY) / SENSITIVITY));
     });
+    window.addEventListener('mouseup', () => isRolling = false);
 
-    window.addEventListener('mouseup', () => {
-      if (isScrollDragging) {
-        isScrollDragging = false;
-        presetInlineScroll.style.scrollSnapType = 'x mandatory';
-        setTimeout(() => { hasMovedMouse = false; }, 50);
-      }
-    });
+    bpmDialWrap.addEventListener('touchstart', (e) => {
+      isRolling = true; startY = e.touches[0].clientY; startBpm = bpm;
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (!isRolling) return;
+      setBpm(startBpm + Math.round((startY - e.touches[0].clientY) / SENSITIVITY));
+    }, { passive: true });
+    window.addEventListener('touchend', () => isRolling = false);
 
-    function showRoutineListBox() {
-      routineListBox.style.display = 'block';
-      routineListBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // 하단 12개 원형 프리셋 슬라이더
+    for (let i = 0; i < 12; i++) {
+      const dot = document.createElement('div');
+      dot.className = `preset-chip-dot ${i === 0 ? 'active' : ''}`;
+      dot.textContent = i + 1;
+      dot.onclick = () => selectPreset(i);
+      presetScrollRow.appendChild(dot);
     }
 
-    closeRoutineListBtn.onclick = () => {
-      triggerHaptic(15);
-      routineListBox.style.display = 'none';
+    function selectPreset(idx) {
+      triggerHaptic(20);
+      currentRoutineSlot = idx;
+      activeSlotBadge.textContent = `ROUTINE #${idx + 1}`;
+      try {
+        localStorage.setItem('matempa_active_slot', idx);
+        const saved = localStorage.getItem(`matempa_routine_slot_${idx}`);
+        routine = saved ? JSON.parse(saved) : (idx === 0 ? [{ durationSec: 60, bpm: 180, pitch: 600, vol: 0.8, sound: 'wood', meter: 'p1' }] : []);
+      } catch (e) { routine = []; }
+      
+      selectedStepIndex = 0;
+      if (routine.length > 0) applyStepData(routine[0]);
+      renderSteps();
+
+      const dots = presetScrollRow.querySelectorAll('.preset-chip-dot');
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      updateSummaries();
+    }
+
+    // 선택된 구간 복제 (헤더 버튼 전용)
+    window.duplicateSelectedStep = function() {
+      if (routine.length === 0 || selectedStepIndex === null || !routine[selectedStepIndex]) {
+        alert("복사할 구간을 먼저 목록에서 선택해주세요.");
+        return;
+      }
+      triggerHaptic(25);
+      const source = routine[selectedStepIndex];
+      const cloned = JSON.parse(JSON.stringify(source));
+      
+      routine.splice(selectedStepIndex + 1, 0, cloned);
+      selectedStepIndex = selectedStepIndex + 1;
+      saveRoutine();
     };
-
-    function selectPresetSlot(slotIdx) {
-      if (isRunning) stop();
-      loadRoutineSlot(slotIdx);
-      showRoutineListBox();
-      scrollPresetIntoView(slotIdx);
-    }
-
-    function scrollPresetIntoView(slotIdx) {
-      const targetCircle = document.getElementById(`preset-circle-${slotIdx}`);
-      if (targetCircle) {
-        targetCircle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-    }
-
-    function loadRoutineSlot(slotIdx) {
-      currentRoutineSlot = slotIdx;
-
-      try {
-        const customTitle = localStorage.getItem(`matempa_routine_name_${slotIdx}`);
-        currentRoutineSlotText.textContent = customTitle ? customTitle : `루틴 #${slotIdx + 1} 구간 목록`;
-      } catch (e) {
-        currentRoutineSlotText.textContent = `루틴 #${slotIdx + 1} 구간 목록`;
-      }
-
-      try {
-        const saved = localStorage.getItem(`matempa_routine_slot_${slotIdx}`);
-        if (saved) {
-          routine = JSON.parse(saved);
-        } else {
-          routine = slotIdx === 0 ? JSON.parse(JSON.stringify(defaultRoutine)) : [];
-        }
-      } catch (e) {
-        routine = [];
-      }
-      selectedEditIndex = 0;
-      currentStepIndex = 0;
-      updateZoneDisplay(0);
-
-      if (routine.length > 0) {
-        applyStepDataToUI(routine[0]);
-      }
-      renderSteps();
-
-      const circles = presetInlineScroll.querySelectorAll('.preset-circle-item');
-      circles.forEach((c, idx) => {
-        c.classList.toggle('active', idx === currentRoutineSlot);
-      });
-    }
-
-    function saveRoutine() {
-      try {
-        localStorage.setItem(`matempa_routine_slot_${currentRoutineSlot}`, JSON.stringify(routine));
-      } catch (e) {}
-      renderSteps();
-    }
-
-    function formatSecToMinSec(totalSec) {
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      if (m > 0 && s > 0) return `${m}분 ${s}초`;
-      if (m > 0) return `${m}분`;
-      return `${s}초`;
-    }
-
-    function formatPrecisionTimer(ms) {
-      const totalCentis = Math.floor(ms / 10);
-      const cs = String(totalCentis % 100).padStart(2, '0');
-      const totalSec = Math.floor(ms / 1000);
-      const s = String(totalSec % 60).padStart(2, '0');
-      const totalMin = Math.floor(totalSec / 60);
-      const m = String(totalMin % 60).padStart(2, '0');
-      const h = Math.floor(totalMin / 60);
-      return `${h}:${m}:${s}:${cs}`;
-    }
-
-    function updatePills() {
-      const soundLabels = { wood: 'WOOD', bass: 'BASS', drum: 'DRUM', beep: 'BEEP', click: 'CLICK' };
-      pillSoundType.textContent = soundLabels[soundType] || 'WOOD';
-      pillMeter.textContent = METERS[meterMode] ? METERS[meterMode].label : '●●●●';
-    }
-
-    function setQuickTime(sec) {
-      triggerHaptic(15);
-      durationSecInput.value = sec;
-      ['t-60', 't-300', 't-600'].forEach(id => {
-        document.getElementById(id).classList.remove('selected');
-      });
-      const matchBtn = document.getElementById(`t-${sec}`);
-      if (matchBtn) matchBtn.classList.add('selected');
-    }
-
-    durationSecInput.addEventListener('input', () => {
-      const val = parseInt(durationSecInput.value);
-      ['t-60', 't-300', 't-600'].forEach(id => {
-        document.getElementById(id).classList.remove('selected');
-      });
-      const matchBtn = document.getElementById(`t-${val}`);
-      if (matchBtn) matchBtn.classList.add('selected');
-    });
 
     let dragSrcIndex = null;
     let longPressTimer = null;
     let isLongPressActive = false;
 
     function renderSteps() {
-      stepsContainer.innerHTML = '';
-      if (!routine || routine.length === 0) {
-        stepsContainer.innerHTML = '<div style="color:#8e8e93; text-align:center; padding: 14px; font-weight: 500;">설정 후 [+ 추가]를 누르세요</div>';
+      stepsListWrap.innerHTML = '';
+      if (routine.length === 0) {
+        stepsListWrap.innerHTML = '<div style="color:#8e8e93; font-size:0.75rem; padding:8px 0;">구간이 없습니다. 상단에서 [+ 추가]를 누르세요.</div>';
+        updateSummaries();
         return;
       }
 
       routine.forEach((step, idx) => {
-        const div = document.createElement('div');
-        let stateClass = '';
-        if (idx === selectedEditIndex) stateClass = 'selected-edit';
-        if (idx === currentStepIndex && isRunning) stateClass += ' running-now';
+        const item = document.createElement('div');
+        item.className = `step-card-item ${idx === selectedStepIndex ? 'selected' : ''}`;
+        item.dataset.index = idx;
 
-        div.className = `step-item ${stateClass}`;
-        div.dataset.index = idx;
-
-        const meterInfo = METERS[step.meter] || METERS['p1'];
-
-        div.innerHTML = `
-          <div class="step-details">
-            <span><b>${idx + 1}구간</b>: ${formatSecToMinSec(step.durationSec)} (${step.bpm} BPM)</span>
-            <span class="step-specs">${step.sound.toUpperCase()} | Pitch ${step.pitch} | ${meterInfo.label}</span>
+        item.innerHTML = `
+          <div style="flex: 1;">
+            <b>${idx + 1}구간</b>: ${step.durationSec}초 (${step.bpm} BPM)
+            <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
           </div>
           <div class="step-btn-group">
-            <span class="step-icon-btn copy" title="구간 복사" onclick="event.stopPropagation(); duplicateStep(${idx});">⧉</span>
-            <span class="step-icon-btn delete" title="삭제" onclick="event.stopPropagation(); removeStep(${idx});">&times;</span>
+            <span class="step-icon-btn delete" title="구간 삭제" onclick="event.stopPropagation(); removeStep(${idx});">&times;</span>
           </div>
         `;
 
-        div.onclick = () => {
+        item.onclick = () => {
           if (!isLongPressActive) {
             triggerHaptic(15);
-            selectStepForEdit(idx);
+            selectedStepIndex = idx;
+            applyStepData(routine[idx]);
+            renderSteps();
           }
         };
 
@@ -1205,8 +1002,8 @@
           longPressTimer = setTimeout(() => {
             isLongPressActive = true;
             dragSrcIndex = idx;
-            div.classList.add('dragging-active');
-            div.setAttribute('draggable', 'true');
+            item.classList.add('dragging-active');
+            item.setAttribute('draggable', 'true');
             triggerHaptic(40);
           }, 350);
         };
@@ -1218,23 +1015,23 @@
           }
         };
 
-        div.addEventListener('mousedown', (e) => startLongPress(e.clientX, e.clientY));
-        div.addEventListener('mouseup', () => {
+        item.addEventListener('mousedown', (e) => startLongPress(e.clientX, e.clientY));
+        item.addEventListener('mouseup', () => {
           clearLongPress();
           setTimeout(() => { isLongPressActive = false; }, 50);
         });
-        div.addEventListener('mouseleave', clearLongPress);
+        item.addEventListener('mouseleave', clearLongPress);
 
-        div.addEventListener('touchstart', (e) => {
+        item.addEventListener('touchstart', (e) => {
           startLongPress(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: true });
 
-        div.addEventListener('touchend', (e) => {
+        item.addEventListener('touchend', (e) => {
           clearLongPress();
           if (isLongPressActive && dragSrcIndex !== null) {
             const changedTouch = e.changedTouches[0];
             const targetEl = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
-            const targetStep = targetEl ? targetEl.closest('.step-item') : null;
+            const targetStep = targetEl ? targetEl.closest('.step-card-item') : null;
             if (targetStep && targetStep.dataset.index !== undefined) {
               const targetIdx = parseInt(targetStep.dataset.index);
               reorderSteps(dragSrcIndex, targetIdx);
@@ -1243,50 +1040,46 @@
           cleanupDragClasses();
         });
 
-        div.addEventListener('touchmove', (e) => {
+        item.addEventListener('touchmove', (e) => {
           if (!isLongPressActive) {
             clearLongPress();
           } else {
             e.preventDefault();
             const touch = e.touches[0];
             const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-            const targetStep = targetEl ? targetEl.closest('.step-item') : null;
-            document.querySelectorAll('.step-item').forEach(el => el.classList.remove('drag-over-target'));
-            if (targetStep && targetStep !== div) {
+            const targetStep = targetEl ? targetEl.closest('.step-card-item') : null;
+            document.querySelectorAll('.step-card-item').forEach(el => el.classList.remove('drag-over-target'));
+            if (targetStep && targetStep !== item) {
               targetStep.classList.add('drag-over-target');
             }
           }
         }, { passive: false });
 
-        div.addEventListener('dragstart', (e) => {
+        item.addEventListener('dragstart', (e) => {
           dragSrcIndex = idx;
           e.dataTransfer.setData('text/plain', idx);
         });
-
-        div.addEventListener('dragover', (e) => {
+        item.addEventListener('dragover', (e) => {
           e.preventDefault();
-          div.classList.add('drag-over-target');
+          item.classList.add('drag-over-target');
         });
-
-        div.addEventListener('dragleave', () => {
-          div.classList.remove('drag-over-target');
-        });
-
-        div.addEventListener('drop', (e) => {
+        item.addEventListener('dragleave', () => item.classList.remove('drag-over-target'));
+        item.addEventListener('drop', (e) => {
           e.preventDefault();
           const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
           reorderSteps(fromIdx, idx);
           cleanupDragClasses();
         });
 
-        stepsContainer.appendChild(div);
+        stepsListWrap.appendChild(item);
       });
+      updateSummaries();
     }
 
     function cleanupDragClasses() {
       isLongPressActive = false;
       dragSrcIndex = null;
-      document.querySelectorAll('.step-item').forEach(el => {
+      document.querySelectorAll('.step-card-item').forEach(el => {
         el.classList.remove('dragging-active', 'drag-over-target');
         el.removeAttribute('draggable');
       });
@@ -1298,457 +1091,161 @@
       const movedItem = routine.splice(fromIdx, 1)[0];
       routine.splice(toIdx, 0, movedItem);
 
-      if (selectedEditIndex === fromIdx) selectedEditIndex = toIdx;
-      else if (fromIdx < selectedEditIndex && toIdx >= selectedEditIndex) selectedEditIndex--;
-      else if (fromIdx > selectedEditIndex && toIdx <= selectedEditIndex) selectedEditIndex++;
+      if (selectedStepIndex === fromIdx) selectedStepIndex = toIdx;
+      else if (fromIdx < selectedStepIndex && toIdx >= selectedStepIndex) selectedStepIndex--;
+      else if (fromIdx > selectedStepIndex && toIdx <= selectedStepIndex) selectedStepIndex++;
 
       saveRoutine();
     }
 
-    window.duplicateStep = function(idx) {
-      triggerHaptic(20);
-      const source = routine[idx];
-      const cloned = JSON.parse(JSON.stringify(source));
-      routine.splice(idx + 1, 0, cloned);
-      selectedEditIndex = idx + 1;
-      saveRoutine();
-    };
+    function applyStepData(step) {
+      bpm = step.bpm;
+      bpmDisplay.textContent = bpm;
+      basePitch = step.pitch;
+      document.getElementById('pitchSlider').value = basePitch;
+      masterGain = step.vol;
+      document.getElementById('volSlider').value = masterGain;
+      soundType = step.sound;
+      meterMode = step.meter;
+      setQuickTime(step.durationSec);
 
-    window.selectStepForEdit = function(idx) {
-      selectedEditIndex = idx;
-      currentStepIndex = idx;
-      updateZoneDisplay(idx);
+      ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
+        document.getElementById(`s-${s}`).classList.toggle('selected', s === soundType);
+      });
+      ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(p => {
+        document.getElementById(`m-${p}`).classList.toggle('selected', p === meterMode);
+      });
+      updateSummaries();
+    }
 
-      let accumulatedSec = 0;
-      for (let i = 0; i < idx; i++) {
-        accumulatedSec += routine[i].durationSec;
-      }
-      baseOffsetMs = accumulatedSec * 1000;
-      elapsedMs = baseOffsetMs;
-      timerEl.textContent = formatPrecisionTimer(elapsedMs);
-
-      const step = routine[idx];
-      applyStepDataToUI(step);
-      playBeep();
+    function saveRoutine() {
+      try {
+        localStorage.setItem(`matempa_routine_slot_${currentRoutineSlot}`, JSON.stringify(routine));
+      } catch (e) {}
       renderSteps();
-    };
+    }
 
-    window.removeStep = function(idx) {
+    function setQuickTime(sec) {
+      triggerHaptic(15);
+      durationSec = sec;
+      durationSecInput.value = sec;
+      ['t-60', 't-300', 't-600'].forEach(id => document.getElementById(id).classList.remove('selected'));
+      const btn = document.getElementById(`t-${sec}`);
+      if (btn) btn.classList.add('selected');
+      updateSummaries();
+    }
+
+    durationSecInput.addEventListener('input', (e) => {
+      durationSec = parseInt(e.target.value) || 60;
+      ['t-60', 't-300', 't-600'].forEach(id => document.getElementById(id).classList.remove('selected'));
+      const btn = document.getElementById(`t-${durationSec}`);
+      if (btn) btn.classList.add('selected');
+      updateSummaries();
+    });
+
+    function setSound(type) {
+      triggerHaptic(15);
+      soundType = type;
+      ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
+        document.getElementById(`s-${s}`).classList.toggle('selected', s === type);
+      });
+      updateSummaries();
+      playBeepSound();
+    }
+
+    function setMeter(meter) {
+      triggerHaptic(15);
+      meterMode = meter;
+      ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
+        document.getElementById(`m-${m}`).classList.toggle('selected', m === meter);
+      });
+      updateSummaries();
+    }
+
+    function removeStep(idx) {
       triggerHaptic(20);
-      if (selectedEditIndex === idx) selectedEditIndex = 0;
-      else if (selectedEditIndex > idx) selectedEditIndex--;
       routine.splice(idx, 1);
-      updateZoneDisplay(selectedEditIndex);
+      selectedStepIndex = Math.max(0, selectedStepIndex - 1);
       saveRoutine();
-    };
+    }
 
-    document.getElementById('clearRoutinesBtn').onclick = () => {
-      triggerHaptic(25);
-      routine = [];
-      selectedEditIndex = 0;
-      currentStepIndex = 0;
-      updateZoneDisplay(0);
-      baseOffsetMs = 0;
-      elapsedMs = 0;
-      timerEl.textContent = "0:00:00:00";
-      saveRoutine();
-    };
-
-    document.getElementById('addPresetBtn').onclick = () => {
+    testToneBtn.onclick = () => {
       triggerHaptic(20);
-      const secVal = parseInt(durationSecInput.value) || 0;
-      if (secVal <= 0) return;
+      runTestFourBeats();
+    };
+
+    document.getElementById('addStepBtn').onclick = () => {
+      triggerHaptic(25);
+      const sec = parseInt(durationSecInput.value) || 60;
       routine.push({
-        durationSec: secVal,
+        durationSec: sec,
         bpm: bpm,
         pitch: basePitch,
         vol: masterGain,
         sound: soundType,
         meter: meterMode
       });
-      selectedEditIndex = routine.length - 1;
-      updateZoneDisplay(selectedEditIndex);
+      selectedStepIndex = routine.length - 1;
       saveRoutine();
-      showRoutineListBox();
+
+      cardWhite.classList.add('expanded');
+      updateSummaries();
     };
 
-    document.getElementById('updatePresetBtn').onclick = () => {
+    document.getElementById('updateStepBtn').onclick = () => {
       triggerHaptic(20);
-      if (selectedEditIndex === null || !routine[selectedEditIndex]) {
-        alert("수정할 구간을 아래 목록에서 먼저 클릭해주세요.");
-        return;
-      }
-      const secVal = parseInt(durationSecInput.value) || 0;
-      if (secVal <= 0) return;
-
-      routine[selectedEditIndex] = {
-        durationSec: secVal,
+      if (!routine[selectedStepIndex]) return;
+      routine[selectedStepIndex] = {
+        durationSec: parseInt(durationSecInput.value) || 60,
         bpm: bpm,
         pitch: basePitch,
         vol: masterGain,
         sound: soundType,
         meter: meterMode
       };
-
-      if (isRunning && currentStepIndex === selectedEditIndex) {
-        syncBpmTimer();
-      }
-
       saveRoutine();
-      showRoutineListBox();
-    };
 
-    function playCueSound(type) {
-      initAudio();
-      if (!audioCtx) return;
-
-      const now = audioCtx.currentTime;
-
-      if (type === 'countdown') {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(900, now);
-        gain.gain.setValueAtTime(masterGain * 0.9, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.08);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.08);
-      } else if (type === 'next_step') {
-        [ { f: 880, t: 0 }, { f: 1320, t: 0.12 } ].forEach(tone => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(tone.f, now + tone.t);
-          gain.gain.setValueAtTime(masterGain * 0.9, now + tone.t);
-          gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.22);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + tone.t);
-          osc.stop(now + tone.t + 0.22);
-        });
-      } else if (type === 'complete') {
-        [ { f: 659.25, t: 0 }, { f: 880, t: 0.15 }, { f: 1318.5, t: 0.3 } ].forEach(tone => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(tone.f, now + tone.t);
-          gain.gain.setValueAtTime(masterGain * 1.0, now + tone.t);
-          gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.4);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + tone.t);
-          osc.stop(now + tone.t + 0.4);
-        });
-      }
-    }
-
-    function playBeep() {
-      initAudio();
-      if (!audioCtx) return;
-
-      const now = audioCtx.currentTime;
-
-      if (soundType === 'drum') {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(Math.max(basePitch * 0.35, 120), now);
-        osc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
-
-        gain.gain.setValueAtTime(masterGain * 1.2, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.09);
-
-        const clickOsc = audioCtx.createOscillator();
-        const clickGain = audioCtx.createGain();
-        clickOsc.type = 'triangle';
-        clickOsc.frequency.setValueAtTime(800, now);
-        clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
-
-        clickGain.gain.setValueAtTime(masterGain * 0.7, now);
-        clickGain.gain.linearRampToValueAtTime(0.0001, now + 0.02);
-
-        clickOsc.connect(clickGain);
-        clickGain.connect(audioCtx.destination);
-
-        clickOsc.start(now);
-        clickOsc.stop(now + 0.02);
-        return;
-      }
-
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      let dur = 0.05;
-      let startFreq = basePitch;
-      let wave = 'triangle';
-
-      if (soundType === 'bass') {
-        wave = 'sine';
-        startFreq = basePitch * 0.3;
-        dur = 0.08;
-      } else if (soundType === 'wood') {
-        wave = 'triangle';
-        startFreq = basePitch;
-        dur = 0.04;
-      } else if (soundType === 'beep') {
-        wave = 'sine';
-        startFreq = basePitch;
-        dur = 0.06;
-      } else {
-        wave = 'square';
-        startFreq = basePitch;
-        dur = 0.02;
-      }
-
-      osc.type = wave;
-      osc.frequency.setValueAtTime(startFreq, now);
-
-      gain.gain.setValueAtTime(masterGain * 0.8, now);
-      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(now);
-      osc.stop(now + dur);
-    }
-
-    function shouldPlaySoundInPattern(beatIdx) {
-      const activeMeter = METERS[meterMode] || METERS['p1'];
-      return activeMeter.pattern[beatIdx % 4] === 1;
-    }
-
-    function updateStepIndicator(activeIdx, isSounding) {
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(`ind-${i}`);
-        if (!el) continue;
-        el.className = 'watch-ind-step';
-        if (i === activeIdx && isSounding) {
-          el.classList.add('active');
-        }
-      }
-    }
-
-    function resetStepIndicators() {
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(`ind-${i}`);
-        if (el) el.className = 'watch-ind-step';
-      }
-    }
-
-    function triggerStep() {
-      if (!isRunning || isInterrupted) return;
-
-      const stepInCycle = currentBeatIndex % 4;
-      const playSound = shouldPlaySoundInPattern(stepInCycle);
-
-      if (playSound) {
-        playBeep();
-      }
-
-      updateStepIndicator(stepInCycle, playSound);
-      currentBeatIndex = (currentBeatIndex + 1) % 4;
-    }
-
-    function clearAllTimers() {
-      if (beatTimer) {
-        clearInterval(beatTimer);
-        beatTimer = null;
-      }
-      if (clockTimer) {
-        clearInterval(clockTimer);
-        clockTimer = null;
-      }
-    }
-
-    function syncBpmTimer() {
-      if (beatTimer) clearInterval(beatTimer);
-      if (isRunning && !isInterrupted) {
-        beatTimer = setInterval(triggerStep, (60 / bpm) * 1000);
-      }
-    }
-
-    function applyStepDataToUI(step) {
-      bpm = step.bpm;
-      bpmEl.textContent = bpm;
-      basePitch = step.pitch;
-      document.getElementById('pitchSlider').value = basePitch;
-      masterGain = step.vol;
-      document.getElementById('volSlider').value = masterGain;
-      soundType = step.sound || 'wood';
-      meterMode = step.meter || 'p1';
-      setQuickTime(step.durationSec);
-
-      ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
-        document.getElementById(`s-${s}`).classList.toggle('selected', s === soundType);
-      });
-
-      ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(p => {
-        document.getElementById(`m-${p}`).classList.toggle('selected', p === meterMode);
-      });
-
-      updatePills();
-    }
-
-    function evaluateRoutine(currentSec) {
-      if (!routine || routine.length === 0) return;
-
-      let accumulatedSec = 0;
-      for (let i = 0; i < routine.length; i++) {
-        accumulatedSec += routine[i].durationSec;
-        if (currentSec < accumulatedSec) {
-          const remainingSec = accumulatedSec - currentSec;
-
-          if (remainingSec <= 3 && remainingSec > 0 && currentSec !== lastSecondReported) {
-            playCueSound('countdown');
-            triggerHaptic(30);
-            lastSecondReported = currentSec;
-          }
-
-          if (currentStepIndex !== i) {
-            currentStepIndex = i;
-            selectedEditIndex = i;
-            updateZoneDisplay(i);
-
-            playCueSound('next_step');
-            triggerHaptic(40);
-            applyStepDataToUI(routine[i]);
-            syncBpmTimer();
-            renderSteps();
-          }
-          return;
-        }
-      }
-
-      playCueSound('complete');
-      triggerHaptic([40, 60, 40]);
-      stop();
-    }
-
-    function start() {
-      initAudio();
-      clearAllTimers();
-
-      isRunning = true;
-      isInterrupted = false;
-      startBtn.textContent = 'STOP';
-      startBtn.classList.add('stop');
-
-      currentBeatIndex = 0;
-      if (routine && routine.length > 0) {
-        if (selectedEditIndex !== null && selectedEditIndex < routine.length) {
-          currentStepIndex = selectedEditIndex;
-        } else {
-          currentStepIndex = 0;
-        }
-
-        updateZoneDisplay(currentStepIndex);
-        applyStepDataToUI(routine[currentStepIndex]);
-
-        let accumulatedSec = 0;
-        for (let i = 0; i < currentStepIndex; i++) {
-          accumulatedSec += routine[i].durationSec;
-        }
-        baseOffsetMs = accumulatedSec * 1000;
-        elapsedMs = baseOffsetMs;
-        timerEl.textContent = formatPrecisionTimer(elapsedMs);
-
-        playCueSound('next_step');
-      }
-
-      triggerStep();
-      syncBpmTimer();
-
-      startTimeMs = performance.now();
-
-      clockTimer = setInterval(() => {
-        const now = performance.now();
-        elapsedMs = baseOffsetMs + (now - startTimeMs);
-        timerEl.textContent = formatPrecisionTimer(elapsedMs);
-
-        const currentSec = Math.floor(elapsedMs / 1000);
-        evaluateRoutine(currentSec);
-      }, 10);
-
-      renderSteps();
-    }
-
-    function stop() {
-      isRunning = false;
-      isInterrupted = false;
-      baseOffsetMs = elapsedMs;
-      clearAllTimers();
-      resetStepIndicators();
-      startBtn.textContent = 'START';
-      startBtn.classList.remove('stop');
-      renderSteps();
-    }
-
-    startBtn.onclick = () => {
-      triggerHaptic(20);
-      if (!isRunning) start();
-      else stop();
+      cardWhite.classList.add('expanded');
+      updateSummaries();
     };
 
     document.getElementById('resetBtn').onclick = () => {
-      triggerHaptic(20);
-      stop();
-      baseOffsetMs = 0;
-      elapsedMs = 0;
-      lastSecondReported = -1;
-      currentStepIndex = 0;
-      selectedEditIndex = 0;
-      updateZoneDisplay(0);
-      resetStepIndicators();
-      timerEl.textContent = "0:00:00:00";
-      if (routine && routine.length > 0) {
-        applyStepDataToUI(routine[0]);
-      }
-      renderSteps();
+      triggerHaptic(30);
+      bpm = 180;
+      bpmDisplay.textContent = bpm;
+      setQuickTime(60);
+      setSound('wood');
+      setMeter('p1');
     };
 
-    document.getElementById('pitchSlider').oninput = (e) => basePitch = parseFloat(e.target.value);
-    document.getElementById('volSlider').oninput = (e) => masterGain = parseFloat(e.target.value);
+    // 피치 조절 시 1박 사운드 재생
+    document.getElementById('pitchSlider').oninput = (e) => {
+      basePitch = parseFloat(e.target.value);
+      updateSummaries();
+      triggerSliderTone();
+    };
 
-    function setSound(type, id) {
-      triggerHaptic(15);
-      soundType = type;
-      ['s-wood', 's-bass', 's-drum', 's-beep', 's-click'].forEach(i => document.getElementById(i).classList.remove('selected'));
-      document.getElementById(id).classList.add('selected');
-      updatePills();
-      playBeep();
-    }
-    document.getElementById('s-wood').onclick = () => setSound('wood', 's-wood');
-    document.getElementById('s-bass').onclick = () => setSound('bass', 's-bass');
-    document.getElementById('s-drum').onclick = () => setSound('drum', 's-drum');
-    document.getElementById('s-beep').onclick = () => setSound('beep', 's-beep');
-    document.getElementById('s-click').onclick = () => setSound('click', 's-click');
+    // 볼륨 조절 시 1박 사운드 재생
+    document.getElementById('volSlider').oninput = (e) => {
+      masterGain = parseFloat(e.target.value);
+      updateSummaries();
+      triggerSliderTone();
+    };
 
-    function setMeter(meter) {
-      triggerHaptic(15);
-      meterMode = meter;
-      ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(p => {
-        document.getElementById(`m-${p}`).classList.toggle('selected', p === meter);
-      });
-      currentBeatIndex = 0;
-      updatePills();
-    }
-    document.getElementById('m-p1').onclick = () => setMeter('p1');
-    document.getElementById('m-p2').onclick = () => setMeter('p2');
-    document.getElementById('m-p3').onclick = () => setMeter('p3');
-    document.getElementById('m-p4').onclick = () => setMeter('p4');
-    document.getElementById('m-p5').onclick = () => setMeter('p5');
+    document.getElementById('startRunBtn').onclick = () => {
+      triggerHaptic(30);
+      if (routine.length === 0) {
+        alert('최소 1개 이상의 구간을 등록해주세요.');
+        return;
+      }
+      try {
+        localStorage.setItem('matempa_active_slot', currentRoutineSlot);
+      } catch (e) {}
+      window.location.href = 'run.html';
+    };
 
-    loadRoutineSlot(0);
-    updatePills();
+    selectPreset(0);
+    updateSummaries();
   </script>
 </body>
 </html>
