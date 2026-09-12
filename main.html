@@ -374,12 +374,37 @@
       letter-spacing: -0.5px;
     }
 
+    /* 박자가 상단으로 이동하면서 하단 여백 추가 */
+    .meter-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-bottom: 1.1rem;
+    }
+    .meter-btn {
+      background: rgba(255, 255, 255, 0.4);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 9px 0;
+      border-radius: 12px;
+      font-size: 0.68rem;
+      letter-spacing: -1.2px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .meter-btn.selected {
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 시간이 하단으로 이동 */
     .mint-time-row {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 1.1rem;
     }
     .time-chip-quick {
       background: rgba(255, 255, 255, 0.4);
@@ -407,29 +432,6 @@
       font-weight: 800;
       text-align: center;
       outline: none;
-    }
-
-    .meter-chips-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-    }
-    .meter-btn {
-      background: rgba(255, 255, 255, 0.4);
-      color: #111111;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      padding: 9px 0;
-      border-radius: 12px;
-      font-size: 0.68rem;
-      letter-spacing: -1.2px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-    }
-    .meter-btn.selected {
-      background: #111111;
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
     /* 4단: 화이트 카드 */
@@ -586,7 +588,7 @@
             <div class="bpm-arrows-side" id="bpmArrowsSide">▲<br>▼</div>
           </div>
 
-          <!-- TEST / 추가 / 수정 (음표 제거) -->
+          <!-- TEST / 추가 / 수정 -->
           <div class="black-action-capsule">
             <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST</button>
             <button class="capsule-btn btn-capsule-add" id="addStepBtn">+ 추가</button>
@@ -625,7 +627,7 @@
         </div>
       </div>
 
-      <!-- 3단: 민트 카드 (Rhythm & Time: 시간 설정 이전) -->
+      <!-- 3단: 민트 카드 (박자가 상단, 시간이 하단) -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -637,20 +639,21 @@
           <span class="card-arrow-icon">→</span>
         </div>
         <div class="card-expand-body" onclick="event.stopPropagation()">
-          <!-- 케이던스에서 이전된 시간 옵션 영역 -->
-          <div class="mint-time-row">
-            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
-            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
-            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
-            <input type="number" class="mint-sec-input" id="durationSecInput" value="60" min="1" max="99999">
-          </div>
-
+          <!-- 1. 박자 선택 그리드 (상단) -->
           <div class="meter-chips-grid">
             <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
             <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
             <button class="meter-btn" id="m-p3" onclick="setMeter('p3')">●○●●</button>
             <button class="meter-btn" id="m-p4" onclick="setMeter('p4')">●●○●</button>
             <button class="meter-btn" id="m-p5" onclick="setMeter('p5')">●●●○</button>
+          </div>
+
+          <!-- 2. 시간 옵션 영역 (하단) -->
+          <div class="mint-time-row">
+            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
+            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
+            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
+            <input type="number" class="mint-sec-input" id="durationSecInput" value="60" min="1" max="99999">
           </div>
         </div>
       </div>
@@ -746,7 +749,7 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // 일반 버튼 클릭 사운드
+    // 일반 버튼 클릭 사운드 (기존 800->400에서 20% 다운 -> 640->320)
     function playClickSound() {
       try {
         initAudio();
@@ -756,8 +759,8 @@
         const gain = audioCtx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.03);
+        osc.frequency.setValueAtTime(640, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.03);
 
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
@@ -770,7 +773,7 @@
       } catch (e) {}
     }
 
-    // 케이던스 롤링 휠 틱 사운드
+    // 케이던스 롤링 틱 사운드 (기존 1200->700에서 20% 다운 -> 960->560)
     function playDialTickSound() {
       try {
         initAudio();
@@ -780,8 +783,8 @@
         const gain = audioCtx.createGain();
 
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(700, now + 0.015);
+        osc.frequency.setValueAtTime(960, now);
+        osc.frequency.exponentialRampToValueAtTime(560, now + 0.015);
 
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.linearRampToValueAtTime(0.0001, now + 0.015);
@@ -817,7 +820,6 @@
       sumBoxTime.textContent = totalTimeFormatted;
     }
 
-    // 케이던스 카드 토글
     function toggleCadenceCard() {
       playClickSound();
       triggerHaptic(15);
@@ -1016,7 +1018,6 @@
     }, { passive: true });
     window.addEventListener('touchend', () => isRolling = false);
 
-    // 하단 12개 원형 프리셋 슬라이더
     for (let i = 0; i < 12; i++) {
       const dot = document.createElement('div');
       dot.className = `preset-chip-dot ${i === 0 ? 'active' : ''}`;
