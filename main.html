@@ -374,7 +374,6 @@
       letter-spacing: -0.5px;
     }
 
-    /* 박자가 상단으로 이동하면서 하단 여백 추가 */
     .meter-chips-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -399,7 +398,6 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 시간이 하단으로 이동 */
     .mint-time-row {
       display: flex;
       align-items: center;
@@ -627,7 +625,7 @@
         </div>
       </div>
 
-      <!-- 3단: 민트 카드 (박자가 상단, 시간이 하단) -->
+      <!-- 3단: 민트 카드 (Rhythm Meter) -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -639,7 +637,6 @@
           <span class="card-arrow-icon">→</span>
         </div>
         <div class="card-expand-body" onclick="event.stopPropagation()">
-          <!-- 1. 박자 선택 그리드 (상단) -->
           <div class="meter-chips-grid">
             <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
             <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
@@ -648,7 +645,6 @@
             <button class="meter-btn" id="m-p5" onclick="setMeter('p5')">●●●○</button>
           </div>
 
-          <!-- 2. 시간 옵션 영역 (하단) -->
           <div class="mint-time-row">
             <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
             <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
@@ -741,15 +737,27 @@
       if (navigator.vibrate) navigator.vibrate(ms);
     }
 
+    // 전역 오디오 컨텍스트 초기화 및 잠금 해제
     function initAudio() {
       if (!audioCtx) {
         const AudioClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioClass({ latencyHint: 'interactive' });
       }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
     }
 
-    // 일반 버튼 클릭 사운드 (기존 800->400에서 20% 다운 -> 640->320)
+    // 첫 터치/클릭 시 브라우저 오디오 자동 잠금 강제 해제
+    const unlockAudioOnce = () => {
+      initAudio();
+      window.removeEventListener('pointerdown', unlockAudioOnce);
+      window.removeEventListener('touchstart', unlockAudioOnce);
+    };
+    window.addEventListener('pointerdown', unlockAudioOnce, { passive: true });
+    window.addEventListener('touchstart', unlockAudioOnce, { passive: true });
+
+    // 일반 버튼 클릭 사운드 (640Hz -> 320Hz)
     function playClickSound() {
       try {
         initAudio();
@@ -773,7 +781,7 @@
       } catch (e) {}
     }
 
-    // 케이던스 롤링 틱 사운드 (기존 1200->700에서 20% 다운 -> 960->560)
+    // 케이던스 롤링 틱 사운드 (960Hz -> 560Hz)
     function playDialTickSound() {
       try {
         initAudio();
@@ -991,6 +999,7 @@
     bpmInputCustom.addEventListener('blur', saveCustomBpm);
 
     bpmDialWrap.addEventListener('mousedown', (e) => {
+      initAudio();
       if (bpmInputCustom.style.display === 'block') return;
       isRolling = true;
       hasDragged = false;
@@ -1005,6 +1014,7 @@
     window.addEventListener('mouseup', () => isRolling = false);
 
     bpmDialWrap.addEventListener('touchstart', (e) => {
+      initAudio();
       if (bpmInputCustom.style.display === 'block') return;
       isRolling = true;
       hasDragged = false;
