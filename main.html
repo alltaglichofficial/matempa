@@ -39,7 +39,6 @@
       flex-direction: column;
     }
 
-    /* 상단 내비 바 */
     .header-nav {
       display: flex;
       justify-content: space-between;
@@ -85,7 +84,6 @@
       margin-left: 2px;
     }
 
-    /* 카드 스택 컨테이너 */
     .card-stack {
       position: relative;
       width: 100%;
@@ -95,7 +93,6 @@
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
     }
 
-    /* 공통 카드 스타일 */
     .stack-card {
       width: 100%;
       border-radius: 34px;
@@ -127,7 +124,6 @@
       gap: 8px;
     }
 
-    /* 헤더 인라인 복사 버튼: 펼쳐졌을 때만 표시 */
     .header-copy-btn {
       display: none;
       background: #f0f2f5;
@@ -161,7 +157,6 @@
       display: none;
     }
 
-    /* 4단 전용 요약 박스 그룹 */
     .summary-badge-group {
       display: flex;
       align-items: center;
@@ -204,7 +199,7 @@
       padding: 0 1.4rem 1.6rem 1.4rem;
     }
 
-    /* 1단: 검정 카드 (Cadence & Time) */
+    /* 1단: 검정 카드 */
     .card-black {
       background: #111315;
       color: #ffffff;
@@ -221,45 +216,66 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Reset 버튼: 단어 제거 후 아이콘만 유지 */
     .black-reset-pill {
       background: rgba(255, 255, 255, 0.14);
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
       transition: transform 0.12s ease;
     }
     .black-reset-pill:active { transform: scale(0.92); }
 
+    /* 케이던스 디스플레이 & 우측 화살표 인디케이터 */
     .black-bpm-hero {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1.8rem 0;
+      gap: 12px;
+      padding: 2.2rem 0 2rem 0;
       cursor: ns-resize;
       touch-action: none;
+      position: relative;
     }
     .bpm-display-num {
-      font-size: 6.8rem;
+      font-size: 7.2rem;
       font-weight: 900;
       line-height: 0.88;
       color: #ffffff;
       font-variant-numeric: tabular-nums;
       letter-spacing: -4px;
+      cursor: pointer;
     }
-    .bpm-label-sub {
-      font-size: 0.72rem;
-      color: #8e8e93;
-      font-weight: 800;
-      letter-spacing: 1.6px;
-      margin-top: 8px;
+    .bpm-arrows-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.95rem;
+      line-height: 1.1;
+      color: #555558;
+      user-select: none;
+    }
+    .bpm-input-custom {
+      display: none;
+      width: 220px;
+      font-size: 5.5rem;
+      font-weight: 900;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid #ffffff;
+      border-radius: 20px;
+      color: #ffffff;
+      outline: none;
+      font-variant-numeric: tabular-nums;
     }
 
     .black-time-row {
@@ -330,7 +346,7 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 2단: 주황 카드 (Sound & Tuning) */
+    /* 2단: 주황 카드 */
     .card-orange {
       background: #e89553;
       color: #111111;
@@ -382,7 +398,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 3단: 민트 카드 (Rhythm Meter) */
+    /* 3단: 민트 카드 */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
@@ -418,7 +434,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 4단: 화이트 카드 (Intervals & Presets) */
+    /* 4단: 화이트 카드 */
     .card-white {
       background: #ffffff;
       color: #111111;
@@ -510,7 +526,6 @@
       color: #ffffff;
     }
 
-    /* 하단 START RUN 버튼 */
     .start-run-bar {
       margin-top: 1.4rem;
       width: 100%;
@@ -549,7 +564,7 @@
     <div class="card-stack">
 
       <!-- 1단: 검정 영역 (Cadence & Time) -->
-      <div class="stack-card card-black expanded" id="cardBlack" onclick="openCadenceManually()">
+      <div class="stack-card card-black expanded" id="cardBlack">
         <div class="card-header-bar">
           <div class="card-header-left">
             <div class="card-header-title">
@@ -560,18 +575,18 @@
           <span class="card-arrow-icon">→</span>
         </div>
 
-        <div class="card-expand-body" onclick="event.stopPropagation()">
+        <div class="card-expand-body">
           <div class="black-subhead-row">
             <span style="font-size:0.75rem; color:#8e8e93; font-weight:700;" id="activeSlotBadge">ROUTINE #1</span>
-            <button class="black-reset-pill" id="resetBtn">
-              <span>Reset</span>
-              <span style="font-size:0.8rem;">↻</span>
-            </button>
+            <!-- 리셋 텍스트 제거, 원형 아이콘 버튼 -->
+            <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
           </div>
 
+          <!-- BPM 디스플레이 & 오른쪽에 배치된 화살표 -->
           <div class="black-bpm-hero" id="bpmDialWrap">
-            <div class="bpm-display-num" id="bpmDisplay">180</div>
-            <div class="bpm-label-sub">TARGET SPM (ROLL ▲▼)</div>
+            <div class="bpm-display-num" id="bpmDisplay" title="클릭하여 직접 입력">180</div>
+            <input type="number" class="bpm-input-custom" id="bpmInputCustom" min="40" max="260">
+            <div class="bpm-arrows-side" id="bpmArrowsSide">▲<br>▼</div>
           </div>
 
           <div class="black-time-row">
@@ -648,10 +663,8 @@
           <div class="card-header-left">
             <div class="card-header-title">
               <span>Intervals & Presets</span>
-              <!-- 펼쳐졌을 때만 노출되는 복사 버튼 -->
               <button class="header-copy-btn" onclick="event.stopPropagation(); duplicateSelectedStep();" title="선택된 구간 복제">복사 ⧉</button>
             </div>
-            <!-- 요청된 3개 분리 뱃지 요약 박스: #1, zone3, 0:00:00 -->
             <div class="summary-badge-group">
               <span class="summary-box" id="sumBoxSlot">#1</span>
               <span class="summary-box" id="sumBoxZone">zone 1</span>
@@ -706,6 +719,8 @@
     const cardWhite = document.getElementById('cardWhite');
 
     const bpmDisplay = document.getElementById('bpmDisplay');
+    const bpmInputCustom = document.getElementById('bpmInputCustom');
+    const bpmArrowsSide = document.getElementById('bpmArrowsSide');
     const bpmDialWrap = document.getElementById('bpmDialWrap');
     const durationSecInput = document.getElementById('durationSecInput');
     const stepsListWrap = document.getElementById('stepsListWrap');
@@ -717,7 +732,6 @@
     const summarySound = document.getElementById('summarySound');
     const summaryMeter = document.getElementById('summaryMeter');
 
-    // 4단 요약 분리 박스들
     const sumBoxSlot = document.getElementById('sumBoxSlot');
     const sumBoxZone = document.getElementById('sumBoxZone');
     const sumBoxTime = document.getElementById('sumBoxTime');
@@ -744,19 +758,9 @@
       const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
       const totalTimeFormatted = formatTotalTimeHMS(totalSec);
 
-      // 개별 박스에 값 배정: #1, zone3, 0:00:00
       sumBoxSlot.textContent = `#${currentRoutineSlot + 1}`;
       sumBoxZone.textContent = `zone ${routine.length}`;
       sumBoxTime.textContent = totalTimeFormatted;
-    }
-
-    function openCadenceManually() {
-      if (!cardBlack.classList.contains('expanded')) {
-        triggerHaptic(15);
-        cardBlack.classList.add('expanded');
-        cardWhite.classList.remove('expanded');
-        updateSummaries();
-      }
     }
 
     function toggleSubCard(cardId) {
@@ -773,18 +777,17 @@
       updateSummaries();
     }
 
+    // 인터벌 카드를 열거나 닫아도 케이던스는 접히지 않음
     function toggleIntervalCard() {
       triggerHaptic(15);
       const isExpanded = cardWhite.classList.contains('expanded');
 
       if (!isExpanded) {
         cardWhite.classList.add('expanded');
-        cardBlack.classList.remove('expanded');
         cardOrange.classList.remove('expanded');
         cardMint.classList.remove('expanded');
       } else {
         cardWhite.classList.remove('expanded');
-        cardBlack.classList.add('expanded');
       }
       updateSummaries();
     }
@@ -797,7 +800,6 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // 1박 테스트 사운드 (피치, 볼륨 조절 시 호출)
     function playBeepSound() {
       initAudio();
       if (!audioCtx) return;
@@ -838,7 +840,6 @@
       osc.stop(now + dur);
     }
 
-    // 슬라이더 조작 시 1박 테스트 사운드 디바운스 트리거
     function triggerSliderTone() {
       if (sliderSoundDebounce) clearTimeout(sliderSoundDebounce);
       sliderSoundDebounce = setTimeout(() => {
@@ -847,7 +848,6 @@
       }, 40);
     }
 
-    // 4박자 완주 테스트
     function runTestFourBeats() {
       if (testTimer) {
         clearInterval(testTimer);
@@ -884,10 +884,11 @@
       testTimer = setInterval(playBeat, intervalMs);
     }
 
-    // BPM 다이얼 조작
+    // 케이던스 롤링 및 커스텀 입력 로직
     let isRolling = false;
     let startY = 0;
     let startBpm = 180;
+    let hasDragged = false;
     const SENSITIVITY = 4.5;
 
     function setBpm(val) {
@@ -900,20 +901,60 @@
       }
     }
 
+    // BPM 클릭 시 커스텀 숫자 입력
+    bpmDisplay.onclick = (e) => {
+      if (hasDragged) return;
+      e.stopPropagation();
+      bpmInputCustom.value = bpm;
+      bpmDisplay.style.display = 'none';
+      bpmArrowsSide.style.display = 'none';
+      bpmInputCustom.style.display = 'block';
+      bpmInputCustom.focus();
+      bpmInputCustom.select();
+    };
+
+    function saveCustomBpm() {
+      const val = parseInt(bpmInputCustom.value);
+      if (!isNaN(val)) setBpm(val);
+      bpmInputCustom.style.display = 'none';
+      bpmDisplay.style.display = 'block';
+      bpmArrowsSide.style.display = 'flex';
+    }
+
+    bpmInputCustom.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') saveCustomBpm();
+      else if (e.key === 'Escape') {
+        bpmInputCustom.style.display = 'none';
+        bpmDisplay.style.display = 'block';
+        bpmArrowsSide.style.display = 'flex';
+      }
+    });
+    bpmInputCustom.addEventListener('blur', saveCustomBpm);
+
     bpmDialWrap.addEventListener('mousedown', (e) => {
-      isRolling = true; startY = e.clientY; startBpm = bpm;
+      if (bpmInputCustom.style.display === 'block') return;
+      isRolling = true;
+      hasDragged = false;
+      startY = e.clientY;
+      startBpm = bpm;
     });
     window.addEventListener('mousemove', (e) => {
       if (!isRolling) return;
+      if (Math.abs(startY - e.clientY) > 4) hasDragged = true;
       setBpm(startBpm + Math.round((startY - e.clientY) / SENSITIVITY));
     });
     window.addEventListener('mouseup', () => isRolling = false);
 
     bpmDialWrap.addEventListener('touchstart', (e) => {
-      isRolling = true; startY = e.touches[0].clientY; startBpm = bpm;
+      if (bpmInputCustom.style.display === 'block') return;
+      isRolling = true;
+      hasDragged = false;
+      startY = e.touches[0].clientY;
+      startBpm = bpm;
     }, { passive: true });
     window.addEventListener('touchmove', (e) => {
       if (!isRolling) return;
+      if (Math.abs(startY - e.touches[0].clientY) > 4) hasDragged = true;
       setBpm(startBpm + Math.round((startY - e.touches[0].clientY) / SENSITIVITY));
     }, { passive: true });
     window.addEventListener('touchend', () => isRolling = false);
@@ -932,7 +973,6 @@
       currentRoutineSlot = idx;
       activeSlotBadge.textContent = `ROUTINE #${idx + 1}`;
       try {
-        localStorage.setItem('matempa_active_slot', idx);
         const saved = localStorage.getItem(`matempa_routine_slot_${idx}`);
         routine = saved ? JSON.parse(saved) : (idx === 0 ? [{ durationSec: 60, bpm: 180, pitch: 600, vol: 0.8, sound: 'wood', meter: 'p1' }] : []);
       } catch (e) { routine = []; }
@@ -946,7 +986,6 @@
       updateSummaries();
     }
 
-    // 선택된 구간 복제 (헤더 버튼 전용)
     window.duplicateSelectedStep = function() {
       if (routine.length === 0 || selectedStepIndex === null || !routine[selectedStepIndex]) {
         alert("복사할 구간을 먼저 목록에서 선택해주세요.");
@@ -1153,6 +1192,7 @@
       playBeepSound();
     }
 
+    // 리듬미터 선택 시 샘플 소리 재생 (4박자 패턴 완주)
     function setMeter(meter) {
       triggerHaptic(15);
       meterMode = meter;
@@ -1160,6 +1200,7 @@
         document.getElementById(`m-${m}`).classList.toggle('selected', m === meter);
       });
       updateSummaries();
+      runTestFourBeats();
     }
 
     function removeStep(idx) {
@@ -1209,23 +1250,26 @@
       updateSummaries();
     };
 
+    // 리셋 버튼 클릭 시 기본값 복원
     document.getElementById('resetBtn').onclick = () => {
       triggerHaptic(30);
       bpm = 180;
       bpmDisplay.textContent = bpm;
       setQuickTime(60);
       setSound('wood');
-      setMeter('p1');
+      meterMode = 'p1';
+      ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
+        document.getElementById(`m-${m}`).classList.toggle('selected', m === 'p1');
+      });
+      updateSummaries();
     };
 
-    // 피치 조절 시 1박 사운드 재생
     document.getElementById('pitchSlider').oninput = (e) => {
       basePitch = parseFloat(e.target.value);
       updateSummaries();
       triggerSliderTone();
     };
 
-    // 볼륨 조절 시 1박 사운드 재생
     document.getElementById('volSlider').oninput = (e) => {
       masterGain = parseFloat(e.target.value);
       updateSummaries();
@@ -1244,6 +1288,7 @@
       window.location.href = 'run.html';
     };
 
+    // 앱 실행/새로고침 시 항상 1번 프리셋(인덱스 0) 기본 활성화
     selectPreset(0);
     updateSummaries();
   </script>
