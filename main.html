@@ -216,7 +216,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Reset 버튼: 단어 제거 후 아이콘만 유지 */
     .black-reset-pill {
       background: rgba(255, 255, 255, 0.14);
       color: #ffffff;
@@ -234,13 +233,12 @@
     }
     .black-reset-pill:active { transform: scale(0.92); }
 
-    /* 케이던스 디스플레이 & 우측 화살표 인디케이터 */
     .black-bpm-hero {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
-      padding: 2.2rem 0 2rem 0;
+      padding: 1.8rem 0 1.8rem 0;
       cursor: ns-resize;
       touch-action: none;
       position: relative;
@@ -276,41 +274,6 @@
       color: #ffffff;
       outline: none;
       font-variant-numeric: tabular-nums;
-    }
-
-    .black-time-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 1.2rem;
-    }
-    .time-chip-quick {
-      background: rgba(255, 255, 255, 0.08);
-      color: #d1d1d6;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 7px 14px;
-      border-radius: 12px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .time-chip-quick.selected {
-      background: #ffffff;
-      color: #111111;
-      font-weight: 800;
-    }
-    .black-sec-input {
-      width: 65px;
-      height: 33px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      color: #ffffff;
-      font-size: 0.88rem;
-      font-weight: 800;
-      text-align: center;
-      outline: none;
     }
 
     .black-action-capsule {
@@ -409,6 +372,41 @@
     .card-mint .card-summary-tag {
       color: #1b2f2d;
       letter-spacing: -0.5px;
+    }
+
+    .mint-time-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 1.1rem;
+    }
+    .time-chip-quick {
+      background: rgba(255, 255, 255, 0.4);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .time-chip-quick.selected {
+      background: #111111;
+      color: #ffffff;
+      font-weight: 800;
+    }
+    .mint-sec-input {
+      width: 65px;
+      height: 33px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      color: #111111;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
     }
 
     .meter-chips-grid {
@@ -553,32 +551,31 @@
 
     <!-- 상단 내비 바 -->
     <div class="header-nav">
-      <button class="nav-circle-btn" onclick="window.location.href='index.html'">←</button>
+      <button class="nav-circle-btn" onclick="playClickSound(); window.location.href='index.html'">←</button>
       <div class="nav-title">
         <h2>Make<span>your tempo</span></h2>
       </div>
-      <button class="nav-circle-btn" onclick="triggerHaptic(15)">//</button>
+      <button class="nav-circle-btn" onclick="playClickSound(); triggerHaptic(15)">//</button>
     </div>
 
     <!-- 4단 스택 레이아웃 -->
     <div class="card-stack">
 
-      <!-- 1단: 검정 영역 (Cadence & Time) -->
-      <div class="stack-card card-black expanded" id="cardBlack">
+      <!-- 1단: 검정 영역 (Cadence) -->
+      <div class="stack-card card-black expanded" id="cardBlack" onclick="toggleCadenceCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
             <div class="card-header-title">
               <span>Cadence</span>
             </div>
-            <span class="card-summary-tag" id="summaryCadence">180 BPM · 60s</span>
+            <span class="card-summary-tag" id="summaryCadence">180 BPM</span>
           </div>
           <span class="card-arrow-icon">→</span>
         </div>
 
-        <div class="card-expand-body">
+        <div class="card-expand-body" onclick="event.stopPropagation()">
           <div class="black-subhead-row">
             <span style="font-size:0.75rem; color:#8e8e93; font-weight:700;" id="activeSlotBadge">ROUTINE #1</span>
-            <!-- 리셋 텍스트 제거, 원형 아이콘 버튼 -->
             <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
           </div>
 
@@ -589,16 +586,9 @@
             <div class="bpm-arrows-side" id="bpmArrowsSide">▲<br>▼</div>
           </div>
 
-          <div class="black-time-row">
-            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
-            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
-            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
-            <input type="number" class="black-sec-input" id="durationSecInput" value="60" min="1" max="99999">
-          </div>
-
-          <!-- TEST / 추가 / 수정 -->
+          <!-- TEST / 추가 / 수정 (음표 제거) -->
           <div class="black-action-capsule">
-            <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST ♪</button>
+            <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST</button>
             <button class="capsule-btn btn-capsule-add" id="addStepBtn">+ 추가</button>
             <button class="capsule-btn btn-capsule-mod" id="updateStepBtn">수정</button>
           </div>
@@ -635,18 +625,26 @@
         </div>
       </div>
 
-      <!-- 3단: 민트 카드 (Rhythm Meter) -->
+      <!-- 3단: 민트 카드 (Rhythm & Time: 시간 설정 이전) -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
             <div class="card-header-title">
               <span>Rhythm Meter</span>
             </div>
-            <span class="card-summary-tag" id="summaryMeter">●●●●</span>
+            <span class="card-summary-tag" id="summaryMeter">●●●● · 60s</span>
           </div>
           <span class="card-arrow-icon">→</span>
         </div>
         <div class="card-expand-body" onclick="event.stopPropagation()">
+          <!-- 케이던스에서 이전된 시간 옵션 영역 -->
+          <div class="mint-time-row">
+            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
+            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
+            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
+            <input type="number" class="mint-sec-input" id="durationSecInput" value="60" min="1" max="99999">
+          </div>
+
           <div class="meter-chips-grid">
             <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
             <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
@@ -740,6 +738,62 @@
       if (navigator.vibrate) navigator.vibrate(ms);
     }
 
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass({ latencyHint: 'interactive' });
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    // 일반 버튼 클릭 사운드
+    function playClickSound() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.03);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.03);
+      } catch (e) {}
+    }
+
+    // 케이던스 롤링 휠 틱 사운드
+    function playDialTickSound() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.015);
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.0001, now + 0.015);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.015);
+      } catch (e) {}
+    }
+
     function formatTotalTimeHMS(totalSeconds) {
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -751,9 +805,9 @@
     }
 
     function updateSummaries() {
-      summaryCadence.textContent = `${bpm} BPM · ${durationSec}s`;
+      summaryCadence.textContent = `${bpm} BPM`;
       summarySound.textContent = `${soundType.toUpperCase()} · P${basePitch} · V${Math.round(masterGain * 100)}%`;
-      summaryMeter.textContent = METERS[meterMode] ? METERS[meterMode].label : '●●●●';
+      summaryMeter.textContent = `${METERS[meterMode] ? METERS[meterMode].label : '●●●●'} · ${durationSec}s`;
 
       const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
       const totalTimeFormatted = formatTotalTimeHMS(totalSec);
@@ -763,7 +817,16 @@
       sumBoxTime.textContent = totalTimeFormatted;
     }
 
+    // 케이던스 카드 토글
+    function toggleCadenceCard() {
+      playClickSound();
+      triggerHaptic(15);
+      cardBlack.classList.toggle('expanded');
+      updateSummaries();
+    }
+
     function toggleSubCard(cardId) {
+      playClickSound();
       triggerHaptic(15);
       const targetCard = document.getElementById(cardId);
       const isExpanded = targetCard.classList.contains('expanded');
@@ -777,8 +840,8 @@
       updateSummaries();
     }
 
-    // 인터벌 카드를 열거나 닫아도 케이던스는 접히지 않음
     function toggleIntervalCard() {
+      playClickSound();
       triggerHaptic(15);
       const isExpanded = cardWhite.classList.contains('expanded');
 
@@ -790,14 +853,6 @@
         cardWhite.classList.remove('expanded');
       }
       updateSummaries();
-    }
-
-    function initAudio() {
-      if (!audioCtx) {
-        const AudioClass = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioClass({ latencyHint: 'interactive' });
-      }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function playBeepSound() {
@@ -867,7 +922,7 @@
           clearInterval(testTimer);
           testTimer = null;
           testToneBtn.classList.remove('playing');
-          testToneBtn.textContent = 'TEST ♪';
+          testToneBtn.textContent = 'TEST';
           return;
         }
 
@@ -884,26 +939,28 @@
       testTimer = setInterval(playBeat, intervalMs);
     }
 
-    // 케이던스 롤링 및 커스텀 입력 로직
     let isRolling = false;
     let startY = 0;
     let startBpm = 180;
     let hasDragged = false;
     const SENSITIVITY = 4.5;
 
-    function setBpm(val) {
+    function setBpm(val, isFromRoll = false) {
       const clamped = Math.min(Math.max(Math.round(val), 40), 260);
       if (clamped !== bpm) {
         bpm = clamped;
         bpmDisplay.textContent = bpm;
         updateSummaries();
         triggerHaptic(8);
+        if (isFromRoll) {
+          playDialTickSound();
+        }
       }
     }
 
-    // BPM 클릭 시 커스텀 숫자 입력
     bpmDisplay.onclick = (e) => {
       if (hasDragged) return;
+      playClickSound();
       e.stopPropagation();
       bpmInputCustom.value = bpm;
       bpmDisplay.style.display = 'none';
@@ -941,7 +998,7 @@
     window.addEventListener('mousemove', (e) => {
       if (!isRolling) return;
       if (Math.abs(startY - e.clientY) > 4) hasDragged = true;
-      setBpm(startBpm + Math.round((startY - e.clientY) / SENSITIVITY));
+      setBpm(startBpm + Math.round((startY - e.clientY) / SENSITIVITY), true);
     });
     window.addEventListener('mouseup', () => isRolling = false);
 
@@ -955,7 +1012,7 @@
     window.addEventListener('touchmove', (e) => {
       if (!isRolling) return;
       if (Math.abs(startY - e.touches[0].clientY) > 4) hasDragged = true;
-      setBpm(startBpm + Math.round((startY - e.touches[0].clientY) / SENSITIVITY));
+      setBpm(startBpm + Math.round((startY - e.touches[0].clientY) / SENSITIVITY), true);
     }, { passive: true });
     window.addEventListener('touchend', () => isRolling = false);
 
@@ -969,6 +1026,7 @@
     }
 
     function selectPreset(idx) {
+      playClickSound();
       triggerHaptic(20);
       currentRoutineSlot = idx;
       activeSlotBadge.textContent = `ROUTINE #${idx + 1}`;
@@ -987,6 +1045,7 @@
     }
 
     window.duplicateSelectedStep = function() {
+      playClickSound();
       if (routine.length === 0 || selectedStepIndex === null || !routine[selectedStepIndex]) {
         alert("복사할 구간을 먼저 목록에서 선택해주세요.");
         return;
@@ -1029,6 +1088,7 @@
 
         item.onclick = () => {
           if (!isLongPressActive) {
+            playClickSound();
             triggerHaptic(15);
             selectedStepIndex = idx;
             applyStepData(routine[idx]);
@@ -1126,6 +1186,7 @@
 
     function reorderSteps(fromIdx, toIdx) {
       if (fromIdx === toIdx || fromIdx === null || toIdx === null) return;
+      playClickSound();
       triggerHaptic(30);
       const movedItem = routine.splice(fromIdx, 1)[0];
       routine.splice(toIdx, 0, movedItem);
@@ -1146,7 +1207,7 @@
       document.getElementById('volSlider').value = masterGain;
       soundType = step.sound;
       meterMode = step.meter;
-      setQuickTime(step.durationSec);
+      setQuickTime(step.durationSec, false);
 
       ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
         document.getElementById(`s-${s}`).classList.toggle('selected', s === soundType);
@@ -1164,7 +1225,8 @@
       renderSteps();
     }
 
-    function setQuickTime(sec) {
+    function setQuickTime(sec, shouldPlaySound = true) {
+      if (shouldPlaySound) playClickSound();
       triggerHaptic(15);
       durationSec = sec;
       durationSecInput.value = sec;
@@ -1183,6 +1245,7 @@
     });
 
     function setSound(type) {
+      playClickSound();
       triggerHaptic(15);
       soundType = type;
       ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
@@ -1192,8 +1255,8 @@
       playBeepSound();
     }
 
-    // 리듬미터 선택 시 샘플 소리 재생 (4박자 패턴 완주)
     function setMeter(meter) {
+      playClickSound();
       triggerHaptic(15);
       meterMode = meter;
       ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
@@ -1204,6 +1267,7 @@
     }
 
     function removeStep(idx) {
+      playClickSound();
       triggerHaptic(20);
       routine.splice(idx, 1);
       selectedStepIndex = Math.max(0, selectedStepIndex - 1);
@@ -1211,11 +1275,13 @@
     }
 
     testToneBtn.onclick = () => {
+      playClickSound();
       triggerHaptic(20);
       runTestFourBeats();
     };
 
     document.getElementById('addStepBtn').onclick = () => {
+      playClickSound();
       triggerHaptic(25);
       const sec = parseInt(durationSecInput.value) || 60;
       routine.push({
@@ -1234,6 +1300,7 @@
     };
 
     document.getElementById('updateStepBtn').onclick = () => {
+      playClickSound();
       triggerHaptic(20);
       if (!routine[selectedStepIndex]) return;
       routine[selectedStepIndex] = {
@@ -1250,12 +1317,12 @@
       updateSummaries();
     };
 
-    // 리셋 버튼 클릭 시 기본값 복원
     document.getElementById('resetBtn').onclick = () => {
+      playClickSound();
       triggerHaptic(30);
       bpm = 180;
       bpmDisplay.textContent = bpm;
-      setQuickTime(60);
+      setQuickTime(60, false);
       setSound('wood');
       meterMode = 'p1';
       ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
@@ -1277,6 +1344,7 @@
     };
 
     document.getElementById('startRunBtn').onclick = () => {
+      playClickSound();
       triggerHaptic(30);
       if (routine.length === 0) {
         alert('최소 1개 이상의 구간을 등록해주세요.');
@@ -1288,7 +1356,6 @@
       window.location.href = 'run.html';
     };
 
-    // 앱 실행/새로고침 시 항상 1번 프리셋(인덱스 0) 기본 활성화
     selectPreset(0);
     updateSummaries();
   </script>
