@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MA.TEMPA - INTRO</title>
+  <style>
+    body {
+      background-color: #e7e5e1; /* 이미지 톤에 맞춘 배경 컬러 */
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .intro-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      gap: 25px;
+    }
+    .logo-img {
+      max-width: 200px;
+      width: 50%;
+      height: auto;
+      object-fit: contain;
+    }
+    .cat-video {
+      width: 220px;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 20px;
+      background-color: #1a1a1a; /* 배경색을 동일하게 일치 */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="intro-container" onclick="goMain()">
+    <img src="matempatext.png" alt="MA.TEMPA Logo" class="logo-img">
+    
+    <video src="cat_intro.mp4" class="cat-video" autoplay muted loop playsinline></video>
+  </div>
+
+  <script>
+    function goMain() {
+      window.location.href = 'main.html';
+    }
+  </script>
+</body>
+</html>
