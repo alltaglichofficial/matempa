@@ -298,11 +298,11 @@
       color: #111111;
     }
     .pb-calc-badge {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       font-weight: 800;
       color: #007aff;
       background: rgba(0, 122, 255, 0.1);
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 6px;
       font-variant-numeric: tabular-nums;
     }
@@ -454,7 +454,7 @@
           </div>
           <div class="header-right-meta">
             <span class="toggle-arrow">▼</span>
-            <span class="header-summary-badge" id="badge-summary-max">-- km</span>
+            <span class="header-summary-badge" id="badge-summary-max">--</span>
           </div>
         </div>
 
@@ -462,7 +462,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최대 완주 세부 기록</span>
-              <span class="pb-calc-badge" id="calc-max">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-max">--'--"</span>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
@@ -489,7 +489,7 @@
         </div>
       </div>
 
-      <!-- 3. 최단시간 최장거리 기록 (신규 추가 & 초기 닫힘 상태) -->
+      <!-- 3. 최단시간 최장거리 기록 (초기 닫힘 상태) -->
       <div class="profile-card collapsed" id="card-fastest-max">
         <div class="card-title-box collapsible-header" onclick="toggleCard('card-fastest-max')">
           <div class="header-text-group">
@@ -498,7 +498,7 @@
           </div>
           <div class="header-right-meta">
             <span class="toggle-arrow">▼</span>
-            <span class="header-summary-badge" id="badge-summary-fastest">-- km</span>
+            <span class="header-summary-badge" id="badge-summary-fastest">--</span>
           </div>
         </div>
 
@@ -506,7 +506,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최단시간 완주 기록</span>
-              <span class="pb-calc-badge" id="calc-fastest">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-fastest">--'--"</span>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
@@ -551,7 +551,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">5.00 km</span>
-              <span class="pb-calc-badge" id="calc-5k">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-5k">--'--"</span>
             </div>
             <div class="time-three-inputs">
               <input type="number" id="t5k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('5k', 5.00)">
@@ -574,7 +574,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">10.00 km</span>
-              <span class="pb-calc-badge" id="calc-10k">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-10k">--'--"</span>
             </div>
             <div class="time-three-inputs">
               <input type="number" id="t10k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('10k', 10.00)">
@@ -597,7 +597,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">하프 마라톤 (21.10 km)</span>
-              <span class="pb-calc-badge" id="calc-half">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-half">--'--"</span>
             </div>
             <div class="time-three-inputs">
               <input type="number" id="thalf-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('half', 21.0975)">
@@ -620,7 +620,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">풀코스 마라톤 (42.20 km)</span>
-              <span class="pb-calc-badge" id="calc-full">-- km/h · --'--"</span>
+              <span class="pb-calc-badge" id="calc-full">--'--"</span>
             </div>
             <div class="time-three-inputs">
               <input type="number" id="tfull-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('full', 42.195)">
@@ -650,6 +650,15 @@
 
   <script>
     let currentGender = 'male';
+
+    // 전역 페이스 포맷터: 초 단위를 분'초"로 변환
+    function formatPace(totalSec, distKm) {
+      if (distKm <= 0 || totalSec <= 0) return "--'--\"";
+      const paceSec = Math.round(totalSec / distKm);
+      const pMin = Math.floor(paceSec / 60);
+      const pSec = String(paceSec % 60).padStart(2, '0');
+      return `${pMin}'${pSec}"`;
+    }
 
     function triggerHaptic(duration = 20) {
       if (navigator.vibrate) navigator.vibrate(duration);
@@ -708,17 +717,13 @@
       const spdInput = document.getElementById('spd-max');
 
       if (dist <= 0 || totalSec <= 0) {
-        badge.textContent = "-- km/h · --'--\"";
+        badge.textContent = "--'--\"";
         updateAllSummaries();
         return;
       }
 
       const speedKmh = parseFloat((dist / (totalSec / 3600)).toFixed(2));
-      const paceSecPerKm = Math.round(totalSec / dist);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh.toFixed(2)} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, dist);
       spdInput.value = speedKmh.toFixed(2);
 
       autoFillPbRecords(dist, speedKmh);
@@ -741,11 +746,7 @@
       document.getElementById('tmax-m').value = m > 0 ? m : '';
       document.getElementById('tmax-s').value = s > 0 ? s : '';
 
-      const paceSecPerKm = Math.round(totalSec / dist);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh.toFixed(2)} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, dist);
 
       autoFillPbRecords(dist, speedKmh);
       updateAllSummaries();
@@ -765,17 +766,13 @@
       const spdInput = document.getElementById('spd-fastest');
 
       if (dist <= 0 || totalSec <= 0) {
-        badge.textContent = "-- km/h · --'--\"";
+        badge.textContent = "--'--\"";
         updateAllSummaries();
         return;
       }
 
       const speedKmh = parseFloat((dist / (totalSec / 3600)).toFixed(2));
-      const paceSecPerKm = Math.round(totalSec / dist);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh.toFixed(2)} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, dist);
       spdInput.value = speedKmh.toFixed(2);
 
       updateAllSummaries();
@@ -797,11 +794,7 @@
       document.getElementById('tfastest-m').value = m > 0 ? m : '';
       document.getElementById('tfastest-s').value = s > 0 ? s : '';
 
-      const paceSecPerKm = Math.round(totalSec / dist);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh.toFixed(2)} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, dist);
       updateAllSummaries();
     }
 
@@ -818,17 +811,13 @@
       const spdInput = document.getElementById(`spd-${key}`);
 
       if (totalSec <= 0) {
-        badge.textContent = "-- km/h · --'--\"";
+        badge.textContent = "--'--\"";
         if (shouldUpdateSummary) updateAllSummaries();
         return;
       }
 
       const speedKmh = (distanceKm / (totalSec / 3600)).toFixed(2);
-      const paceSecPerKm = Math.round(totalSec / distanceKm);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, distanceKm);
       spdInput.value = speedKmh;
 
       if (shouldUpdateSummary) updateAllSummaries();
@@ -849,16 +838,12 @@
       document.getElementById(`t${key}-m`).value = m > 0 ? m : '';
       document.getElementById(`t${key}-s`).value = s > 0 ? s : '';
 
-      const paceSecPerKm = Math.round(totalSec / distanceKm);
-      const pMin = Math.floor(paceSecPerKm / 60);
-      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
-
-      badge.textContent = `${speedKmh.toFixed(2)} km/h · ${pMin}'${pSec}"`;
+      badge.textContent = formatPace(totalSec, distanceKm);
       if (shouldUpdateSummary) updateAllSummaries();
     }
 
     /* ----------------------------------------------------
-       4. 요약 배지 갱신 (0.00 단위 통일)
+       4. 요약 배지 갱신 (페이스 형식 통일: 5K · 6'30")
     ---------------------------------------------------- */
     function updateAllSummaries() {
       // 1) 최장 거리 요약
@@ -866,16 +851,15 @@
       const mh = parseInt(document.getElementById('tmax-h').value) || 0;
       const mm = parseInt(document.getElementById('tmax-m').value) || 0;
       const ms = parseInt(document.getElementById('tmax-s').value) || 0;
+      const totalSecMax = (mh * 3600) + (mm * 60) + ms;
       const maxBadge = document.getElementById('badge-summary-max');
 
-      if (maxDist > 0) {
-        let timeStr = '';
-        if (mh > 0 || mm > 0 || ms > 0) {
-          timeStr = ` · ${mh > 0 ? String(mh).padStart(2, '0') + ':' : ''}${String(mm).padStart(2, '0')}:${String(ms).padStart(2, '0')}`;
-        }
-        maxBadge.textContent = `${maxDist.toFixed(2)}km${timeStr}`;
+      if (maxDist > 0 && totalSecMax > 0) {
+        maxBadge.textContent = `${maxDist.toFixed(2)}km · ${formatPace(totalSecMax, maxDist)}`;
+      } else if (maxDist > 0) {
+        maxBadge.textContent = `${maxDist.toFixed(2)}km`;
       } else {
-        maxBadge.textContent = '-- km';
+        maxBadge.textContent = '--';
       }
 
       // 2) 최단시간 최장거리 요약
@@ -883,38 +867,38 @@
       const fh = parseInt(document.getElementById('tfastest-h').value) || 0;
       const fm = parseInt(document.getElementById('tfastest-m').value) || 0;
       const fs = parseInt(document.getElementById('tfastest-s').value) || 0;
+      const totalSecFastest = (fh * 3600) + (fm * 60) + fs;
       const fastestBadge = document.getElementById('badge-summary-fastest');
 
-      if (fastestDist > 0) {
-        let timeStr = '';
-        if (fh > 0 || fm > 0 || fs > 0) {
-          timeStr = ` · ${fh > 0 ? String(fh).padStart(2, '0') + ':' : ''}${String(fm).padStart(2, '0')}:${String(fs).padStart(2, '0')}`;
-        }
-        fastestBadge.textContent = `${fastestDist.toFixed(2)}km${timeStr}`;
+      if (fastestDist > 0 && totalSecFastest > 0) {
+        fastestBadge.textContent = `${fastestDist.toFixed(2)}km · ${formatPace(totalSecFastest, fastestDist)}`;
+      } else if (fastestDist > 0) {
+        fastestBadge.textContent = `${fastestDist.toFixed(2)}km`;
       } else {
-        fastestBadge.textContent = '-- km';
+        fastestBadge.textContent = '--';
       }
 
-      // 3) 대회별 PB 요약
+      // 3) 대회별 PB 요약 (예: 5K · 6'30")
       const pbBadge = document.getElementById('badge-summary-pb');
       const pbList = [];
 
-      const checkRecord = (key, label) => {
-        const m = parseInt(document.getElementById(`t${key}-m`).value);
+      const checkRecord = (key, label, distKm) => {
         const h = parseInt(document.getElementById(`t${key}-h`).value) || 0;
+        const m = parseInt(document.getElementById(`t${key}-m`).value) || 0;
         const s = parseInt(document.getElementById(`t${key}-s`).value) || 0;
-        if (!isNaN(m) && (m > 0 || h > 0 || s > 0)) {
-          pbList.push(`${label} ${h > 0 ? h + 'h' : ''}${m > 0 ? m + 'm' : ''}${s > 0 && h === 0 ? s + 's' : ''}`);
+        const totalSec = (h * 3600) + (m * 60) + s;
+        if (totalSec > 0) {
+          pbList.push(`${label} · ${formatPace(totalSec, distKm)}`);
         }
       };
 
-      checkRecord('5k', '5K');
-      checkRecord('10k', '10K');
-      checkRecord('half', 'Half');
-      checkRecord('full', 'Full');
+      checkRecord('5k', '5K', 5.00);
+      checkRecord('10k', '10K', 10.00);
+      checkRecord('half', 'Half', 21.0975);
+      checkRecord('full', 'Full', 42.195);
 
       if (pbList.length > 0) {
-        pbBadge.textContent = pbList.slice(0, 2).join(' · ');
+        pbBadge.textContent = pbList.slice(0, 2).join(' | ');
       } else {
         pbBadge.textContent = '기록 없음';
       }
@@ -1035,7 +1019,6 @@
         }
       } catch (e) {}
 
-      // 초기 연동 계산 및 요약 노출
       onMaxDistanceOrTimeChange();
       onFastestDistanceOrTimeChange();
       onPbTimeChange('5k', 5.00, false);
