@@ -130,7 +130,7 @@
     .badge-next { background: rgba(0, 122, 255, 0.12); color: #007aff; }
     .badge-master { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
 
-    /* 사용자 프로필 요약 카드 (기존 유지) */
+    /* 사용자 프로필 요약 카드 */
     .profile-summary-grid {
       display: grid;
       grid-template-columns: 1.1fr 1fr 1fr;
@@ -358,7 +358,7 @@
       <button class="nav-circle-btn" onclick="window.location.href='main.html'">✕</button>
     </div>
 
-    <!-- 1. 러너 프로필 요약 카드 (기존 유지) -->
+    <!-- 1. 러너 프로필 요약 카드 (기존 등록 데이터 그대로 표시) -->
     <div class="report-card">
       <div class="card-header-line">
         <div class="header-text-group">
@@ -384,12 +384,12 @@
       </div>
     </div>
 
-    <!-- 2. 생체역학 기준 코스별 적정/예상치 (프로필 기준 정상 완주 지표) -->
+    <!-- 2. 생체역학 기준 코스별 적정치 (주행 기록 제외, 순수 신체 스펙으로만 계산) -->
     <div class="report-card">
       <div class="card-header-line">
         <div class="header-text-group">
           <h3>생체역학 기준 코스별 적정 완주치</h3>
-          <p class="card-sub-desc">현재 프로필 신체 스펙 및 주력 기준 정상 페이스·케이던스입니다.</p>
+          <p class="card-sub-desc">주행 기록과 무관하게 성별·나이·신체 스펙 기준 정상 지표입니다.</p>
         </div>
         <span class="badge-sub badge-curr" id="currBadge">NORMAL ZONE</span>
       </div>
@@ -575,20 +575,20 @@
       const heightCm = Math.round(parseFloat(p.height) || 175);
       const weightKg = Math.round(parseFloat(p.weight) || 68);
 
-      // 1. profile.html 에서 등록한 평균 페이스 원본 파싱
+      // ----------------------------------------------------
+      // [A] 프로필 요약 카드용 유저 실제 입력 데이터 파싱
+      // ----------------------------------------------------
       const pMin = parseInt(p.paceMin, 10) || 5;
       const pSec = parseInt(p.paceSec, 10) || 30;
       const userAvgPaceSec = (pMin * 60) + pSec;
       const userAvgPaceStr = formatMinSec(userAvgPaceSec);
 
-      // 2. 최고 완주 거리 및 케이던스 파싱
       const maxDist = (p.maxRun && parseFloat(p.maxRun.distance)) || 15.0;
       let userCad = 0;
       if (p.maxRun && p.maxRun.cadence) userCad = parseInt(p.maxRun.cadence, 10);
       else if (p.fastestMaxRun && p.fastestMaxRun.cadence) userCad = parseInt(p.fastestMaxRun.cadence, 10);
       if (!userCad && p.records && p.records.full && p.records.full.cadence) userCad = parseInt(p.records.full.cadence, 10);
 
-      // 3. 최고 페이스 파싱 (최단시간 완주 기록에서 산출)
       let fastestPaceSec = 0;
       if (p.fastestMaxRun && parseFloat(p.fastestMaxRun.distance) > 0) {
         const fDist = parseFloat(p.fastestMaxRun.distance);
@@ -606,45 +606,54 @@
       }
       const fastestPaceStr = formatMinSec(fastestPaceSec);
 
-      // 4. 생체역학 기본 케이던스 계산 (키, BMI, 성별, 나이 보정)
-      // 공식: 175 - (키 - 170) * 0.25
-      let baseCadence = 175 - ((heightCm - 170) * 0.25);
+      // ----------------------------------------------------
+      // [B] 생체역학 기준 코스별 정상 완주치 독자 계산
+      // (★ 주행 기록 배제: 오직 성별, 나이, 키, 몸무게 BMI로만 산출)
+      // ----------------------------------------------------
       const heightM = heightCm / 100;
       const bmi = weightKg / (heightM * heightM);
-      if (bmi >= 25.0) baseCadence += 2.0;
-      if (gender === '여') baseCadence += 1.5;
-      if (age >= 45) baseCadence += 1.0;
 
-      let optimalBaseCadence = Math.round(baseCadence);
-      if (userCad > 120 && userCad < 240) {
-        optimalBaseCadence = Math.round((userCad * 0.65) + (baseCadence * 0.35));
-      }
-      optimalBaseCadence = Math.min(MAX_ALLOWED_CADENCE, Math.max(155, optimalBaseCadence));
+      // 1) 순수 생체역학 케이던스 (신장 보폭 역학 공식)
+      // 기준 키 170cm = 175 SPM, 키 1cm당 -0.25 SPM 보정
+      let pureBioCadence = 175 - ((heightCm - 170) * 0.25);
+      if (bmi >= 25.0) pureBioCadence += 2.0; // 체중 부하 충격 분산 피치
+      if (gender === '여') pureBioCadence += 1.5; // 골반 구조 보정
+      if (age >= 45) pureBioCadence += 1.0; // 관절 충격 완화 피치
+      pureBioCadence = Math.min(MAX_ALLOWED_CADENCE, Math.max(160, Math.round(pureBioCadence)));
 
-      // 5. 생체역학 및 운동생리학 기준 코스별 정상 완주치 산출 (5k, 10k, Half, Full)
-      // 사용자의 현재 신체스펙/체력 기준 10km 페이스를 앵커로 잡고 거리별 피로 감쇠 곡선 적용
-      const courseConfig = [
+      // 2) 순수 신체 스펙 기반 10km 정상 기준 페이스 (Aerobic Norm Model)
+      // 건강한 성인 남성 30세, 정상 BMI 기준 10km 정상 페이스: 약 5'35"(335초)
+      let baseNormPace10k = 335;
+      if (gender === '여') baseNormPace10k += 35; // 성별 유산소 파워 차이 반영 (+35초)
+      if (age > 30) baseNormPace10k += (age - 30) * 1.6; // 연령별 연간 약 0.5% 심폐 감쇠 곡선
+      if (bmi > 22.5) baseNormPace10k += (bmi - 22.5) * 5.0; // BMI 증가에 따른 심장·근육 부하 계수
+      else if (bmi < 19.0) baseNormPace10k += (19.0 - bmi) * 3.0;
+      baseNormPace10k = Math.round(baseNormPace10k);
+
+      // 3) 생체역학 코스별 정상 페이스 및 케이던스 감쇠 곡선
+      const pureBioCourseConfig = [
         { key: '5k', km: 5.0, paceOffset: -12, cadOffset: +2 },
         { key: '10k', km: 10.0, paceOffset: 0, cadOffset: 0 },
         { key: 'half', km: 21.0975, paceOffset: +16, cadOffset: -1 },
-        { key: 'full', km: 42.195, paceOffset: +38, cadOffset: -2 }
+        { key: 'full', km: 42.195, paceOffset: +40, cadOffset: -2 }
       ];
 
       const courseResults = {};
-      courseConfig.forEach(c => {
-        const pace = Math.max(userAvgPaceSec + c.paceOffset, 180);
+      pureBioCourseConfig.forEach(c => {
+        const pace = Math.max(baseNormPace10k + c.paceOffset, 180);
         const timeSec = Math.round(c.km * pace);
-        let cad = Math.min(MAX_ALLOWED_CADENCE, Math.max(150, optimalBaseCadence + c.cadOffset));
+        const cad = Math.min(MAX_ALLOWED_CADENCE, Math.max(150, pureBioCadence + c.cadOffset));
         courseResults[c.key] = {
           paceStr: formatMinSec(pace),
           timeStr: formatHoursMinSec(timeSec),
           cadence: cad,
-          timeSec: timeSec,
-          paceSec: pace
+          timeSec: timeSec
         };
       });
 
-      // 6. 상급자 판정 (풀코스 4시간 30분 이내이거나 케이던스 185 SPM 이상)
+      // ----------------------------------------------------
+      // [C] 다음 목표 성장 제안 및 상급자 판정 (기존 유지)
+      // ----------------------------------------------------
       let fullPbTotalSec = 0;
       if (p.records && p.records.full) {
         const fh = parseInt(p.records.full.h, 10) || 0;
@@ -661,13 +670,12 @@
         masterReason = `풀코스 마라톤 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 서비스 기준치(4시간 30분)보다 높습니다.`;
       } else if (courseResults.full.timeSec <= FULL_430_TOTAL_SEC) {
         isMasterRunner = true;
-        masterReason = `회원님의 체형 및 페이스 기준 풀코스 예상 시간(${courseResults.full.timeStr})이 4시간 30분 미만입니다.`;
+        masterReason = `회원님의 신체 스펙 기준 풀코스 완주 예상치(${courseResults.full.timeStr})가 4시간 30분 미만입니다.`;
       } else if (userCad >= MAX_ALLOWED_CADENCE) {
         isMasterRunner = true;
         masterReason = `등록된 케이던스(${userCad} SPM)가 서비스 권장 상한선(185 SPM)에 도달하였습니다.`;
       }
 
-      // 7. 다음 목표 성장 제안 (기존 유지: 10km 기준 +10% 룰 적용)
       const targetBaseDist = maxDist >= 10 ? 10.0 : maxDist;
       let nextGoalDist = Math.round((targetBaseDist * 1.15) * 10) / 10;
       if (nextGoalDist > MAX_ALLOWED_DISTANCE) nextGoalDist = MAX_ALLOWED_DISTANCE;
@@ -676,8 +684,8 @@
       const nextPaceSec = Math.max(userAvgPaceSec - 15, 180);
       const actualPaceDiff = userAvgPaceSec - nextPaceSec;
       const nextTotalSec = Math.round(nextGoalDist * nextPaceSec);
-      const nextCadence = Math.min(MAX_ALLOWED_CADENCE, optimalBaseCadence + 3);
-      const cadDiff = nextCadence - optimalBaseCadence;
+      const nextCadence = Math.min(MAX_ALLOWED_CADENCE, (userCad || pureBioCadence) + 3);
+      const cadDiff = nextCadence - (userCad || pureBioCadence);
 
       return {
         gender,
@@ -687,7 +695,7 @@
         userAvgPaceStr,
         fastestPaceStr,
         maxDist,
-        userCad: userCad || optimalBaseCadence,
+        userCad: userCad || pureBioCadence,
         courses: courseResults,
         isMasterRunner,
         masterReason,
@@ -704,12 +712,12 @@
     function renderReport() {
       const res = calculateFullReport(profileData);
 
-      // 1. 러너 프로필 요약 카드 바인딩 (기존 유지)
+      // 1. 러너 프로필 요약 카드 (기존 유지)
       document.getElementById('sumBioSpec').textContent = `${res.gender} · ${res.age}세 (${res.heightCm}/${res.weightKg})`;
       document.getElementById('sumPaceGroup').textContent = `${res.userAvgPaceStr} / ${res.fastestPaceStr}`;
       document.getElementById('sumDistCadGroup').textContent = `${res.maxDist.toFixed(1)}km / ${res.userCad} SPM`;
 
-      // 2. 생체역학 기준 코스별 정상 완주치 바인딩 (5k, 10k, Half, Full)
+      // 2. 생체역학 기준 코스별 적정 완주치 바인딩 (주행 기록 배제된 순수 신체 기준값)
       ['5k', '10k', 'half', 'full'].forEach(k => {
         const item = res.courses[k];
         document.getElementById(`pace-${k}`).textContent = item.paceStr;
