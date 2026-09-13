@@ -102,7 +102,6 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* 접이식 헤더 스타일 */
     .card-title-box.collapsible-header {
       cursor: pointer;
       display: flex;
@@ -155,7 +154,6 @@
       display: none;
     }
 
-    /* 접힘 상태 제어 */
     .profile-card.collapsed .card-body-content {
       display: none;
     }
@@ -278,7 +276,6 @@
       background: #ffffff;
     }
 
-    /* 거리별/최대거리 기록 블록 */
     .distance-pb-block {
       background: #f8f9fa;
       border: 1px solid rgba(0, 0, 0, 0.05);
@@ -474,12 +471,12 @@
         </div>
       </div>
 
-      <!-- 2. 최장 거리 기록 (접이식 & 요약 & 상호 연동) -->
+      <!-- 2. 최장 거리 기록 -->
       <div class="profile-card" id="card-max">
         <div class="card-title-box collapsible-header" onclick="toggleCard('card-max')">
           <div class="header-text-group">
             <h3>최장 거리 기록</h3>
-            <p>러너의 개인 최대 완주 거리와 기록을 보관합니다.</p>
+            <p>러너의 개인 최대 완주 거리와 세부 기록을 보관합니다.</p>
           </div>
           <div class="header-right-meta">
             <span class="toggle-arrow">▼</span>
@@ -500,9 +497,9 @@
               </div>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="tmax-h" placeholder="01h" min="0" max="99" oninput="onMaxDistanceOrTimeChange()">
-              <input type="number" id="tmax-m" placeholder="30m" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
-              <input type="number" id="tmax-s" placeholder="00s" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
+              <input type="number" id="tmax-h" placeholder="시" min="0" max="99" oninput="onMaxDistanceOrTimeChange()">
+              <input type="number" id="tmax-m" placeholder="분" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
+              <input type="number" id="tmax-s" placeholder="초" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
@@ -518,11 +515,11 @@
         </div>
       </div>
 
-      <!-- 3. 거리별 PB 기록 (접이식 & 요약 & 상호 연동) -->
+      <!-- 3. 대회별 PB 기록 -->
       <div class="profile-card" id="card-pb">
         <div class="card-title-box collapsible-header" onclick="toggleCard('card-pb')">
           <div class="header-text-group">
-            <h3>거리별 PB 기록</h3>
+            <h3>대회별 PB 기록</h3>
             <p>시간과 속도 변경 시 상호 자동 연동 계산됩니다.</p>
           </div>
           <div class="header-right-meta">
@@ -539,9 +536,9 @@
               <span class="pb-calc-badge" id="calc-5k">-- km/h · --'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="t5k-h" placeholder="00h" min="0" max="23" oninput="onPbTimeChange('5k', 5)">
-              <input type="number" id="t5k-m" placeholder="26m" min="0" max="59" oninput="onPbTimeChange('5k', 5)">
-              <input type="number" id="t5k-s" placeholder="00s" min="0" max="59" oninput="onPbTimeChange('5k', 5)">
+              <input type="number" id="t5k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('5k', 5)">
+              <input type="number" id="t5k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('5k', 5)">
+              <input type="number" id="t5k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('5k', 5)">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
@@ -562,9 +559,9 @@
               <span class="pb-calc-badge" id="calc-10k">-- km/h · --'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="t10k-h" placeholder="00h" min="0" max="23" oninput="onPbTimeChange('10k', 10)">
-              <input type="number" id="t10k-m" placeholder="55m" min="0" max="59" oninput="onPbTimeChange('10k', 10)">
-              <input type="number" id="t10k-s" placeholder="00s" min="0" max="59" oninput="onPbTimeChange('10k', 10)">
+              <input type="number" id="t10k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('10k', 10)">
+              <input type="number" id="t10k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('10k', 10)">
+              <input type="number" id="t10k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('10k', 10)">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
@@ -585,9 +582,9 @@
               <span class="pb-calc-badge" id="calc-half">-- km/h · --'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="thalf-h" placeholder="01h" min="0" max="23" oninput="onPbTimeChange('half', 21.0975)">
-              <input type="number" id="thalf-m" placeholder="58m" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
-              <input type="number" id="thalf-s" placeholder="00s" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
+              <input type="number" id="thalf-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('half', 21.0975)">
+              <input type="number" id="thalf-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
+              <input type="number" id="thalf-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
@@ -608,9 +605,9 @@
               <span class="pb-calc-badge" id="calc-full">-- km/h · --'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="tfull-h" placeholder="04h" min="0" max="23" oninput="onPbTimeChange('full', 42.195)">
-              <input type="number" id="tfull-m" placeholder="15m" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
-              <input type="number" id="tfull-s" placeholder="00s" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
+              <input type="number" id="tfull-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('full', 42.195)">
+              <input type="number" id="tfull-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
+              <input type="number" id="tfull-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
@@ -630,7 +627,7 @@
       <div class="recom-hero-box">
         <div class="recom-info-left">
           <span>RECOMMENDED CADENCE</span>
-          <b id="recomZoneComment">지구력 & 무릎 보호 최적</b>
+          <b id="recomZoneComment">지구력 & 무릎 관절 보호 최적</b>
         </div>
         <div class="recom-bpm-val" id="recomBpmNum">178 <span style="font-size:0.9rem; font-weight:700;">BPM</span></div>
       </div>
@@ -650,7 +647,6 @@
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    // 카드 토글 함수
     function toggleCard(cardId) {
       triggerHaptic(12);
       const card = document.getElementById(cardId);
@@ -667,9 +663,35 @@
     }
 
     /* ----------------------------------------------------
-       1. 최장 거리 기록: 거리/시간 <-> 속도 상호 연동
+       최대 완주 기록 기반 대회별 PB 자동 연동 (Auto-fill)
     ---------------------------------------------------- */
-    // 거리 or 시간 변경 시 -> 속도 & 페이스 배지 계산
+    const standardDistances = [
+      { key: '5k', km: 5 },
+      { key: '10k', km: 10 },
+      { key: 'half', km: 21.0975 },
+      { key: 'full', km: 42.195 }
+    ];
+
+    function autoFillPbRecords(maxDist, speedKmh) {
+      if (maxDist <= 0 || speedKmh <= 0) return;
+
+      standardDistances.forEach(item => {
+        if (maxDist >= item.km) {
+          const spdInput = document.getElementById(`spd-${item.key}`);
+          const currentSpd = parseFloat(spdInput.value) || 0;
+          
+          // 기존 기록이 없거나, 새로운 최대 완주 속도가 더 빠르거나 같을 때 업데이트
+          if (currentSpd <= 0 || speedKmh >= currentSpd) {
+            spdInput.value = speedKmh.toFixed(1);
+            onPbSpeedChange(item.key, item.km, false);
+          }
+        }
+      });
+    }
+
+    /* ----------------------------------------------------
+       1. 최장 거리 기록: 상호 연동
+    ---------------------------------------------------- */
     function onMaxDistanceOrTimeChange() {
       const dist = parseFloat(document.getElementById('maxDistance').value) || 0;
       const h = parseInt(document.getElementById('tmax-h').value) || 0;
@@ -686,7 +708,7 @@
         return;
       }
 
-      const speedKmh = (dist / (totalSec / 3600)).toFixed(1);
+      const speedKmh = parseFloat((dist / (totalSec / 3600)).toFixed(1));
       const paceSecPerKm = Math.round(totalSec / dist);
       const pMin = Math.floor(paceSecPerKm / 60);
       const pSec = String(paceSecPerKm % 60).padStart(2, '0');
@@ -694,10 +716,10 @@
       badge.textContent = `${speedKmh} km/h · ${pMin}'${pSec}"`;
       spdInput.value = speedKmh;
 
+      autoFillPbRecords(dist, speedKmh);
       updateAllSummaries();
     }
 
-    // 속도(km/h) 직접 변경 시 -> 시간(h, m, s) 역산 및 페이스 배지 갱신
     function onMaxSpeedChange() {
       const dist = parseFloat(document.getElementById('maxDistance').value) || 0;
       const speedKmh = parseFloat(document.getElementById('spd-max').value) || 0;
@@ -719,14 +741,15 @@
       const pSec = String(paceSecPerKm % 60).padStart(2, '0');
 
       badge.textContent = `${speedKmh.toFixed(1)} km/h · ${pMin}'${pSec}"`;
+
+      autoFillPbRecords(dist, speedKmh);
       updateAllSummaries();
     }
 
     /* ----------------------------------------------------
-       2. 거리별 PB 기록: 시간 <-> 속도 상호 연동
+       2. 대회별 PB 기록: 상호 연동
     ---------------------------------------------------- */
-    // 시간 입력 시 -> 속도 & 배지 계산
-    function onPbTimeChange(key, distanceKm) {
+    function onPbTimeChange(key, distanceKm, shouldUpdateSummary = true) {
       const h = parseInt(document.getElementById(`t${key}-h`).value) || 0;
       const m = parseInt(document.getElementById(`t${key}-m`).value) || 0;
       const s = parseInt(document.getElementById(`t${key}-s`).value) || 0;
@@ -737,7 +760,7 @@
 
       if (totalSec <= 0) {
         badge.textContent = "-- km/h · --'--\"";
-        updateAllSummaries();
+        if (shouldUpdateSummary) updateAllSummaries();
         return;
       }
 
@@ -749,11 +772,10 @@
       badge.textContent = `${speedKmh} km/h · ${pMin}'${pSec}"`;
       spdInput.value = speedKmh;
 
-      updateAllSummaries();
+      if (shouldUpdateSummary) updateAllSummaries();
     }
 
-    // 속도 직접 입력 시 -> 시간(h, m, s) 역산 및 배지 갱신
-    function onPbSpeedChange(key, distanceKm) {
+    function onPbSpeedChange(key, distanceKm, shouldUpdateSummary = true) {
       const speedKmh = parseFloat(document.getElementById(`spd-${key}`).value) || 0;
       const badge = document.getElementById(`calc-${key}`);
 
@@ -773,11 +795,11 @@
       const pSec = String(paceSecPerKm % 60).padStart(2, '0');
 
       badge.textContent = `${speedKmh.toFixed(1)} km/h · ${pMin}'${pSec}"`;
-      updateAllSummaries();
+      if (shouldUpdateSummary) updateAllSummaries();
     }
 
     /* ----------------------------------------------------
-       3. 접혔을 때 표시할 요약 배지 업데이트
+       3. 요약 배지 갱신
     ---------------------------------------------------- */
     function updateAllSummaries() {
       // 최장 거리 요약
@@ -797,7 +819,7 @@
         maxBadge.textContent = '-- km';
       }
 
-      // 거리별 PB 요약 (입력된 대표 코스 축약 노출)
+      // 대회별 PB 요약
       const pbBadge = document.getElementById('badge-summary-pb');
       const pbList = [];
 
@@ -822,7 +844,7 @@
     }
 
     /* ----------------------------------------------------
-       4. 최적 케이던스 계산
+       4. 케이던스 산출 (안정적인 조깅 삭제 반영)
     ---------------------------------------------------- */
     function calculateOptimalCadence() {
       const age = parseInt(document.getElementById('inputAge').value) || 30;
@@ -857,10 +879,8 @@
       const commentEl = document.getElementById('recomZoneComment');
       if (recommendedCadence >= 184) {
         commentEl.textContent = '부상 방지 & 고속 피치 주법';
-      } else if (recommendedCadence >= 174) {
-        commentEl.textContent = '지구력 & 무릎 관절 보호 최적';
       } else {
-        commentEl.textContent = '안정적인 조깅 & 에너지 절약';
+        commentEl.textContent = '지구력 & 무릎 관절 보호 최적';
       }
     }
 
@@ -973,12 +993,11 @@
         }
       } catch (e) {}
 
-      // 초기 통계 및 요약 배지 렌더링
       onMaxDistanceOrTimeChange();
-      onPbTimeChange('5k', 5);
-      onPbTimeChange('10k', 10);
-      onPbTimeChange('half', 21.0975);
-      onPbTimeChange('full', 42.195);
+      onPbTimeChange('5k', 5, false);
+      onPbTimeChange('10k', 10, false);
+      onPbTimeChange('half', 21.0975, false);
+      onPbTimeChange('full', 42.195, false);
       calculateOptimalCadence();
       updateAllSummaries();
     };
