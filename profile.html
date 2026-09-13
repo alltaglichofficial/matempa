@@ -272,6 +272,7 @@
       color: #111111;
       outline: none;
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
     .pace-col input:focus {
       border-color: #111111;
@@ -324,13 +325,13 @@
       color: #111111;
     }
     .time-three-inputs input:focus { border-color: #111111; }
+    
     .pb-sub-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
-    .pb-sub-grid input {
-      width: 100%;
+    .pb-sub-grid .input-wrapper input {
       height: 36px;
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.08);
@@ -338,10 +339,30 @@
       padding: 0 36px 0 8px;
       font-size: 0.8rem;
       font-weight: 800;
-      outline: none;
-      font-variant-numeric: tabular-nums;
     }
-    .pb-sub-grid input:focus { border-color: #111111; }
+    .pb-sub-grid .input-wrapper input:focus { border-color: #111111; }
+
+    /* 블록 내 페이스 전용 인풋 디자인 */
+    .pb-pace-inline-wrap {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      width: 100%;
+    }
+    .pb-pace-inline-wrap .pace-col input {
+      height: 36px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 0 18px 0 6px;
+    }
+    .pb-pace-inline-wrap .pace-col input:focus { border-color: #111111; }
+    .pb-pace-inline-wrap .input-unit {
+      font-size: 0.65rem;
+      right: 5px;
+    }
 
     .save-profile-btn {
       margin-top: 1.4rem;
@@ -382,8 +403,8 @@
       <!-- 1. 기본 신체 프로필 & 주간 거리 -->
       <div class="profile-card" id="card-basic">
         <div class="card-title-box">
-          <h3>기본 신체 프로필</h3>
-          <p>체형과 주행 습관에 맞춘 러너 프로필을 구성합니다.</p>
+          <h3 style="font-size: 1rem; font-weight: 800; color: #111;">기본 신체 프로필</h3>
+          <p style="font-size: 0.7rem; color: #8e8e93; margin-top: 2px;">체형과 주행 습관에 맞춘 러너 프로필을 구성합니다.</p>
         </div>
 
         <div class="row-two-inputs">
@@ -407,14 +428,14 @@
           <div class="form-group">
             <label class="form-label">키 (Height)</label>
             <div class="input-wrapper">
-              <input type="number" id="inputHeight" value="175.00" min="120" max="230" step="0.01">
+              <input type="number" id="inputHeight" value="175" min="120" max="230" step="1">
               <span class="input-unit">cm</span>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">몸무게 (Weight)</label>
             <div class="input-wrapper">
-              <input type="number" id="inputWeight" value="68.00" min="30" max="160" step="0.01">
+              <input type="number" id="inputWeight" value="68" min="30" max="160" step="1">
               <span class="input-unit">kg</span>
             </div>
           </div>
@@ -462,7 +483,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최대 완주 세부 기록</span>
-              <span class="pb-calc-badge" id="calc-max">--'--"</span>
+              <span class="pb-calc-badge" id="calc-max">--</span>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
@@ -480,9 +501,16 @@
                 <input type="number" id="cad-max" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-max" placeholder="속도(연동)" step="0.01" oninput="onMaxSpeedChange()">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="pmax-min" placeholder="분" min="2" max="15" oninput="onMaxPaceChange()">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="pmax-sec" placeholder="초" min="0" max="59" oninput="onMaxPaceChange()">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -506,7 +534,7 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최단시간 완주 기록</span>
-              <span class="pb-calc-badge" id="calc-fastest">--'--"</span>
+              <span class="pb-calc-badge" id="calc-fastest">--</span>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
@@ -524,9 +552,16 @@
                 <input type="number" id="cad-fastest" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-fastest" placeholder="속도(연동)" step="0.01" oninput="onFastestSpeedChange()">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="pfastest-min" placeholder="분" min="2" max="15" oninput="onFastestPaceChange()">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="pfastest-sec" placeholder="초" min="0" max="59" oninput="onFastestPaceChange()">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -538,7 +573,7 @@
         <div class="card-title-box collapsible-header" onclick="toggleCard('card-pb')">
           <div class="header-text-group">
             <h3>대회별 PB 기록</h3>
-            <p>시간과 속도 변경 시 상호 자동 연동 계산됩니다.</p>
+            <p>시간과 페이스 변경 시 상호 자동 연동 계산됩니다.</p>
           </div>
           <div class="header-right-meta">
             <span class="toggle-arrow">▼</span>
@@ -563,9 +598,16 @@
                 <input type="number" id="cad-5k" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-5k" placeholder="속도(연동)" step="0.01" oninput="onPbSpeedChange('5k', 5.00)">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="p5k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('5k', 5.00)">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="p5k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('5k', 5.00)">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -586,9 +628,16 @@
                 <input type="number" id="cad-10k" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-10k" placeholder="속도(연동)" step="0.01" oninput="onPbSpeedChange('10k', 10.00)">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="p10k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('10k', 10.00)">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="p10k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('10k', 10.00)">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -609,9 +658,16 @@
                 <input type="number" id="cad-half" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-half" placeholder="속도(연동)" step="0.01" oninput="onPbSpeedChange('half', 21.0975)">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="phalf-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('half', 21.0975)">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="phalf-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('half', 21.0975)">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -632,9 +688,16 @@
                 <input type="number" id="cad-full" placeholder="케이던스" min="100" max="240">
                 <span class="input-unit">SPM</span>
               </div>
-              <div class="input-wrapper">
-                <input type="number" id="spd-full" placeholder="속도(연동)" step="0.01" oninput="onPbSpeedChange('full', 42.195)">
-                <span class="input-unit">km/h</span>
+              <div class="pb-pace-inline-wrap">
+                <div class="pace-col">
+                  <input type="number" id="pfull-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('full', 42.195)">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="pfull-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('full', 42.195)">
+                  <span class="input-unit">초</span>
+                </div>
               </div>
             </div>
           </div>
@@ -651,7 +714,6 @@
   <script>
     let currentGender = 'male';
 
-    // 전역 페이스 포맷터: 초 단위를 분'초"로 변환
     function formatPace(totalSec, distKm) {
       if (distKm <= 0 || totalSec <= 0) return "--'--\"";
       const paceSec = Math.round(totalSec / distKm);
@@ -688,16 +750,22 @@
       { key: 'full', km: 42.195 }
     ];
 
-    function autoFillPbRecords(maxDist, speedKmh) {
-      if (maxDist <= 0 || speedKmh <= 0) return;
+    function autoFillPbRecords(maxDist, paceSecPerKm) {
+      if (maxDist <= 0 || paceSecPerKm <= 0) return;
 
       standardDistances.forEach(item => {
         if (maxDist >= item.km) {
-          const spdInput = document.getElementById(`spd-${item.key}`);
-          const currentSpd = parseFloat(spdInput.value) || 0;
-          if (currentSpd <= 0 || speedKmh >= currentSpd) {
-            spdInput.value = speedKmh.toFixed(2);
-            onPbSpeedChange(item.key, item.km, false);
+          const pMinInput = document.getElementById(`p${item.key}-min`);
+          const pSecInput = document.getElementById(`p${item.key}-sec`);
+          const curMin = parseInt(pMinInput.value) || 0;
+          const curSec = parseInt(pSecInput.value) || 0;
+          const currentTotalPace = (curMin * 60) + curSec;
+
+          // 비어있거나 더 빠른 페이스일 경우 채움
+          if (currentTotalPace <= 0 || paceSecPerKm <= currentTotalPace) {
+            pMinInput.value = Math.floor(paceSecPerKm / 60);
+            pSecInput.value = paceSecPerKm % 60;
+            onPbPaceChange(item.key, item.km, false);
           }
         }
       });
@@ -713,31 +781,33 @@
       const s = parseInt(document.getElementById('tmax-s').value) || 0;
       const totalSec = (h * 3600) + (m * 60) + s;
 
-      const badge = document.getElementById('calc-max');
-      const spdInput = document.getElementById('spd-max');
+      const pMinInput = document.getElementById('pmax-min');
+      const pSecInput = document.getElementById('pmax-sec');
 
       if (dist <= 0 || totalSec <= 0) {
-        badge.textContent = "--'--\"";
+        pMinInput.value = '';
+        pSecInput.value = '';
         updateAllSummaries();
         return;
       }
 
-      const speedKmh = parseFloat((dist / (totalSec / 3600)).toFixed(2));
-      badge.textContent = formatPace(totalSec, dist);
-      spdInput.value = speedKmh.toFixed(2);
+      const paceSec = Math.round(totalSec / dist);
+      pMinInput.value = Math.floor(paceSec / 60);
+      pSecInput.value = paceSec % 60;
 
-      autoFillPbRecords(dist, speedKmh);
+      autoFillPbRecords(dist, paceSec);
       updateAllSummaries();
     }
 
-    function onMaxSpeedChange() {
+    function onMaxPaceChange() {
       const dist = parseFloat(document.getElementById('maxDistance').value) || 0;
-      const speedKmh = parseFloat(document.getElementById('spd-max').value) || 0;
-      const badge = document.getElementById('calc-max');
+      const pMin = parseInt(document.getElementById('pmax-min').value) || 0;
+      const pSec = parseInt(document.getElementById('pmax-sec').value) || 0;
+      const paceSec = (pMin * 60) + pSec;
 
-      if (dist <= 0 || speedKmh <= 0) return;
+      if (dist <= 0 || paceSec <= 0) return;
 
-      const totalSec = Math.round((dist / speedKmh) * 3600);
+      const totalSec = Math.round(dist * paceSec);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
       const s = totalSec % 60;
@@ -746,9 +816,7 @@
       document.getElementById('tmax-m').value = m > 0 ? m : '';
       document.getElementById('tmax-s').value = s > 0 ? s : '';
 
-      badge.textContent = formatPace(totalSec, dist);
-
-      autoFillPbRecords(dist, speedKmh);
+      autoFillPbRecords(dist, paceSec);
       updateAllSummaries();
     }
 
@@ -762,30 +830,32 @@
       const s = parseInt(document.getElementById('tfastest-s').value) || 0;
       const totalSec = (h * 3600) + (m * 60) + s;
 
-      const badge = document.getElementById('calc-fastest');
-      const spdInput = document.getElementById('spd-fastest');
+      const pMinInput = document.getElementById('pfastest-min');
+      const pSecInput = document.getElementById('pfastest-sec');
 
       if (dist <= 0 || totalSec <= 0) {
-        badge.textContent = "--'--\"";
+        pMinInput.value = '';
+        pSecInput.value = '';
         updateAllSummaries();
         return;
       }
 
-      const speedKmh = parseFloat((dist / (totalSec / 3600)).toFixed(2));
-      badge.textContent = formatPace(totalSec, dist);
-      spdInput.value = speedKmh.toFixed(2);
+      const paceSec = Math.round(totalSec / dist);
+      pMinInput.value = Math.floor(paceSec / 60);
+      pSecInput.value = paceSec % 60;
 
       updateAllSummaries();
     }
 
-    function onFastestSpeedChange() {
+    function onFastestPaceChange() {
       const dist = parseFloat(document.getElementById('fastestDistance').value) || 0;
-      const speedKmh = parseFloat(document.getElementById('spd-fastest').value) || 0;
-      const badge = document.getElementById('calc-fastest');
+      const pMin = parseInt(document.getElementById('pfastest-min').value) || 0;
+      const pSec = parseInt(document.getElementById('pfastest-sec').value) || 0;
+      const paceSec = (pMin * 60) + pSec;
 
-      if (dist <= 0 || speedKmh <= 0) return;
+      if (dist <= 0 || paceSec <= 0) return;
 
-      const totalSec = Math.round((dist / speedKmh) * 3600);
+      const totalSec = Math.round(dist * paceSec);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
       const s = totalSec % 60;
@@ -794,7 +864,6 @@
       document.getElementById('tfastest-m').value = m > 0 ? m : '';
       document.getElementById('tfastest-s').value = s > 0 ? s : '';
 
-      badge.textContent = formatPace(totalSec, dist);
       updateAllSummaries();
     }
 
@@ -808,28 +877,34 @@
       const totalSec = (h * 3600) + (m * 60) + s;
 
       const badge = document.getElementById(`calc-${key}`);
-      const spdInput = document.getElementById(`spd-${key}`);
+      const pMinInput = document.getElementById(`p${key}-min`);
+      const pSecInput = document.getElementById(`p${key}-sec`);
 
       if (totalSec <= 0) {
         badge.textContent = "--'--\"";
+        pMinInput.value = '';
+        pSecInput.value = '';
         if (shouldUpdateSummary) updateAllSummaries();
         return;
       }
 
-      const speedKmh = (distanceKm / (totalSec / 3600)).toFixed(2);
+      const paceSec = Math.round(totalSec / distanceKm);
       badge.textContent = formatPace(totalSec, distanceKm);
-      spdInput.value = speedKmh;
+      pMinInput.value = Math.floor(paceSec / 60);
+      pSecInput.value = paceSec % 60;
 
       if (shouldUpdateSummary) updateAllSummaries();
     }
 
-    function onPbSpeedChange(key, distanceKm, shouldUpdateSummary = true) {
-      const speedKmh = parseFloat(document.getElementById(`spd-${key}`).value) || 0;
+    function onPbPaceChange(key, distanceKm, shouldUpdateSummary = true) {
+      const pMin = parseInt(document.getElementById(`p${key}-min`).value) || 0;
+      const pSec = parseInt(document.getElementById(`p${key}-sec`).value) || 0;
+      const paceSec = (pMin * 60) + pSec;
       const badge = document.getElementById(`calc-${key}`);
 
-      if (speedKmh <= 0) return;
+      if (paceSec <= 0) return;
 
-      const totalSec = Math.round((distanceKm / speedKmh) * 3600);
+      const totalSec = Math.round(distanceKm * paceSec);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
       const s = totalSec % 60;
@@ -843,7 +918,7 @@
     }
 
     /* ----------------------------------------------------
-       4. 요약 배지 갱신 (페이스 형식 통일: 5K · 6'30")
+       4. 요약 배지 갱신 (블록 내부 배지와 동일한 포맷)
     ---------------------------------------------------- */
     function updateAllSummaries() {
       // 1) 최장 거리 요약
@@ -853,14 +928,16 @@
       const ms = parseInt(document.getElementById('tmax-s').value) || 0;
       const totalSecMax = (mh * 3600) + (mm * 60) + ms;
       const maxBadge = document.getElementById('badge-summary-max');
+      const maxBlockBadge = document.getElementById('calc-max');
 
+      let maxText = '--';
       if (maxDist > 0 && totalSecMax > 0) {
-        maxBadge.textContent = `${maxDist.toFixed(2)}km · ${formatPace(totalSecMax, maxDist)}`;
+        maxText = `${maxDist.toFixed(2)}km · ${formatPace(totalSecMax, maxDist)}`;
       } else if (maxDist > 0) {
-        maxBadge.textContent = `${maxDist.toFixed(2)}km`;
-      } else {
-        maxBadge.textContent = '--';
+        maxText = `${maxDist.toFixed(2)}km`;
       }
+      maxBadge.textContent = maxText;
+      maxBlockBadge.textContent = maxText;
 
       // 2) 최단시간 최장거리 요약
       const fastestDist = parseFloat(document.getElementById('fastestDistance').value) || 0;
@@ -869,16 +946,18 @@
       const fs = parseInt(document.getElementById('tfastest-s').value) || 0;
       const totalSecFastest = (fh * 3600) + (fm * 60) + fs;
       const fastestBadge = document.getElementById('badge-summary-fastest');
+      const fastestBlockBadge = document.getElementById('calc-fastest');
 
+      let fastestText = '--';
       if (fastestDist > 0 && totalSecFastest > 0) {
-        fastestBadge.textContent = `${fastestDist.toFixed(2)}km · ${formatPace(totalSecFastest, fastestDist)}`;
+        fastestText = `${fastestDist.toFixed(2)}km · ${formatPace(totalSecFastest, fastestDist)}`;
       } else if (fastestDist > 0) {
-        fastestBadge.textContent = `${fastestDist.toFixed(2)}km`;
-      } else {
-        fastestBadge.textContent = '--';
+        fastestText = `${fastestDist.toFixed(2)}km`;
       }
+      fastestBadge.textContent = fastestText;
+      fastestBlockBadge.textContent = fastestText;
 
-      // 3) 대회별 PB 요약 (예: 5K · 6'30")
+      // 3) 대회별 PB 요약
       const pbBadge = document.getElementById('badge-summary-pb');
       const pbList = [];
 
@@ -913,8 +992,8 @@
       const profileData = {
         gender: currentGender,
         age: document.getElementById('inputAge').value,
-        height: parseFloat(document.getElementById('inputHeight').value || 0).toFixed(2),
-        weight: parseFloat(document.getElementById('inputWeight').value || 0).toFixed(2),
+        height: parseInt(document.getElementById('inputHeight').value || 0, 10),
+        weight: parseInt(document.getElementById('inputWeight').value || 0, 10),
         paceMin: document.getElementById('paceMin').value,
         paceSec: document.getElementById('paceSec').value,
         weeklyDistance: parseFloat(document.getElementById('weeklyDistance').value || 0).toFixed(2),
@@ -924,7 +1003,8 @@
           m: document.getElementById('tmax-m').value,
           s: document.getElementById('tmax-s').value,
           cadence: document.getElementById('cad-max').value,
-          speed: parseFloat(document.getElementById('spd-max').value || 0).toFixed(2)
+          paceMin: document.getElementById('pmax-min').value,
+          paceSec: document.getElementById('pmax-sec').value
         },
         fastestMaxRun: {
           distance: parseFloat(document.getElementById('fastestDistance').value || 0).toFixed(2),
@@ -932,7 +1012,8 @@
           m: document.getElementById('tfastest-m').value,
           s: document.getElementById('tfastest-s').value,
           cadence: document.getElementById('cad-fastest').value,
-          speed: parseFloat(document.getElementById('spd-fastest').value || 0).toFixed(2)
+          paceMin: document.getElementById('pfastest-min').value,
+          paceSec: document.getElementById('pfastest-sec').value
         },
         records: {
           '5k': {
@@ -940,28 +1021,32 @@
             m: document.getElementById('t5k-m').value,
             s: document.getElementById('t5k-s').value,
             cadence: document.getElementById('cad-5k').value,
-            speed: parseFloat(document.getElementById('spd-5k').value || 0).toFixed(2)
+            paceMin: document.getElementById('p5k-min').value,
+            paceSec: document.getElementById('p5k-sec').value
           },
           '10k': {
             h: document.getElementById('t10k-h').value,
             m: document.getElementById('t10k-m').value,
             s: document.getElementById('t10k-s').value,
             cadence: document.getElementById('cad-10k').value,
-            speed: parseFloat(document.getElementById('spd-10k').value || 0).toFixed(2)
+            paceMin: document.getElementById('p10k-min').value,
+            paceSec: document.getElementById('p10k-sec').value
           },
           'half': {
             h: document.getElementById('thalf-h').value,
             m: document.getElementById('thalf-m').value,
             s: document.getElementById('thalf-s').value,
             cadence: document.getElementById('cad-half').value,
-            speed: parseFloat(document.getElementById('spd-half').value || 0).toFixed(2)
+            paceMin: document.getElementById('phalf-min').value,
+            paceSec: document.getElementById('phalf-sec').value
           },
           'full': {
             h: document.getElementById('tfull-h').value,
             m: document.getElementById('tfull-m').value,
             s: document.getElementById('tfull-s').value,
             cadence: document.getElementById('cad-full').value,
-            speed: parseFloat(document.getElementById('spd-full').value || 0).toFixed(2)
+            paceMin: document.getElementById('pfull-min').value,
+            paceSec: document.getElementById('pfull-sec').value
           }
         }
       };
@@ -980,8 +1065,8 @@
           const data = JSON.parse(saved);
           if (data.gender) setGender(data.gender);
           if (data.age) document.getElementById('inputAge').value = data.age;
-          if (data.height) document.getElementById('inputHeight').value = parseFloat(data.height).toFixed(2);
-          if (data.weight) document.getElementById('inputWeight').value = parseFloat(data.weight).toFixed(2);
+          if (data.height) document.getElementById('inputHeight').value = Math.round(parseFloat(data.height));
+          if (data.weight) document.getElementById('inputWeight').value = Math.round(parseFloat(data.weight));
           if (data.paceMin) document.getElementById('paceMin').value = data.paceMin;
           if (data.paceSec) document.getElementById('paceSec').value = data.paceSec;
           if (data.weeklyDistance) document.getElementById('weeklyDistance').value = parseFloat(data.weeklyDistance).toFixed(2);
@@ -992,7 +1077,8 @@
             if (data.maxRun.m) document.getElementById('tmax-m').value = data.maxRun.m;
             if (data.maxRun.s) document.getElementById('tmax-s').value = data.maxRun.s;
             if (data.maxRun.cadence) document.getElementById('cad-max').value = data.maxRun.cadence;
-            if (data.maxRun.speed) document.getElementById('spd-max').value = parseFloat(data.maxRun.speed).toFixed(2);
+            if (data.maxRun.paceMin) document.getElementById('pmax-min').value = data.maxRun.paceMin;
+            if (data.maxRun.paceSec) document.getElementById('pmax-sec').value = data.maxRun.paceSec;
           }
 
           if (data.fastestMaxRun) {
@@ -1001,7 +1087,8 @@
             if (data.fastestMaxRun.m) document.getElementById('tfastest-m').value = data.fastestMaxRun.m;
             if (data.fastestMaxRun.s) document.getElementById('tfastest-s').value = data.fastestMaxRun.s;
             if (data.fastestMaxRun.cadence) document.getElementById('cad-fastest').value = data.fastestMaxRun.cadence;
-            if (data.fastestMaxRun.speed) document.getElementById('spd-fastest').value = parseFloat(data.fastestMaxRun.speed).toFixed(2);
+            if (data.fastestMaxRun.paceMin) document.getElementById('pfastest-min').value = data.fastestMaxRun.paceMin;
+            if (data.fastestMaxRun.paceSec) document.getElementById('pfastest-sec').value = data.fastestMaxRun.paceSec;
           }
 
           if (data.records) {
@@ -1012,7 +1099,8 @@
                 if (rec.m) document.getElementById(`t${distKey}-m`).value = rec.m;
                 if (rec.s) document.getElementById(`t${distKey}-s`).value = rec.s;
                 if (rec.cadence) document.getElementById(`cad-${distKey}`).value = rec.cadence;
-                if (rec.speed) document.getElementById(`spd-${distKey}`).value = parseFloat(rec.speed).toFixed(2);
+                if (rec.paceMin) document.getElementById(`p${distKey}-min`).value = rec.paceMin;
+                if (rec.paceSec) document.getElementById(`p${distKey}-sec`).value = rec.paceSec;
               }
             });
           }
