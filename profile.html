@@ -192,7 +192,6 @@
       color: #8e8e93;
     }
 
-    /* 페이스 2열 인풋 */
     .pace-inputs-wrap {
       display: flex;
       align-items: center;
@@ -222,7 +221,7 @@
       background: #ffffff;
     }
 
-    /* 거리별 PB 기록 아코디언 카드 */
+    /* 거리별/최대거리 기록 블록 */
     .distance-pb-block {
       background: #f8f9fa;
       border: 1px solid rgba(0, 0, 0, 0.05);
@@ -285,7 +284,6 @@
       outline: none;
     }
 
-    /* 추천 결과 영역 */
     .recom-hero-box {
       background: #111315;
       color: #ffffff;
@@ -315,7 +313,6 @@
       color: #ffffff;
     }
 
-    /* 저장 버튼 */
     .save-profile-btn {
       margin-top: 1.2rem;
       width: 100%;
@@ -409,26 +406,47 @@
         </div>
       </div>
 
-      <!-- 2. 주행 거리 기록 (최대 거리 & 주거리) -->
+      <!-- 2. 러닝 마일리지 & 최대 완주 거리 상세 기록 -->
       <div class="profile-card">
         <div class="card-title-box">
-          <h3>러닝 마일리지 & 거리</h3>
-          <p>자신만의 최장 완주 거리와 평소 훈련 거리를 기록합니다.</p>
+          <h3>러닝 마일리지 & 최장 거리 기록</h3>
+          <p>평소 주간 주행 거리와 최대 거리 및 해당 기록을 보관합니다.</p>
         </div>
 
-        <div class="row-two-inputs">
-          <div class="form-group">
-            <label class="form-label">최대 완주 거리</label>
+        <!-- 평소 주 러닝 거리 -->
+        <div class="form-group">
+          <label class="form-label">평소 주 러닝 거리 (Weekly Distance)</label>
+          <div class="input-wrapper">
+            <input type="number" id="weeklyDistance" value="25" min="1" max="300" step="0.5" oninput="calculateOptimalCadence()">
+            <span class="input-unit">km/주</span>
+          </div>
+        </div>
+
+        <!-- 최대 완주거리 및 세부 기록 -->
+        <div class="distance-pb-block">
+          <div class="pb-header">
+            <span class="pb-dist-tag">최대 완주 거리 (Longest Run)</span>
+            <span class="pb-calc-badge" id="calc-max">-- km/h · --'--"</span>
+          </div>
+          <div class="form-group" style="margin-bottom: 2px;">
             <div class="input-wrapper">
-              <input type="number" id="maxDistance" value="15" min="1" max="200" step="0.5">
+              <input type="number" id="maxDistance" value="15" min="1" max="250" step="0.1" placeholder="최대 거리 입력" oninput="updateMaxStats()">
               <span class="input-unit">km</span>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">평소 주 러닝 거리</label>
+          <div class="time-three-inputs">
+            <input type="number" id="tmax-h" placeholder="01h" min="0" max="99" oninput="updateMaxStats()">
+            <input type="number" id="tmax-m" placeholder="30m" min="0" max="59" oninput="updateMaxStats()">
+            <input type="number" id="tmax-s" placeholder="00s" min="0" max="59" oninput="updateMaxStats()">
+          </div>
+          <div class="pb-sub-grid">
             <div class="input-wrapper">
-              <input type="number" id="weeklyDistance" value="25" min="1" max="300" oninput="calculateOptimalCadence()">
-              <span class="input-unit">km/주</span>
+              <input type="number" id="cad-max" placeholder="케이던스" min="100" max="240">
+              <span class="input-unit">SPM</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="spd-max" placeholder="속도(직접입력)" step="0.1">
+              <span class="input-unit">km/h</span>
             </div>
           </div>
         </div>
@@ -438,7 +456,7 @@
       <div class="profile-card">
         <div class="card-title-box">
           <h3>거리별 PB 기록</h3>
-          <p>기록(시간)을 입력하면 속도와 페이스가 자동 계산됩니다.</p>
+          <p>완주 시간을 입력하면 평균 속도와 페이스가 자동 계산됩니다.</p>
         </div>
 
         <!-- 5km -->
@@ -566,7 +584,35 @@
       calculateOptimalCadence();
     }
 
-    // 시간 입력 시 속도(km/h) 및 페이스(min/km) 실시간 계산
+    // 최대 완주 거리 시간/거리 변경 시 속도 및 페이스 계산
+    function updateMaxStats() {
+      const dist = parseFloat(document.getElementById('maxDistance').value) || 0;
+      const h = parseInt(document.getElementById('tmax-h').value) || 0;
+      const m = parseInt(document.getElementById('tmax-m').value) || 0;
+      const s = parseInt(document.getElementById('tmax-s').value) || 0;
+
+      const totalSec = (h * 3600) + (m * 60) + s;
+      const badge = document.getElementById('calc-max');
+      const spdInput = document.getElementById('spd-max');
+
+      if (dist <= 0 || totalSec <= 0) {
+        badge.textContent = "-- km/h · --'--\"";
+        return;
+      }
+
+      const speedKmh = (dist / (totalSec / 3600)).toFixed(1);
+      const paceSecPerKm = Math.round(totalSec / dist);
+      const pMin = Math.floor(paceSecPerKm / 60);
+      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
+
+      badge.textContent = `${speedKmh} km/h · ${pMin}'${pSec}"`;
+      if (!spdInput.value || spdInput.dataset.autofilled === "true") {
+        spdInput.value = speedKmh;
+        spdInput.dataset.autofilled = "true";
+      }
+    }
+
+    // 거리별 PB 시간 입력 시 속도(km/h) 및 페이스(min/km) 실시간 계산
     function updatePbStats(key, distanceKm) {
       const h = parseInt(document.getElementById(`t${key}-h`).value) || 0;
       const m = parseInt(document.getElementById(`t${key}-m`).value) || 0;
@@ -593,14 +639,14 @@
       }
     }
 
-    // 신체 조건, 나이, 페이스 역학 기반 케이던스 계산
+    // 최적 케이던스 산출 알고리즘
     function calculateOptimalCadence() {
       const age = parseInt(document.getElementById('inputAge').value) || 30;
       const height = parseFloat(document.getElementById('inputHeight').value) || 175;
       const weight = parseFloat(document.getElementById('inputWeight').value) || 68;
       const pMin = parseInt(document.getElementById('paceMin').value) || 5;
       const pSec = parseInt(document.getElementById('paceSec').value) || 30;
-      const weeklyKm = parseFloat(document.getElementById('weeklyDistance').value) || 20;
+      const weeklyKm = parseFloat(document.getElementById('weeklyDistance').value) || 25;
 
       const totalPaceSeconds = (pMin * 60) + pSec;
       const speedKmh = 3600 / totalPaceSeconds;
@@ -612,15 +658,12 @@
       const estimatedStride = (height / 100) * (speedKmh / 10) * strideFactor;
       let calculatedBpm = Math.round((speedKmh * 1000 / 60) / estimatedStride);
 
-      // BMI 과체중 관절 보호 보정
       const bmi = weight / Math.pow(height / 100, 2);
       if (bmi > 24) calculatedBpm += 2;
 
-      // 나이(Age) 보정 (40세 이상일수록 착지 충격 분산을 위해 피치형 권장)
       if (age >= 45) calculatedBpm += 3;
       else if (age >= 38) calculatedBpm += 1;
 
-      // 주간 마일리지 고려
       if (weeklyKm >= 40) calculatedBpm += 2;
 
       recommendedCadence = Math.min(Math.max(calculatedBpm, 162), 195);
@@ -647,8 +690,15 @@
         weight: document.getElementById('inputWeight').value,
         paceMin: document.getElementById('paceMin').value,
         paceSec: document.getElementById('paceSec').value,
-        maxDistance: document.getElementById('maxDistance').value,
         weeklyDistance: document.getElementById('weeklyDistance').value,
+        maxRun: {
+          distance: document.getElementById('maxDistance').value,
+          h: document.getElementById('tmax-h').value,
+          m: document.getElementById('tmax-m').value,
+          s: document.getElementById('tmax-s').value,
+          cadence: document.getElementById('cad-max').value,
+          speed: document.getElementById('spd-max').value
+        },
         records: {
           '5k': {
             h: document.getElementById('t5-h').value,
@@ -699,7 +749,6 @@
       window.location.href = 'main.html';
     }
 
-    // 불러오기
     window.onload = () => {
       try {
         const saved = localStorage.getItem('matempa_user_profile');
@@ -711,8 +760,17 @@
           if (data.weight) document.getElementById('inputWeight').value = data.weight;
           if (data.paceMin) document.getElementById('paceMin').value = data.paceMin;
           if (data.paceSec) document.getElementById('paceSec').value = data.paceSec;
-          if (data.maxDistance) document.getElementById('maxDistance').value = data.maxDistance;
           if (data.weeklyDistance) document.getElementById('weeklyDistance').value = data.weeklyDistance;
+
+          if (data.maxRun) {
+            if (data.maxRun.distance) document.getElementById('maxDistance').value = data.maxRun.distance;
+            if (data.maxRun.h) document.getElementById('tmax-h').value = data.maxRun.h;
+            if (data.maxRun.m) document.getElementById('tmax-m').value = data.maxRun.m;
+            if (data.maxRun.s) document.getElementById('tmax-s').value = data.maxRun.s;
+            if (data.maxRun.cadence) document.getElementById('cad-max').value = data.maxRun.cadence;
+            if (data.maxRun.speed) document.getElementById('spd-max').value = data.maxRun.speed;
+            updateMaxStats();
+          }
 
           if (data.records) {
             ['5k', '10k', 'half', 'full'].forEach(distKey => {
