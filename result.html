@@ -115,6 +115,7 @@
     }
     .badge-curr { background: rgba(52, 199, 89, 0.12); color: #34c759; }
     .badge-next { background: rgba(0, 122, 255, 0.12); color: #007aff; }
+    .badge-master { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
 
     /* 신체 스펙 및 지표 칩 그리드 */
     .profile-summary-grid {
@@ -145,7 +146,7 @@
       white-space: nowrap;
     }
 
-    /* 4칸 메트릭 그리드 (거리, 페이스, 시간, 케이던스) */
+    /* 4칸 메트릭 그리드 */
     .metric-quad-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -227,6 +228,24 @@
       color: #34c759;
     }
 
+    /* 상급 러너 전용 안내 박스 */
+    .master-notice-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 149, 0, 0.35);
+      border-radius: 18px;
+      padding: 14px 14px;
+      font-size: 0.78rem;
+      color: #e5e5ea;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+    .master-notice-box b {
+      color: #ff9f0a;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+    }
+
     /* 하단 버튼 */
     .bottom-btn-row {
       display: flex;
@@ -273,7 +292,7 @@
       <button class="nav-circle-btn" onclick="window.location.href='main.html'">✕</button>
     </div>
 
-    <!-- 1. 러너 프로필 신체 분석 요약 (몸무게로 표기) -->
+    <!-- 1. 러너 프로필 신체 분석 요약 -->
     <div class="report-card">
       <div class="card-header-line">
         <h3>생체역학 분석 프로필</h3>
@@ -296,11 +315,11 @@
       </div>
     </div>
 
-    <!-- 2. 현재 프로필 권장 훈련 (프로필 수치와 직접 비교) -->
+    <!-- 2. 현재 프로필 권장 훈련 -->
     <div class="report-card">
       <div class="card-header-line">
         <h3>현재 프로필 권장 훈련</h3>
-        <span class="badge-sub badge-curr">RECOMMENDED LIMIT</span>
+        <span class="badge-sub badge-curr" id="currBadge">RECOMMENDED</span>
       </div>
 
       <div class="metric-quad-grid">
@@ -311,7 +330,7 @@
             <div class="main-val" id="currRecDist">--</div>
             <div class="unit-val">km</div>
           </div>
-          <div class="sub-note" id="currDistBasis">프로필 대비 비교 분석</div>
+          <div class="sub-note" id="currDistBasis">프로필 역량 기준</div>
         </div>
 
         <!-- 훈련 적정 페이스 -->
@@ -330,7 +349,7 @@
           <div class="val-wrap">
             <div class="main-val" id="currRecTime">--:--</div>
           </div>
-          <div class="sub-note" id="currTimeNote">현재 역량 기준 시간</div>
+          <div class="sub-note" id="currTimeNote">현재 체력 주파 가능</div>
         </div>
 
         <!-- 처방 케이던스 -->
@@ -340,20 +359,20 @@
             <div class="main-val" id="currRecCadence" style="color: #34c759;">--</div>
             <div class="unit-val">SPM</div>
           </div>
-          <div class="sub-note" id="currCadenceNote">신장 역학 최적화</div>
+          <div class="sub-note" id="currCadenceNote">신장·페이스 최적화</div>
         </div>
       </div>
     </div>
 
-    <!-- 3. 성장 목표 제안 (+10% Rule & 피치 향상) -->
-    <div class="target-hero-card">
+    <!-- 3. 성장 목표 제안 (상급자는 자율 모드 안내) -->
+    <div class="target-hero-card" id="targetCard">
       <div class="card-header-line">
-        <h3>다음 목표 성장 제안</h3>
-        <span class="badge-sub badge-next">NEXT LEVEL</span>
+        <h3 id="targetCardTitle">다음 목표 성장 제안</h3>
+        <span class="badge-sub badge-next" id="targetBadge">NEXT LEVEL</span>
       </div>
 
-      <div class="metric-quad-grid">
-        <!-- 목표 도전 거리 -->
+      <!-- 일반 모드: 수치 목표 그리드 -->
+      <div class="metric-quad-grid" id="targetMetricGrid">
         <div class="metric-box">
           <span>목표 도전 거리</span>
           <div class="val-wrap">
@@ -363,7 +382,6 @@
           <div class="sub-note" id="nextDistCompare">+10~15% 확장</div>
         </div>
 
-        <!-- 목표 페이스 -->
         <div class="metric-box">
           <span>목표 페이스</span>
           <div class="val-wrap">
@@ -373,24 +391,29 @@
           <div class="sub-note" id="nextPaceCompare">스피드 단축</div>
         </div>
 
-        <!-- 목표 시간 -->
         <div class="metric-box">
           <span>예상 완주 시간</span>
           <div class="val-wrap">
             <div class="main-val" id="nextGoalTime">--:--</div>
           </div>
-          <div class="sub-note">성장형 목표 페이스</div>
+          <div class="sub-note">목표 완주 페이스</div>
         </div>
 
-        <!-- 목표 케이던스 -->
         <div class="metric-box">
           <span>타겟 케이던스</span>
           <div class="val-wrap">
             <div class="main-val" id="nextGoalCadence" style="color: #007aff;">--</div>
             <div class="unit-val">SPM</div>
           </div>
-          <div class="sub-note" id="nextCadenceCompare">+3~4 SPM 향상</div>
+          <div class="sub-note" id="nextCadenceCompare">+3 SPM 향상</div>
         </div>
+      </div>
+
+      <!-- 상급자 모드: 자율 페이스 안내 박스 -->
+      <div class="master-notice-box" id="masterNoticeBox" style="display: none;">
+        <b>🏆 상위 레벨 마스터 러너</b>
+        <span id="masterReasonText">현재 회원님의 프로필 기록은 서비스 권장 기준(풀코스 4시간 30분, 케이던스 185 SPM)을 이미 충족하였습니다.</span><br><br>
+        이미 훌륭한 주법과 역량을 갖추고 계시기 때문에, 정해진 목표치를 일률적으로 따르기보다는 <strong>현재 본인만의 페이스와 컨디션 루틴대로 차근차근 해나가시는 것을 추천해 드립니다.</strong>
       </div>
     </div>
 
@@ -404,6 +427,12 @@
 
   <script>
     let profileData = null;
+
+    // 풀코스 4시간 30분(4h 30m 00s = 16,200초) 기준
+    const MAX_ALLOWED_DISTANCE = 42.195;
+    const FULL_430_TOTAL_SEC = 16200; // 4시간 30분
+    const FULL_430_PACE_SEC = Math.round(FULL_430_TOTAL_SEC / MAX_ALLOWED_DISTANCE); // 약 384초 (6'24"/km)
+    const MAX_ALLOWED_CADENCE = 185;
 
     function formatMinSec(totalSeconds) {
       const m = Math.floor(totalSeconds / 60);
@@ -422,9 +451,6 @@
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    /* ----------------------------------------------------
-       현재 프로필 실질 상한선 및 비교 수치 계산 알고리즘
-    ---------------------------------------------------- */
     function calculateScientificPrescription(p) {
       const gender = p.gender || 'male';
       const age = parseInt(p.age, 10) || 30;
@@ -438,7 +464,53 @@
       const weeklyKm = parseFloat(p.weeklyDistance) || 25.0;
       const maxDist = (p.maxRun && parseFloat(p.maxRun.distance)) || 15.0;
 
-      // 1. 키 및 속도 기반 최적 케이던스 산출 (기본 키 170cm = 175 SPM)
+      // 1. profile.html 의 풀코스(Full) 기록 파싱
+      let fullPbTotalSec = 0;
+      let fullPbCadence = 0;
+      if (p.records && p.records.full) {
+        const fh = parseInt(p.records.full.h, 10) || 0;
+        const fm = parseInt(p.records.full.m, 10) || 0;
+        const fs = parseInt(p.records.full.s, 10) || 0;
+        fullPbTotalSec = (fh * 3600) + (fm * 60) + fs;
+        fullPbCadence = parseInt(p.records.full.cadence, 10) || 0;
+
+        // 시간 대신 페이스(pfull-min/sec)만 입력된 경우 역산
+        if (fullPbTotalSec === 0 && (p.records.full.paceMin || p.records.full.paceSec)) {
+          const pFMin = parseInt(p.records.full.paceMin, 10) || 0;
+          const pFSec = parseInt(p.records.full.paceSec, 10) || 0;
+          const fPaceSec = (pFMin * 60) + pFSec;
+          if (fPaceSec > 0) {
+            fullPbTotalSec = Math.round(fPaceSec * MAX_ALLOWED_DISTANCE);
+          }
+        }
+      }
+
+      // 등록된 기타 케이던스
+      let userRecordedCad = fullPbCadence || 0;
+      if (!userRecordedCad && p.maxRun && p.maxRun.cadence) {
+        userRecordedCad = parseInt(p.maxRun.cadence, 10);
+      } else if (!userRecordedCad && p.fastestMaxRun && p.fastestMaxRun.cadence) {
+        userRecordedCad = parseInt(p.fastestMaxRun.cadence, 10);
+      }
+
+      // 2. 상급 러너(Master Runner) 판정
+      // - 풀코스 마라톤 완주 기록이 4시간 30분(16,200초) 이하인 경우
+      // - 또는 풀코스 기준 페이스가 6'24" 이하이거나, 케이던스가 185 SPM 이상인 경우
+      let isMasterRunner = false;
+      let masterReason = '';
+
+      if (fullPbTotalSec > 0 && fullPbTotalSec <= FULL_430_TOTAL_SEC) {
+        isMasterRunner = true;
+        masterReason = `풀코스 마라톤 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 기준치(4시간 30분)보다 높습니다.`;
+      } else if (maxDist >= 42.195 && basePaceSec <= FULL_430_PACE_SEC) {
+        isMasterRunner = true;
+        masterReason = `풀코스 이상 완주 및 평균 페이스(${formatMinSec(basePaceSec)})가 기준치(4시간 30분 완주 기준)보다 높습니다.`;
+      } else if (userRecordedCad >= MAX_ALLOWED_CADENCE) {
+        isMasterRunner = true;
+        masterReason = `등록된 케이던스(${userRecordedCad} SPM)가 서비스 권장 상한선(185 SPM)에 도달하였습니다.`;
+      }
+
+      // 3. 케이던스 계산 (최대 185 SPM 상한 클램핑)
       let calculatedCadence = 175 - ((heightCm - 170) * 0.25);
       const speedMps = 1000 / basePaceSec;
       calculatedCadence += (speedMps - 2.8) * 4.5;
@@ -448,27 +520,23 @@
       if (bmi >= 25.0) calculatedCadence += 2;
       if (gender === 'female') calculatedCadence += 1.5;
 
-      let userRecordedCad = 0;
-      if (p.maxRun && p.maxRun.cadence) userRecordedCad = parseInt(p.maxRun.cadence, 10);
-      else if (p.fastestMaxRun && p.fastestMaxRun.cadence) userRecordedCad = parseInt(p.fastestMaxRun.cadence, 10);
-
       let optimalCadence = Math.round(calculatedCadence);
-      let cadenceCompareNote = `신장 ${heightCm}cm 최적 피치`;
+      let cadenceCompareNote = `신장 ${heightCm}cm 최적 리듬`;
+
       if (userRecordedCad > 120 && userRecordedCad < 240) {
         optimalCadence = Math.round((userRecordedCad * 0.7) + (calculatedCadence * 0.3));
         const diffCad = optimalCadence - userRecordedCad;
         cadenceCompareNote = diffCad === 0 ? `프로필 기록과 일치` : `프로필 대비 ${diffCad > 0 ? '+' : ''}${diffCad} SPM`;
       }
-      optimalCadence = Math.max(165, Math.min(190, optimalCadence));
+      optimalCadence = Math.min(MAX_ALLOWED_CADENCE, Math.max(165, optimalCadence));
 
-      // 2. 현재 프로필 권장 훈련 거리 계산 (주간의 38% 또는 최장거리의 85%)
+      // 4. 현재 권장 훈련 거리 (풀코스 42.195km 상한)
       let currentSessionDist = Math.max(weeklyKm * 0.38, maxDist * 0.85);
       currentSessionDist = Math.round(currentSessionDist * 10) / 10;
       
       if (currentSessionDist < 5.0 && maxDist >= 5.0) currentSessionDist = 5.0;
-      if (currentSessionDist > maxDist) currentSessionDist = maxDist;
+      if (currentSessionDist > MAX_ALLOWED_DISTANCE) currentSessionDist = MAX_ALLOWED_DISTANCE;
 
-      // 프로필 거리 비교 문구 생성
       let distCompareNote = '';
       if (maxDist > 0 && currentSessionDist >= maxDist * 0.8) {
         const ratio = Math.round((currentSessionDist / maxDist) * 100);
@@ -480,10 +548,10 @@
 
       const currentTotalSec = currentSessionDist * basePaceSec;
 
-      // 3. 다음 목표 성장 제안
+      // 5. 다음 목표 계산 (풀코스 42.195km & 케이던스 185 한도 적용)
       let nextGoalDist = Math.round((currentSessionDist * 1.15) * 10) / 10;
-      if (nextGoalDist > maxDist * 1.15) {
-        nextGoalDist = Math.round((maxDist * 1.1) * 10) / 10;
+      if (nextGoalDist > MAX_ALLOWED_DISTANCE) {
+        nextGoalDist = MAX_ALLOWED_DISTANCE;
       }
       const distDiff = Math.round((nextGoalDist - currentSessionDist) * 10) / 10;
 
@@ -492,7 +560,7 @@
       const actualPaceDiff = basePaceSec - nextPaceSec;
 
       const nextTotalSec = nextGoalDist * nextPaceSec;
-      const nextCadence = Math.min(optimalCadence + 3, 195);
+      const nextCadence = Math.min(MAX_ALLOWED_CADENCE, optimalCadence + (optimalCadence >= 183 ? 185 - optimalCadence : 3));
       const cadDiff = nextCadence - optimalCadence;
 
       return {
@@ -507,6 +575,8 @@
         currentTotalSec,
         optimalCadence,
         cadenceCompareNote,
+        isMasterRunner,
+        masterReason,
         nextGoalDist,
         distDiff,
         nextPaceSec,
@@ -520,12 +590,12 @@
     function generatePrescription() {
       const res = calculateScientificPrescription(profileData);
 
-      // 1. 프로필 요약 카드 (BMI 대신 몸무게 kg 표기)
+      // 1. 프로필 요약 카드
       document.getElementById('sumGenderAge').textContent = `${res.genderStr} · ${res.age}세`;
       document.getElementById('sumHeightWeight').textContent = `${res.heightCm}cm · ${res.weightKg}kg`;
       document.getElementById('sumCurrentPace').textContent = res.basePaceStr;
 
-      // 2. 현재 프로필 권장 훈련 (실제 비교 수치 반영)
+      // 2. 현재 프로필 권장 훈련
       document.getElementById('currRecDist').textContent = res.currentSessionDist.toFixed(1);
       document.getElementById('currDistBasis').textContent = res.distCompareNote;
       
@@ -533,22 +603,48 @@
       document.getElementById('currPaceNote').textContent = `프로필 등록 페이스 100%`;
       
       document.getElementById('currRecTime').textContent = formatHoursMinSec(res.currentTotalSec);
-      document.getElementById('currTimeNote').textContent = `평균 페이스 유지 시 소요`;
+      document.getElementById('currTimeNote').textContent = `현재 체력 기준 주파 가능`;
       
       document.getElementById('currRecCadence').textContent = res.optimalCadence;
       document.getElementById('currCadenceNote').textContent = res.cadenceCompareNote;
 
-      // 3. 다음 목표 성장 제안
-      document.getElementById('nextGoalDist').textContent = res.nextGoalDist.toFixed(1);
-      document.getElementById('nextDistCompare').textContent = `권장 대비 +${res.distDiff.toFixed(1)}km 확장`;
+      // 3. 목표 제안 영역 분기 (상급자 vs 일반 목표)
+      const metricGrid = document.getElementById('targetMetricGrid');
+      const masterNotice = document.getElementById('masterNoticeBox');
+      const targetBadge = document.getElementById('targetBadge');
+      const targetTitle = document.getElementById('targetCardTitle');
+      const masterReasonText = document.getElementById('masterReasonText');
 
-      document.getElementById('nextGoalPace').textContent = formatMinSec(res.nextPaceSec);
-      document.getElementById('nextPaceCompare').textContent = `현재 대비 -${res.actualPaceDiff}초 단축`;
+      if (res.isMasterRunner) {
+        // 기준 초과: 목표 수치 숨김 및 자율 페이스 안내 노출
+        metricGrid.style.display = 'none';
+        masterNotice.style.display = 'block';
+        targetTitle.textContent = '러너 맞춤 가이드';
+        targetBadge.textContent = 'MASTER RUNNER';
+        targetBadge.className = 'badge-sub badge-master';
 
-      document.getElementById('nextGoalTime').textContent = formatHoursMinSec(res.nextTotalSec);
+        if (res.masterReason) {
+          masterReasonText.textContent = `회원님의 프로필 기록은 ${res.masterReason}`;
+        }
+      } else {
+        // 일반 목표치 노출 모드
+        metricGrid.style.display = 'grid';
+        masterNotice.style.display = 'none';
+        targetTitle.textContent = '다음 목표 성장 제안';
+        targetBadge.textContent = 'NEXT LEVEL';
+        targetBadge.className = 'badge-sub badge-next';
 
-      document.getElementById('nextGoalCadence').textContent = res.nextCadence;
-      document.getElementById('nextCadenceCompare').textContent = `피치 +${res.cadDiff} SPM 향상`;
+        document.getElementById('nextGoalDist').textContent = res.nextGoalDist.toFixed(1);
+        document.getElementById('nextDistCompare').textContent = `권장 대비 +${res.distDiff.toFixed(1)}km 확장`;
+
+        document.getElementById('nextGoalPace').textContent = formatMinSec(res.nextPaceSec);
+        document.getElementById('nextPaceCompare').textContent = `현재 대비 -${res.actualPaceDiff}초 단축`;
+
+        document.getElementById('nextGoalTime').textContent = formatHoursMinSec(res.nextTotalSec);
+
+        document.getElementById('nextGoalCadence').textContent = res.nextCadence;
+        document.getElementById('nextCadenceCompare').textContent = res.cadDiff > 0 ? `피치 +${res.cadDiff} SPM 향상` : `최적 한도(185 SPM) 도달`;
+      }
     }
 
     function applyToMainSettings() {
