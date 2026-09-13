@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MA.TEMPA - CADENCE & RUN REPORT</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#dbe7ee">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: linear-gradient(180deg, #d3e4ed 0%, #e9edf1 100%);
+      color: #121212;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.2rem 1.2rem 3rem 1.2rem;
+      user-select: none;
+      -webkit-user-select: none;
+      letter-spacing: -0.3px;
+    }
+
+    .app-screen {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+      padding: 0 4px;
+    }
+
+    .nav-circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #2c2c2e;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s ease;
+    }
+    .nav-circle-btn:active { transform: scale(0.92); }
+
+    .nav-title {
+      text-align: center;
+      line-height: 1.15;
+    }
+    .nav-title h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.5px;
+    }
+    .nav-title span {
+      font-size: 1.15rem;
+      font-weight: 500;
+      font-style: italic;
+      color: #111111;
+      font-family: serif;
+      margin-left: 2px;
+    }
+
+    .report-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 1.3rem 1.2rem;
+      box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .card-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding-bottom: 0.6rem;
+    }
+    .card-header-line h3 {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #111111;
+    }
+    .badge-sub {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+    .badge-curr { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+    .badge-next { background: rgba(0, 122, 255, 0.12); color: #007aff; }
+
+    /* 사용자 프로필 요약 칩 그리드 */
+    .profile-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .summary-chip {
+      background: #f7f8fa;
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .summary-chip span {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #8e8e93;
+    }
+    .summary-chip b {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #111111;
+    }
+
+    /* 4칸 메트릭 그리드 (거리, 속도, 시간, 케이던스) */
+    .metric-quad-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric-box {
+      background: #f8f9fb;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .metric-box span {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #8e8e93;
+      text-transform: uppercase;
+    }
+    .metric-box .val-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .metric-box .main-val {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #111111;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-box .unit-val {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #666668;
+    }
+    .metric-box .sub-note {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #007aff;
+      margin-top: 2px;
+    }
+
+    /* 강조형 블랙 히어로 카드 (다음 목표) */
+    .target-hero-card {
+      background: #111315;
+      color: #ffffff;
+      border-radius: 28px;
+      padding: 1.3rem 1.2rem;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .target-hero-card .card-header-line {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    .target-hero-card .card-header-line h3 {
+      color: #ffffff;
+    }
+    .target-hero-card .metric-box {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+    .target-hero-card .metric-box span {
+      color: #a0a0a5;
+    }
+    .target-hero-card .metric-box .main-val {
+      color: #ffffff;
+    }
+    .target-hero-card .metric-box .unit-val {
+      color: #c7c7cc;
+    }
+    .target-hero-card .metric-box .sub-note {
+      color: #34c759;
+    }
+
+    /* 하단 액션 버튼 그룹 */
+    .bottom-btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 0.4rem;
+    }
+    .action-bar-btn {
+      height: 52px;
+      border: none;
+      border-radius: 26px;
+      font-size: 0.9rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease;
+    }
+    .action-bar-btn:active { transform: scale(0.96); }
+    .btn-secondary {
+      flex: 1;
+      background: #ffffff;
+      color: #111111;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .btn-primary {
+      flex: 1.5;
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-screen">
+
+    <!-- 상단 내비 바 -->
+    <div class="header-nav">
+      <button class="nav-circle-btn" onclick="window.location.href='profile.html'">←</button>
+      <div class="nav-title">
+        <h2>Run<span>Prescription</span></h2>
+      </div>
+      <button class="nav-circle-btn" onclick="window.location.href='main.html'">✕</button>
+    </div>
+
+    <!-- 1. 사용자 신체 프로필 요약 카드 -->
+    <div class="report-card">
+      <div class="card-header-line">
+        <h3>러너 프로필 요약</h3>
+        <span class="badge-sub badge-curr">ANALYZED</span>
+      </div>
+
+      <div class="profile-summary-grid">
+        <div class="summary-chip">
+          <span>성별/나이</span>
+          <b id="sumGenderAge">남 · 30세</b>
+        </div>
+        <div class="summary-chip">
+          <span>신체 스펙</span>
+          <b id="sumHeightWeight">175cm · 68kg</b>
+        </div>
+        <div class="summary-chip">
+          <span>현재 평균 페이스</span>
+          <b id="sumCurrentPace">5'30" /km</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 현재 적정 맞춤 추천 (Current Optimal) -->
+    <div class="report-card">
+      <div class="card-header-line">
+        <h3>현재 권장 훈련 세션</h3>
+        <span class="badge-sub badge-curr">OPTIMAL ZONE</span>
+      </div>
+
+      <div class="metric-quad-grid">
+        <!-- 추천 거리 -->
+        <div class="metric-box">
+          <span>추천 1회 거리</span>
+          <div class="val-wrap">
+            <div class="main-val" id="currRecDist">6.5</div>
+            <div class="unit-val">km</div>
+          </div>
+          <div class="sub-note" id="currDistBasis">주간 거리 기준</div>
+        </div>
+
+        <!-- 추천 속도 & 페이스 -->
+        <div class="metric-box">
+          <span>목표 속도 & 페이스</span>
+          <div class="val-wrap">
+            <div class="main-val" id="currRecSpeed">10.9</div>
+            <div class="unit-val">km/h</div>
+          </div>
+          <div class="sub-note" id="currRecPace">5'30" /km</div>
+        </div>
+
+        <!-- 예상 소요 시간 -->
+        <div class="metric-box">
+          <span>예상 완주 시간</span>
+          <div class="val-wrap">
+            <div class="main-val" id="currRecTime">35:45</div>
+          </div>
+          <div class="sub-note">안정 심박수 유지</div>
+        </div>
+
+        <!-- 최적 케이던스 -->
+        <div class="metric-box">
+          <span>처방 케이던스</span>
+          <div class="val-wrap">
+            <div class="main-val" id="currRecCadence" style="color: #34c759;">178</div>
+            <div class="unit-val">BPM</div>
+          </div>
+          <div class="sub-note">관절 부하 최소화</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 다음 목표 성장 추천 (Next Goal: +10% 원칙 반영) -->
+    <div class="target-hero-card">
+      <div class="card-header-line">
+        <h3>다음 목표 성장 제안</h3>
+        <span class="badge-sub badge-next">NEXT GOAL</span>
+      </div>
+
+      <div class="metric-quad-grid">
+        <!-- 다음 목표 거리 -->
+        <div class="metric-box">
+          <span>목표 도전 거리</span>
+          <div class="val-wrap">
+            <div class="main-val" id="nextGoalDist">7.5</div>
+            <div class="unit-val">km</div>
+          </div>
+          <div class="sub-note">+10~15% 마일리지</div>
+        </div>
+
+        <!-- 다음 목표 속도 & 페이스 -->
+        <div class="metric-box">
+          <span>목표 속도 & 페이스</span>
+          <div class="val-wrap">
+            <div class="main-val" id="nextGoalSpeed">11.4</div>
+            <div class="unit-val">km/h</div>
+          </div>
+          <div class="sub-note" id="nextGoalPace">5'15" /km</div>
+        </div>
+
+        <!-- 다음 목표 예상 시간 -->
+        <div class="metric-box">
+          <span>예상 소요 시간</span>
+          <div class="val-wrap">
+            <div class="main-val" id="nextGoalTime">39:28</div>
+          </div>
+          <div class="sub-note">지구력 점진 확장</div>
+        </div>
+
+        <!-- 다음 케이던스 -->
+        <div class="metric-box">
+          <span>타겟 케이던스</span>
+          <div class="val-wrap">
+            <div class="main-val" id="nextGoalCadence" style="color: #007aff;">182</div>
+            <div class="unit-val">BPM</div>
+          </div>
+          <div class="sub-note">빠른 피치 적응</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 액션 버튼 바 -->
+    <div class="bottom-btn-row">
+      <button class="action-bar-btn btn-secondary" onclick="window.location.href='profile.html'">프로필 수정</button>
+      <button class="action-bar-btn btn-primary" onclick="applyToMainSettings()">메인으로 이동 ▶</button>
+    </div>
+
+  </div>
+
+  <script>
+    let profileData = null;
+
+    function formatMinSec(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = Math.round(totalSeconds % 60);
+      return `${m}'${String(s).padStart(2, '0')}"`;
+    }
+
+    function formatHoursMinSec(totalSeconds) {
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = Math.round(totalSeconds % 60);
+
+      if (h > 0) {
+        return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function generatePrescription() {
+      const gender = profileData.gender === 'female' ? '여' : '남';
+      const age = profileData.age || 30;
+      const height = profileData.height || 175;
+      const weight = profileData.weight || 68;
+      const pMin = parseInt(profileData.paceMin) || 5;
+      const pSec = parseInt(profileData.paceSec) || 30;
+      const weeklyKm = parseFloat(profileData.weeklyDistance) || 25;
+      const maxDist = (profileData.maxRun && parseFloat(profileData.maxRun.distance)) || 15;
+      const optCadence = profileData.optimalCadence || 178;
+
+      // 1. 프로필 요약 카드 바인딩
+      document.getElementById('sumGenderAge').textContent = `${gender} · ${age}세`;
+      document.getElementById('sumHeightWeight').textContent = `${height}cm · ${weight}kg`;
+      document.getElementById('sumCurrentPace').textContent = `${pMin}'${String(pSec).padStart(2, '0')}" /km`;
+
+      // 2. 현재 적정 1회 러닝 세션 계산
+      // 주간 마일리지를 3~4회 세션으로 분할한 이상적 1회 거리
+      let currentSessionDist = Math.round((weeklyKm / 3.5) * 10) / 10;
+      if (currentSessionDist < 3.0) currentSessionDist = 3.0;
+      if (currentSessionDist > maxDist) currentSessionDist = maxDist;
+
+      const currentPaceSecPerKm = (pMin * 60) + pSec;
+      const currentSpeedKmh = (3600 / currentPaceSecPerKm).toFixed(1);
+      const currentTotalDurationSec = currentSessionDist * currentPaceSecPerKm;
+
+      document.getElementById('currRecDist').textContent = currentSessionDist.toFixed(1);
+      document.getElementById('currRecSpeed').textContent = currentSpeedKmh;
+      document.getElementById('currRecPace').textContent = `${pMin}'${String(pSec).padStart(2, '0')}" /km`;
+      document.getElementById('currRecTime').textContent = formatHoursMinSec(currentTotalDurationSec);
+      document.getElementById('currRecCadence').textContent = optCadence;
+
+      // 3. 다음 목표 성장 세션 계산 (러닝 안전 10% 룰 반영)
+      // 거리: 10~15% 확장 (최대 거리 이내 또는 안전 점진 증가)
+      let nextTargetDist = Math.round((currentSessionDist * 1.15) * 10) / 10;
+      if (nextTargetDist > maxDist * 1.1) {
+        nextTargetDist = Math.round((maxDist * 1.05) * 10) / 10;
+      }
+
+      // 페이스: 1km당 10~15초 단축 목표
+      let nextPaceSecPerKm = Math.max(currentPaceSecPerKm - 15, 180); // 최소 3분 페이스 이상
+      const nextSpeedKmh = (3600 / nextPaceSecPerKm).toFixed(1);
+      const nextTotalDurationSec = nextTargetDist * nextPaceSecPerKm;
+      const nextTargetCadence = Math.min(optCadence + 4, 196); // 가벼운 피치 증진
+
+      document.getElementById('nextGoalDist').textContent = nextTargetDist.toFixed(1);
+      document.getElementById('nextGoalSpeed').textContent = nextSpeedKmh;
+      document.getElementById('nextGoalPace').textContent = `${formatMinSec(nextPaceSecPerKm)} /km`;
+      document.getElementById('nextGoalTime').textContent = formatHoursMinSec(nextTotalDurationSec);
+      document.getElementById('nextGoalCadence').textContent = nextTargetCadence;
+    }
+
+    function applyToMainSettings() {
+      // 메인 화면으로 이동
+      window.location.href = 'main.html';
+    }
+
+    window.onload = () => {
+      try {
+        const saved = localStorage.getItem('matempa_user_profile');
+        if (saved) {
+          profileData = JSON.parse(saved);
+        }
+      } catch (e) {}
+
+      if (!profileData) {
+        profileData = {
+          gender: 'male',
+          age: 30,
+          height: 175,
+          weight: 68,
+          paceMin: 5,
+          paceSec: 30,
+          weeklyDistance: 25,
+          maxRun: { distance: 15 },
+          optimalCadence: 178
+        };
+      }
+
+      generatePrescription();
+    };
+  </script>
+</body>
+</html>
