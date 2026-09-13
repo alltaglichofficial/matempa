@@ -130,20 +130,21 @@
     .badge-next { background: rgba(0, 122, 255, 0.12); color: #007aff; }
     .badge-master { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
 
+    /* 사용자 프로필 요약 카드 (3분할 칩) */
     .profile-summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1.1fr 1fr 1fr;
       gap: 6px;
     }
     .summary-chip {
       background: #f7f8fa;
-      border-radius: 12px;
-      padding: 8px 4px;
+      border-radius: 14px;
+      padding: 10px 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 3px;
       text-align: center;
     }
     .summary-chip span {
@@ -156,56 +157,80 @@
       font-weight: 800;
       color: #111111;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
-    .metric-quad-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* 코스별 훈련 처방 리스트 */
+    .course-list-wrap {
+      display: flex;
+      flex-direction: column;
       gap: 8px;
     }
-    .metric-box {
+    .course-item-box {
       background: #f8f9fb;
       border: 1px solid rgba(0, 0, 0, 0.04);
       border-radius: 16px;
-      padding: 10px 12px;
+      padding: 11px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .course-left-info {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-    .metric-box span {
-      font-size: 0.65rem;
+    .course-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .course-title {
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: #111111;
+    }
+    .course-sub-km {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #8e8e93;
+    }
+    .course-time-val {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #007aff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .course-right-metrics {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: right;
+    }
+    .course-metric-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+    }
+    .course-metric-col .metric-label {
+      font-size: 0.6rem;
       font-weight: 700;
       color: #8e8e93;
       text-transform: uppercase;
     }
-    .metric-box .val-wrap {
-      display: flex;
-      align-items: baseline;
-      gap: 3px;
-    }
-    .metric-box .main-val {
-      font-size: 1.35rem;
+    .course-metric-col .metric-value {
+      font-size: 0.95rem;
       font-weight: 900;
       color: #111111;
-      letter-spacing: -0.5px;
       font-variant-numeric: tabular-nums;
     }
-    .metric-box .unit-val {
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #666668;
-    }
-    .metric-box .sub-note {
-      font-size: 0.64rem;
-      font-weight: 700;
-      color: #007aff;
-      margin-top: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-variant-numeric: tabular-nums;
+    .course-metric-col .metric-value.cad-val {
+      color: #34c759;
     }
 
+    /* 다음 목표 카드 (다크 스타일) */
     .target-hero-card {
       background: #111315;
       color: #ffffff;
@@ -222,21 +247,53 @@
     .target-hero-card .card-header-line h3 {
       color: #ffffff;
     }
-    .target-hero-card .metric-box {
+
+    .metric-quad-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric-box {
       background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .target-hero-card .metric-box span {
+    .metric-box span {
+      font-size: 0.65rem;
+      font-weight: 700;
       color: #a0a0a5;
+      text-transform: uppercase;
     }
-    .target-hero-card .metric-box .main-val {
+    .metric-box .val-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .metric-box .main-val {
+      font-size: 1.35rem;
+      font-weight: 900;
       color: #ffffff;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
     }
-    .target-hero-card .metric-box .unit-val {
+    .metric-box .unit-val {
+      font-size: 0.7rem;
+      font-weight: 800;
       color: #c7c7cc;
     }
-    .target-hero-card .metric-box .sub-note {
+    .metric-box .sub-note {
+      font-size: 0.64rem;
+      font-weight: 700;
       color: #34c759;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
     }
 
     .master-notice-box {
@@ -292,6 +349,7 @@
 
   <div class="app-screen">
 
+    <!-- 헤더 -->
     <div class="header-nav">
       <button class="nav-circle-btn" onclick="window.location.href='profile.html'">←</button>
       <div class="nav-title">
@@ -300,85 +358,133 @@
       <button class="nav-circle-btn" onclick="window.location.href='main.html'">✕</button>
     </div>
 
-    <!-- 1. 러너 프로필 신체 분석 요약 -->
+    <!-- 1. 러너 프로필 요약 카드 -->
     <div class="report-card">
       <div class="card-header-line">
         <div class="header-text-group">
           <h3>러너 프로필 요약</h3>
-          <p class="card-sub-desc">등록된 신체 스펙과 기본 페이스 지표입니다.</p>
+          <p class="card-sub-desc">등록된 실제 주행 데이터와 신체 스펙입니다.</p>
         </div>
         <span class="badge-sub badge-curr">PROFILE FIT</span>
       </div>
 
       <div class="profile-summary-grid">
+        <!-- 1) 성별/나이/스펙 -->
         <div class="summary-chip">
-          <span>성별 / 나이</span>
-          <b id="sumGenderAge">남 · 30세</b>
+          <span>성별 · 나이 (스펙)</span>
+          <b id="sumBioSpec">남 · 30세 (175/68)</b>
         </div>
+        <!-- 2) 평균페이스 / 최고페이스 -->
         <div class="summary-chip">
-          <span>신체 스펙</span>
-          <b id="sumHeightWeight">175cm · 68kg</b>
+          <span>평균 / 최고 페이스</span>
+          <b id="sumPaceGroup">5'30" / 5'00"</b>
         </div>
+        <!-- 3) 최고거리 / 케이던스 -->
         <div class="summary-chip">
-          <span>등록 평균 페이스</span>
-          <b id="sumCurrentPace">5'30"</b>
+          <span>최고 거리 / 케이던스</span>
+          <b id="sumDistCadGroup">15.0km / 178</b>
         </div>
       </div>
     </div>
 
-    <!-- 2. 현재 프로필 권장 훈련 (산출 대표 추천값 ▶ 생체역학 알고리즘 적용값) -->
+    <!-- 2. 코스별 생체역학 권장 훈련 세션 (5k, 10k, Half, Full) -->
     <div class="report-card">
       <div class="card-header-line">
         <div class="header-text-group">
-          <h3>현재 프로필 권장 훈련</h3>
-          <p class="card-sub-desc">생체역학 및 운동생리학으로 정밀 계산된 권장 수치입니다.</p>
+          <h3>코스별 권장 훈련 처방</h3>
+          <p class="card-sub-desc">생체역학적으로 계산된 권장 수치입니다.</p>
         </div>
-        <span class="badge-sub badge-curr" id="currBadge">RECOMMENDED</span>
+        <span class="badge-sub badge-curr" id="currBadge">BIOMECHANIC</span>
       </div>
 
-      <div class="metric-quad-grid">
-        <!-- 1회 권장 훈련 거리 -->
-        <div class="metric-box">
-          <span>권장 훈련 거리</span>
-          <div class="val-wrap">
-            <div class="main-val" id="currRecDist">--</div>
-            <div class="unit-val">km</div>
+      <div class="course-list-wrap">
+        <!-- 5km -->
+        <div class="course-item-box">
+          <div class="course-left-info">
+            <div class="course-name-row">
+              <span class="course-title">5 km</span>
+              <span class="course-sub-km">단거리 템포</span>
+            </div>
+            <span class="course-time-val" id="time-5k">--:--</span>
           </div>
-          <div class="sub-note" id="currDistBasis">-- ▶ --</div>
+          <div class="course-right-metrics">
+            <div class="course-metric-col">
+              <span class="metric-label">권장 페이스</span>
+              <span class="metric-value" id="pace-5k">--'--"</span>
+            </div>
+            <div class="course-metric-col">
+              <span class="metric-label">케이던스</span>
+              <span class="metric-value cad-val" id="cad-5k">-- SPM</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 훈련 권장 페이스 -->
-        <div class="metric-box">
-          <span>권장 페이스</span>
-          <div class="val-wrap">
-            <div class="main-val" id="currRecPace">--'--"</div>
-            <div class="unit-val">/km</div>
+        <!-- 10km -->
+        <div class="course-item-box">
+          <div class="course-left-info">
+            <div class="course-name-row">
+              <span class="course-title">10 km</span>
+              <span class="course-sub-km">지구력 기준</span>
+            </div>
+            <span class="course-time-val" id="time-10k">--:--</span>
           </div>
-          <div class="sub-note" id="currPaceNote">-- ▶ --</div>
+          <div class="course-right-metrics">
+            <div class="course-metric-col">
+              <span class="metric-label">권장 페이스</span>
+              <span class="metric-value" id="pace-10k">--'--"</span>
+            </div>
+            <div class="course-metric-col">
+              <span class="metric-label">케이던스</span>
+              <span class="metric-value cad-val" id="cad-10k">-- SPM</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 예상 완주 시간 -->
-        <div class="metric-box">
-          <span>예상 완주 시간</span>
-          <div class="val-wrap">
-            <div class="main-val" id="currRecTime">--:--</div>
+        <!-- 하프 마라톤 -->
+        <div class="course-item-box">
+          <div class="course-left-info">
+            <div class="course-name-row">
+              <span class="course-title">하프 (21.1km)</span>
+              <span class="course-sub-km">하프 레이스</span>
+            </div>
+            <span class="course-time-val" id="time-half">--:--:--</span>
           </div>
-          <div class="sub-note" id="currTimeNote">-- ▶ --</div>
+          <div class="course-right-metrics">
+            <div class="course-metric-col">
+              <span class="metric-label">권장 페이스</span>
+              <span class="metric-value" id="pace-half">--'--"</span>
+            </div>
+            <div class="course-metric-col">
+              <span class="metric-label">케이던스</span>
+              <span class="metric-value cad-val" id="cad-half">-- SPM</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 생체역학 처방 케이던스 -->
-        <div class="metric-box">
-          <span>처방 케이던스</span>
-          <div class="val-wrap">
-            <div class="main-val" id="currRecCadence" style="color: #34c759;">--</div>
-            <div class="unit-val">SPM</div>
+        <!-- 풀코스 마라톤 -->
+        <div class="course-item-box">
+          <div class="course-left-info">
+            <div class="course-name-row">
+              <span class="course-title">풀코스 (42.2km)</span>
+              <span class="course-sub-km">마라톤 완주</span>
+            </div>
+            <span class="course-time-val" id="time-full">--:--:--</span>
           </div>
-          <div class="sub-note" id="currCadenceNote">-- ▶ --</div>
+          <div class="course-right-metrics">
+            <div class="course-metric-col">
+              <span class="metric-label">권장 페이스</span>
+              <span class="metric-value" id="pace-full">--'--"</span>
+            </div>
+            <div class="course-metric-col">
+              <span class="metric-label">케이던스</span>
+              <span class="metric-value cad-val" id="cad-full">-- SPM</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. 성장 목표 제안 -->
+    <!-- 3. 성장 목표 제안 (상급 러너 안내 기능 포함) -->
     <div class="target-hero-card" id="targetCard">
       <div class="card-header-line">
         <div class="header-text-group">
@@ -432,6 +538,7 @@
       </div>
     </div>
 
+    <!-- 하단 버튼 -->
     <div class="bottom-btn-row">
       <button class="action-bar-btn btn-secondary" onclick="window.location.href='profile.html'">프로필 수정</button>
       <button class="action-bar-btn btn-primary" onclick="applyToMainSettings()">메인으로 이동 ▶</button>
@@ -443,17 +550,18 @@
     let profileData = null;
 
     const MAX_ALLOWED_DISTANCE = 42.195;
-    const FULL_430_TOTAL_SEC = 16200; // 풀코스 4시간 30분(초)
-    const FULL_430_PACE_SEC = Math.round(FULL_430_TOTAL_SEC / MAX_ALLOWED_DISTANCE); // 384초 (6'24"/km)
+    const FULL_430_TOTAL_SEC = 16200; // 풀코스 4시간 30분
     const MAX_ALLOWED_CADENCE = 185;
 
     function formatMinSec(totalSeconds) {
+      if (!totalSeconds || totalSeconds <= 0) return "--'--\"";
       const m = Math.floor(totalSeconds / 60);
       const s = Math.round(totalSeconds % 60);
       return `${m}'${String(s).padStart(2, '0')}"`;
     }
 
     function formatHoursMinSec(totalSeconds) {
+      if (!totalSeconds || totalSeconds <= 0) return "--:--";
       const h = Math.floor(totalSeconds / 3600);
       const m = Math.floor((totalSeconds % 3600) / 60);
       const s = Math.round(totalSeconds % 60);
@@ -464,121 +572,83 @@
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    /* ----------------------------------------------------
-       대표값 산출 및 생체역학·운동생리학 알고리즘
-    ---------------------------------------------------- */
-    function calculateScientificPrescription(p) {
-      const gender = p.gender || 'male';
+    function calculateFullReport(p) {
+      const gender = p.gender === 'female' ? '여' : '남';
       const age = parseInt(p.age, 10) || 30;
       const heightCm = Math.round(parseFloat(p.height) || 175);
       const weightKg = Math.round(parseFloat(p.weight) || 68);
-      
+
+      // 1. profile.html 에서 등록한 평균 페이스 원본 파싱
       const pMin = parseInt(p.paceMin, 10) || 5;
       const pSec = parseInt(p.paceSec, 10) || 30;
-      const basePaceSec = (pMin * 60) + pSec;
-      const basePaceStr = `${pMin}'${String(pSec).padStart(2, '0')}"`;
+      const userAvgPaceSec = (pMin * 60) + pSec;
+      const userAvgPaceStr = formatMinSec(userAvgPaceSec);
 
-      // 1. 등록된 2대 기록(최장거리 기록, 최단시간 완주 기록) 수집
-      const validRuns = [];
+      // 2. 최고 완주 거리 및 케이던스 파싱
+      const maxDist = (p.maxRun && parseFloat(p.maxRun.distance)) || 15.0;
+      let userCad = 0;
+      if (p.maxRun && p.maxRun.cadence) userCad = parseInt(p.maxRun.cadence, 10);
+      else if (p.fastestMaxRun && p.fastestMaxRun.cadence) userCad = parseInt(p.fastestMaxRun.cadence, 10);
+      if (!userCad && p.records && p.records.full && p.records.full.cadence) userCad = parseInt(p.records.full.cadence, 10);
 
-      // 기록 1: 최장거리 기록 (maxRun)
-      if (p.maxRun && parseFloat(p.maxRun.distance) > 0) {
-        const d = parseFloat(p.maxRun.distance);
-        const h = parseInt(p.maxRun.h, 10) || 0;
-        const m = parseInt(p.maxRun.m, 10) || 0;
-        const s = parseInt(p.maxRun.s, 10) || 0;
-        let sec = (h * 3600) + (m * 60) + s;
-        if (sec <= 0 && (p.maxRun.paceMin || p.maxRun.paceSec)) {
-          const pm = parseInt(p.maxRun.paceMin, 10) || 0;
-          const ps = parseInt(p.maxRun.paceSec, 10) || 0;
-          sec = Math.round(d * ((pm * 60) + ps));
-        }
-        const cad = parseInt(p.maxRun.cadence, 10) || 0;
-        if (sec > 0) validRuns.push({ dist: d, totalSec: sec, cad: cad });
-      }
-
-      // 기록 2: 최단시간 완주 기록 (fastestMaxRun)
+      // 3. 최고 페이스 파싱 (최단시간 완주 기록에서 산출)
+      let fastestPaceSec = 0;
       if (p.fastestMaxRun && parseFloat(p.fastestMaxRun.distance) > 0) {
-        const d = parseFloat(p.fastestMaxRun.distance);
-        const h = parseInt(p.fastestMaxRun.h, 10) || 0;
-        const m = parseInt(p.fastestMaxRun.m, 10) || 0;
-        const s = parseInt(p.fastestMaxRun.s, 10) || 0;
-        let sec = (h * 3600) + (m * 60) + s;
-        if (sec <= 0 && (p.fastestMaxRun.paceMin || p.fastestMaxRun.paceSec)) {
-          const pm = parseInt(p.fastestMaxRun.paceMin, 10) || 0;
-          const ps = parseInt(p.fastestMaxRun.paceSec, 10) || 0;
-          sec = Math.round(d * ((pm * 60) + ps));
+        const fDist = parseFloat(p.fastestMaxRun.distance);
+        const fh = parseInt(p.fastestMaxRun.h, 10) || 0;
+        const fm = parseInt(p.fastestMaxRun.m, 10) || 0;
+        const fs = parseInt(p.fastestMaxRun.s, 10) || 0;
+        const fTotalSec = (fh * 3600) + (fm * 60) + fs;
+        if (fTotalSec > 0) fastestPaceSec = Math.round(fTotalSec / fDist);
+        else if (p.fastestMaxRun.paceMin || p.fastestMaxRun.paceSec) {
+          fastestPaceSec = (parseInt(p.fastestMaxRun.paceMin, 10) || 0) * 60 + (parseInt(p.fastestMaxRun.paceSec, 10) || 0);
         }
-        const cad = parseInt(p.fastestMaxRun.cadence, 10) || 0;
-        if (sec > 0) validRuns.push({ dist: d, totalSec: sec, cad: cad });
       }
-
-      // 유효 기록이 없을 경우 기본 세이프티 가드
-      if (validRuns.length === 0) {
-        validRuns.push({ dist: 5.0, totalSec: 5.0 * basePaceSec, cad: 165 });
+      if (fastestPaceSec <= 0 || fastestPaceSec > userAvgPaceSec) {
+        fastestPaceSec = Math.max(userAvgPaceSec - 20, 180); // 데이터 없을 시 안전 기본값
       }
+      const fastestPaceStr = formatMinSec(fastestPaceSec);
 
-      // 2. [산출 대표 추천값] 계산
-      // ① 대표 거리 = 기록 거리 산술평균
-      const sumDist = validRuns.reduce((acc, cur) => acc + cur.dist, 0);
-      const repDist = Math.round((sumDist / validRuns.length) * 10) / 10;
-
-      // ② 대표 페이스 = 총 시간 ÷ 총 거리
-      const sumTotalSec = validRuns.reduce((acc, cur) => acc + cur.totalSec, 0);
-      const repPaceSec = Math.round(sumTotalSec / sumDist);
-      const repPaceStr = formatMinSec(repPaceSec);
-
-      // ③ 대표 케이던스 = 기록 케이던스 평균
-      const validCads = validRuns.map(r => r.cad).filter(c => c > 0);
-      let repCadence = 160;
-      if (validCads.length > 0) {
-        repCadence = Math.round(validCads.reduce((acc, c) => acc + c, 0) / validCads.length);
-      } else {
-        repCadence = Math.round(175 - ((heightCm - 170) * 0.25));
-      }
-
-      // ④ 대표 소요 시간 = 대표 거리 × 대표 페이스
-      const repTimeSec = Math.round(repDist * repPaceSec);
-
-      // 3. [생체역학 및 운동생리학 알고리즘 적용값] 계산
-      // (1) 신장(Height) 기반 보폭 역학 공식: 175 - (키 - 170) * 0.25
-      let bioCadence = 175 - ((heightCm - 170) * 0.25);
-
-      // (2) 페이스(속도) 보정: 1m/s 빨라질 때 케이던스 증가율 반영
-      const speedMps = 1000 / repPaceSec;
-      bioCadence += (speedMps - 2.8) * 4.5;
-
-      // (3) 체중 및 BMI 부하 보정: BMI >= 25일 때 착지 충격 분산을 위해 피치 +2 SPM 유도
+      // 4. 생체역학 기본 케이던스 계산 (키, BMI, 성별 보정)
+      // 공식: 175 - (키 - 170) * 0.25
+      let baseCadence = 175 - ((heightCm - 170) * 0.25);
       const heightM = heightCm / 100;
       const bmi = weightKg / (heightM * heightM);
-      if (bmi >= 25.0) bioCadence += 2.0;
+      if (bmi >= 25.0) baseCadence += 2.0;
+      if (gender === '여') baseCadence += 1.5;
+      if (age >= 45) baseCadence += 1.0;
 
-      // (4) 성별 및 연령 보정: 여성 구조상 +1.5 SPM, 45세 이상 관절 보호 +1 SPM
-      if (gender === 'female') bioCadence += 1.5;
-      if (age >= 45) bioCadence += 1.0;
-
-      // 러너 고유 주법(대표값)과 생체역학 모델을 6:4 비율로 결합
-      let bioFinalCadence = Math.round((repCadence * 0.6) + (bioCadence * 0.4));
-      bioFinalCadence = Math.min(MAX_ALLOWED_CADENCE, Math.max(150, bioFinalCadence));
-
-      // (5) 생체역학 최적 권장 거리 및 페이스
-      // 체형 부하(BMI)를 고려한 1회 권장 최적 거리
-      let bioRecDist = repDist;
-      if (bmi >= 26.0) {
-        bioRecDist = Math.max(3.0, Math.round((repDist * 0.95) * 10) / 10);
-      } else {
-        bioRecDist = Math.round((repDist * 1.05) * 10) / 10;
+      // 사용자 기록 케이던스가 있다면 가중 블렌딩
+      let optimalBaseCadence = Math.round(baseCadence);
+      if (userCad > 120 && userCad < 240) {
+        optimalBaseCadence = Math.round((userCad * 0.65) + (baseCadence * 0.35));
       }
-      if (bioRecDist > MAX_ALLOWED_DISTANCE) bioRecDist = MAX_ALLOWED_DISTANCE;
+      optimalBaseCadence = Math.min(MAX_ALLOWED_CADENCE, Math.max(155, optimalBaseCadence));
 
-      // 유산소 안정 심박 구간 최적 페이스
-      const bioPaceSec = repPaceSec; // 안정적 지구력 유지를 위한 기준 페이스
-      const bioPaceStr = formatMinSec(bioPaceSec);
+      // 5. 코스별 유산소 지구력 감쇠 및 생체역학 처방 (5k, 10k, Half, Full)
+      // 10km를 기준 페이스로 삼고 거리 비례 피로 계수 적용 (잭 대니얼스 VDOT 감쇠 원리)
+      const courseConfig = [
+        { key: '5k', km: 5.0, paceOffset: -12, cadOffset: +2 },
+        { key: '10k', km: 10.0, paceOffset: 0, cadOffset: 0 },
+        { key: 'half', km: 21.0975, paceOffset: +16, cadOffset: -1 },
+        { key: 'full', km: 42.195, paceOffset: +38, cadOffset: -2 }
+      ];
 
-      // 생체역학 기준 완주 예상 시간
-      const bioTotalTimeSec = Math.round(bioRecDist * bioPaceSec);
+      const courseResults = {};
+      courseConfig.forEach(c => {
+        const pace = Math.max(userAvgPaceSec + c.paceOffset, 180);
+        const timeSec = Math.round(c.km * pace);
+        let cad = Math.min(MAX_ALLOWED_CADENCE, Math.max(150, optimalBaseCadence + c.cadOffset));
+        courseResults[c.key] = {
+          paceStr: formatMinSec(pace),
+          timeStr: formatHoursMinSec(timeSec),
+          cadence: cad,
+          timeSec: timeSec,
+          paceSec: pace
+        };
+      });
 
-      // 4. 풀코스 PB 기록 검증 및 상급자 판정
+      // 6. 상급자 판정 (풀코스 4시간 30분 이내이거나 케이던스 185 SPM 이상)
       let fullPbTotalSec = 0;
       if (p.records && p.records.full) {
         const fh = parseInt(p.records.full.h, 10) || 0;
@@ -592,48 +662,39 @@
 
       if (fullPbTotalSec > 0 && fullPbTotalSec <= FULL_430_TOTAL_SEC) {
         isMasterRunner = true;
-        masterReason = `풀코스 마라톤 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 기준치(4시간 30분)보다 높습니다.`;
-      } else if (bioRecDist >= 42.195 && bioPaceSec <= FULL_430_PACE_SEC) {
+        masterReason = `풀코스 마라톤 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 서비스 기준치(4시간 30분)보다 높습니다.`;
+      } else if (courseResults.full.timeSec <= FULL_430_TOTAL_SEC) {
         isMasterRunner = true;
-        masterReason = `풀코스 이상 완주 및 평균 페이스(${bioPaceStr})가 기준치(4시간 30분 페이스)보다 높습니다.`;
-      } else if (bioFinalCadence >= MAX_ALLOWED_CADENCE) {
+        masterReason = `회원님의 체형 및 페이스 기준 풀코스 예상 시간(${courseResults.full.timeStr})이 4시간 30분 미만입니다.`;
+      } else if (userCad >= MAX_ALLOWED_CADENCE) {
         isMasterRunner = true;
-        masterReason = `처방 케이던스(${bioFinalCadence} SPM)가 서비스 권장 상한선(185 SPM)에 도달하였습니다.`;
+        masterReason = `등록된 케이던스(${userCad} SPM)가 서비스 권장 상한선(185 SPM)에 도달하였습니다.`;
       }
 
-      // 5. 다음 목표 성장 계산 (+10% Rule)
-      let nextGoalDist = Math.round((bioRecDist * 1.12) * 10) / 10;
+      // 7. 다음 목표 성장 제안 (10km 기준 +10% 룰 적용)
+      const targetBaseDist = maxDist >= 10 ? 10.0 : maxDist;
+      let nextGoalDist = Math.round((targetBaseDist * 1.15) * 10) / 10;
       if (nextGoalDist > MAX_ALLOWED_DISTANCE) nextGoalDist = MAX_ALLOWED_DISTANCE;
-      const distDiff = Math.round((nextGoalDist - bioRecDist) * 10) / 10;
+      const distDiff = Math.round((nextGoalDist - targetBaseDist) * 10) / 10;
 
-      const paceReductionSec = (bmi > 26 || age > 50) ? 10 : 15;
-      const nextPaceSec = Math.max(bioPaceSec - paceReductionSec, 180);
-      const actualPaceDiff = bioPaceSec - nextPaceSec;
-
+      const nextPaceSec = Math.max(userAvgPaceSec - 15, 180);
+      const actualPaceDiff = userAvgPaceSec - nextPaceSec;
       const nextTotalSec = Math.round(nextGoalDist * nextPaceSec);
-      const nextCadence = Math.min(MAX_ALLOWED_CADENCE, bioFinalCadence + (bioFinalCadence >= 183 ? 185 - bioFinalCadence : 3));
-      const cadDiff = nextCadence - bioFinalCadence;
+      const nextCadence = Math.min(MAX_ALLOWED_CADENCE, optimalBaseCadence + 3);
+      const cadDiff = nextCadence - optimalBaseCadence;
 
       return {
-        genderStr: gender === 'female' ? '여' : '남',
+        gender,
         age,
         heightCm,
         weightKg,
-        basePaceStr,
-        // 대표 추천값 (좌측)
-        repDist,
-        repPaceStr,
-        repTimeSec,
-        repCadence,
-        // 생체역학 알고리즘 적용값 (우측 메인 및 서브노트 타겟)
-        bioRecDist,
-        bioPaceStr,
-        bioTotalTimeSec,
-        bioFinalCadence,
-        // 상급자 여부
+        userAvgPaceStr,
+        fastestPaceStr,
+        maxDist,
+        userCad: userCad || optimalBaseCadence,
+        courses: courseResults,
         isMasterRunner,
         masterReason,
-        // 다음 목표값
         nextGoalDist,
         distDiff,
         nextPaceSec,
@@ -644,28 +705,26 @@
       };
     }
 
-    function generatePrescription() {
-      const res = calculateScientificPrescription(profileData);
+    function renderReport() {
+      const res = calculateFullReport(profileData);
 
-      // 1. 프로필 요약 카드
-      document.getElementById('sumGenderAge').textContent = `${res.genderStr} · ${res.age}세`;
-      document.getElementById('sumHeightWeight').textContent = `${res.heightCm}cm · ${res.weightKg}kg`;
-      document.getElementById('sumCurrentPace').textContent = res.basePaceStr;
+      // 1. 러너 프로필 요약 카드 바인딩
+      // (1) 성별 · 나이 (스펙)
+      document.getElementById('sumBioSpec').textContent = `${res.gender} · ${res.age}세 (${res.heightCm}/${res.weightKg})`;
+      // (2) 평균 / 최고 페이스
+      document.getElementById('sumPaceGroup').textContent = `${res.userAvgPaceStr} / ${res.fastestPaceStr}`;
+      // (3) 최고거리 / 케이던스
+      document.getElementById('sumDistCadGroup').textContent = `${res.maxDist.toFixed(1)}km / ${res.userCad} SPM`;
 
-      // 2. 현재 프로필 권장 훈련 (산출 대표 추천값 ▶ 생체역학 알고리즘 적용값)
-      document.getElementById('currRecDist').textContent = res.bioRecDist.toFixed(1);
-      document.getElementById('currDistBasis').textContent = `${res.repDist.toFixed(1)}km ▶ ${res.bioRecDist.toFixed(1)}km`;
+      // 2. 코스별 권장 훈련 바인딩 (5k, 10k, Half, Full)
+      ['5k', '10k', 'half', 'full'].forEach(k => {
+        const item = res.courses[k];
+        document.getElementById(`pace-${k}`).textContent = item.paceStr;
+        document.getElementById(`time-${k}`).textContent = item.timeStr;
+        document.getElementById(`cad-${k}`).textContent = `${item.cadence} SPM`;
+      });
 
-      document.getElementById('currRecPace').textContent = res.bioPaceStr;
-      document.getElementById('currPaceNote').textContent = `${res.repPaceStr} ▶ ${res.bioPaceStr}`;
-
-      document.getElementById('currRecTime').textContent = formatHoursMinSec(res.bioTotalTimeSec);
-      document.getElementById('currTimeNote').textContent = `${formatHoursMinSec(res.repTimeSec)} ▶ ${formatHoursMinSec(res.bioTotalTimeSec)}`;
-
-      document.getElementById('currRecCadence').textContent = res.bioFinalCadence;
-      document.getElementById('currCadenceNote').textContent = `${res.repCadence} SPM ▶ ${res.bioFinalCadence} SPM`;
-
-      // 3. 목표 제안 영역 분기 (상급자 vs 일반 모드)
+      // 3. 목표 제안 영역 분기 (상급자 vs 일반 목표)
       const metricGrid = document.getElementById('targetMetricGrid');
       const masterNotice = document.getElementById('masterNoticeBox');
       const targetBadge = document.getElementById('targetBadge');
@@ -690,10 +749,10 @@
         targetBadge.className = 'badge-sub badge-next';
 
         document.getElementById('nextGoalDist').textContent = res.nextGoalDist.toFixed(1);
-        document.getElementById('nextDistCompare').textContent = `권장 대비 +${res.distDiff.toFixed(1)}km 확장`;
+        document.getElementById('nextDistCompare').textContent = `10km 기준 +${res.distDiff.toFixed(1)}km 확장`;
 
         document.getElementById('nextGoalPace').textContent = formatMinSec(res.nextPaceSec);
-        document.getElementById('nextPaceCompare').textContent = `현재 대비 -${res.actualPaceDiff}초 단축`;
+        document.getElementById('nextPaceCompare').textContent = `평균 대비 -${res.actualPaceDiff}초 단축`;
 
         document.getElementById('nextGoalTime').textContent = formatHoursMinSec(res.nextTotalSec);
 
@@ -720,14 +779,15 @@
           age: 30,
           height: 175,
           weight: 68,
-          paceMin: 6,
-          paceSec: 0,
-          maxRun: { distance: 5.0, h: 0, m: 30, s: 0, cadence: 160 },
-          fastestMaxRun: { distance: 3.0, h: 0, m: 16, s: 30, cadence: 160 }
+          paceMin: 5,
+          paceSec: 30,
+          weeklyDistance: 25.0,
+          maxRun: { distance: 15.0, cadence: 178 },
+          fastestMaxRun: { distance: 10.0, paceMin: 5, paceSec: 0, cadence: 178 }
         };
       }
 
-      generatePrescription();
+      renderReport();
     };
   </script>
 </body>
