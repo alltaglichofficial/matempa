@@ -29,7 +29,7 @@
 
     .app-screen {
       width: 100%;
-      max-width: 350px;
+      max-width: 360px;
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -66,10 +66,10 @@
     /* 대형 워치 메인 페이스 */
     .watch-display-large {
       width: 100%;
-      height: 450px;
+      height: 460px;
       background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
       border-radius: 46px;
-      padding: 24px 20px 20px 20px;
+      padding: 24px 18px 20px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -96,26 +96,28 @@
       font-weight: 800;
     }
 
-    /* 실시간 & 목표 케이던스 비교 그리드 */
+    /* 실시간 & 목표 케이던스 및 실시간 페이스 3열 비교 그리드 */
     .cadence-comparison-grid {
       width: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-around;
-      margin: 0.5rem 0;
+      justify-content: space-between;
+      margin: 0.4rem 0;
+      padding: 0 4px;
     }
 
     .cadence-col {
       display: flex;
       flex-direction: column;
       align-items: center;
+      flex: 1;
     }
     .cadence-num {
-      font-size: 4.8rem;
+      font-size: 3.2rem;
       font-weight: 900;
-      line-height: 0.92;
+      line-height: 0.95;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -3px;
+      letter-spacing: -2px;
     }
     .cadence-num.target {
       color: #ffffff;
@@ -125,16 +127,24 @@
       color: #34c759;
       filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.25));
     }
+    .cadence-num.pace {
+      color: #ff9f0a;
+      font-size: 2.85rem;
+      letter-spacing: -1.5px;
+      filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25));
+    }
+
     .cadence-col-label {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 800;
-      letter-spacing: 1.2px;
-      margin-top: 6px;
+      letter-spacing: 0.8px;
+      margin-top: 8px;
       color: #8e8e93;
+      white-space: nowrap;
     }
     .cadence-divider {
       width: 1px;
-      height: 60px;
+      height: 52px;
       background: rgba(255, 255, 255, 0.12);
     }
 
@@ -216,23 +226,28 @@
       <button class="exit-btn" onclick="finishRun()">종료 ✕</button>
     </div>
 
-    <!-- 대형 워치 페이스 (Target vs Live 케이던스) -->
+    <!-- 대형 워치 페이스 (Target vs Live vs Live Pace) -->
     <div class="watch-display-large">
       <div class="top-stat-row">
         <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 케이던스 2열 비교 -->
+      <!-- 케이던스 및 페이스 3열 비교 디스플레이 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
-          <span class="cadence-col-label">TARGET BPM</span>
+          <span class="cadence-col-label">TARGET</span>
         </div>
         <div class="cadence-divider"></div>
         <div class="cadence-col">
           <div class="cadence-num live" id="liveCadenceDisplay">--</div>
-          <span class="cadence-col-label">LIVE SPM</span>
+          <span class="cadence-col-label">SPM</span>
+        </div>
+        <div class="cadence-divider"></div>
+        <div class="cadence-col">
+          <div class="cadence-num pace" id="livePaceDisplay">--'--"</div>
+          <span class="cadence-col-label">PACE /KM</span>
         </div>
       </div>
 
@@ -279,9 +294,14 @@
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
-    let isStepPeaked = false;
-    const STEP_THRESHOLD = 11.8; // 중력(약 9.8) + 착지 충격 가속도 역치
-    const MIN_STEP_INTERVAL_MS = 220; // 분당 최대 약 270 SPM 제한 (노이즈 방지)
+    const STEP_THRESHOLD = 11.8;
+    const MIN_STEP_INTERVAL_MS = 220;
+    let currentCalculatedSpm = 0;
+
+    // GPS 기반 실시간 페이스 변수
+    let geoWatchId = null;
+    let recentSpeeds = []; // 최근 속도 샘플(m/s) 스무딩 버퍼
+    let lastGpsUpdateTime = 0;
 
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
@@ -296,6 +316,7 @@
     const runSoundAndMeter = document.getElementById('runSoundAndMeter');
     const targetBpmDisplay = document.getElementById('targetBpmDisplay');
     const liveCadenceDisplay = document.getElementById('liveCadenceDisplay');
+    const livePaceDisplay = document.getElementById('livePaceDisplay');
     const stepRemainingText = document.getElementById('stepRemainingText');
     const runTimerDisplay = document.getElementById('runTimerDisplay');
     const pauseToggleBtn = document.getElementById('pauseToggleBtn');
@@ -314,7 +335,62 @@
       }
     }
 
-    // 1. 가속도 센서 초기화 및 권한 요청 (iOS 대응)
+    // 초/km 단위를 "분'초\"" 형식 문자열로 포맷
+    function formatPace(secPerKm) {
+      if (!secPerKm || !isFinite(secPerKm) || secPerKm <= 0 || secPerKm > 1200) {
+        return `--'--"`; // 시속 3km 미만(걷기/정지) 또는 신호 불량
+      }
+      const min = Math.floor(secPerKm / 60);
+      const sec = Math.round(secPerKm % 60);
+      return `${min}'${String(sec).padStart(2, '0')}"`;
+    }
+
+    // 1. GPS 기반 실시간 속도 및 페이스 수집
+    function initGeolocation() {
+      if ('geolocation' in navigator && geoWatchId === null) {
+        geoWatchId = navigator.geolocation.watchPosition(
+          (position) => {
+            if (!isRunning) return;
+            const coords = position.coords;
+            const now = performance.now();
+            lastGpsUpdateTime = now;
+
+            // GPS speed (m/s) 가 지원되는 경우
+            if (coords.speed !== null && !isNaN(coords.speed)) {
+              if (coords.speed > 0.8) { // 최소 러닝 인식 속도 (약 2.88 km/h)
+                recentSpeeds.push(coords.speed);
+                if (recentSpeeds.length > 5) recentSpeeds.shift();
+
+                const avgSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+                const secPerKm = 1000 / avgSpeed;
+                livePaceDisplay.textContent = formatPace(secPerKm);
+              } else {
+                recentSpeeds = [];
+                livePaceDisplay.textContent = `--'--"`;
+              }
+            }
+          },
+          (err) => {
+            // 위치 권한 거부 시 실내 모드(케이던스 기반 추정치)로 자동 대응
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 1000,
+            timeout: 5000
+          }
+        );
+      }
+    }
+
+    function stopGeolocation() {
+      if (geoWatchId !== null) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+      recentSpeeds = [];
+    }
+
+    // 2. 가속도 센서 초기화 및 권한 요청
     function initMotionSensor() {
       if (typeof DeviceMotionEvent !== 'undefined') {
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -331,43 +407,52 @@
       }
     }
 
-    // 2. 가속도 센서 신호 분석 및 실시간 케이던스 계산
+    // 3. 실시간 SPM 계산 및 GPS 미수신 시 보폭 기반 페이스 보정
     function handleDeviceMotion(event) {
       if (!isRunning) return;
 
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
 
-      // 3축 벡터 합성 가속도 크기 (Magnitude)
       const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
       const now = performance.now();
 
-      // 착지 피크 감지 알고리즘
       if (magnitude > STEP_THRESHOLD && lastAccelMagnitude <= STEP_THRESHOLD) {
         if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
           lastStepTime = now;
           recentStepTimes.push(now);
 
-          // 최근 4초 이내 걸음만 유지
           recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
 
-          // 실시간 분당 걸음 수(SPM) 계산
           if (recentStepTimes.length >= 3) {
             const timeSpanSec = (recentStepTimes[recentStepTimes.length - 1] - recentStepTimes[0]) / 1000;
             const stepsCount = recentStepTimes.length - 1;
             const currentSpm = Math.round((stepsCount / timeSpanSec) * 60);
 
             if (currentSpm >= 100 && currentSpm <= 250) {
+              currentCalculatedSpm = currentSpm;
               liveCadenceDisplay.textContent = currentSpm;
+
+              // GPS 수신이 4초 이상 지연될 경우 케이던스 기반 보폭 추정 페이스 표기 (실내 러닝 대응)
+              if (now - lastGpsUpdateTime > 4000) {
+                // 평균 러닝 보폭 모델: 케이던스에 비례한 추정 보폭(미터)
+                const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
+                const estimatedSpeedMs = (currentSpm / 60) * estimatedStride;
+                const secPerKm = 1000 / estimatedSpeedMs;
+                livePaceDisplay.textContent = formatPace(secPerKm);
+              }
             }
           }
         }
       }
 
-      // 일정 시간 멈추었을 때 리셋
       if (now - lastStepTime > 3000) {
         liveCadenceDisplay.textContent = '--';
+        currentCalculatedSpm = 0;
         recentStepTimes = [];
+        if (now - lastGpsUpdateTime > 4000) {
+          livePaceDisplay.textContent = `--'--"`;
+        }
       }
 
       lastAccelMagnitude = magnitude;
@@ -567,7 +652,8 @@
 
     function startRunLoop() {
       initAudio();
-      initMotionSensor(); // 가속도 센서 시작
+      initMotionSensor();
+      initGeolocation();
       isRunning = true;
       isInterrupted = false;
       pauseToggleBtn.textContent = 'PAUSE ||';
@@ -588,6 +674,7 @@
       isRunning = false;
       baseOffsetMs = elapsedMs;
       clearAllTimers();
+      stopGeolocation();
       for (let i = 0; i < 4; i++) document.getElementById(`ind-${i}`).className = 'watch-ind-step';
       if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
       pauseToggleBtn.textContent = 'RESUME ▶';
@@ -606,11 +693,9 @@
       window.location.href = 'main.html';
     }
 
-    // 통화/포커스 전환 동기화
     window.addEventListener('blur', () => { if (isRunning) pauseRun(); });
-    window.addEventListener('focus', () => { if (!isRunning && pauseToggleBtn.classList.contains('paused')) { /* 수동 유지 */ } });
+    window.addEventListener('focus', () => { if (!isRunning && pauseToggleBtn.classList.contains('paused')) { } });
 
-    // 초기 루틴 데이터 로드 및 러닝 즉시 시작
     window.onload = () => {
       try {
         const slot = localStorage.getItem('matempa_active_slot');
