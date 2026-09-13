@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MA.TEMPA - CADENCE PROFILE</title>
+  <title>MA.TEMPA - RUNNER PROFILE</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -84,55 +84,70 @@
       margin-left: 2px;
     }
 
-    .profile-card {
-      background: #ffffff;
-      border-radius: 34px;
-      padding: 1.5rem 1.4rem;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+    .cards-container {
       display: flex;
       flex-direction: column;
-      gap: 1.1rem;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .profile-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 1.3rem 1.2rem;
+      box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .card-title-box {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding-bottom: 0.6rem;
     }
     .card-title-box h3 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 800;
       color: #111111;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .card-title-box p {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: #8e8e93;
-      margin-top: 3px;
+      margin-top: 2px;
       line-height: 1.3;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
     .form-label {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 800;
-      color: #3a3a3c;
+      color: #444446;
     }
 
-    /* 성별 선택 칩 */
-    .gender-chips-row {
+    .row-two-inputs {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
+
+    .gender-chips-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
     .gender-chip-btn {
-      height: 40px;
+      height: 42px;
       border-radius: 12px;
       border: 1px solid rgba(0, 0, 0, 0.06);
       background: #f4f6f8;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 800;
       color: #555555;
       cursor: pointer;
@@ -147,13 +162,6 @@
       border-color: #111111;
     }
 
-    /* 2열 인풋 배치 */
-    .row-two-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
     .input-wrapper {
       position: relative;
       display: flex;
@@ -161,12 +169,12 @@
     }
     .input-wrapper input {
       width: 100%;
-      height: 44px;
+      height: 42px;
       background: #f4f6f8;
       border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: 12px;
-      padding: 0 34px 0 12px;
-      font-size: 0.9rem;
+      padding: 0 32px 0 12px;
+      font-size: 0.88rem;
       font-weight: 800;
       color: #111111;
       outline: none;
@@ -178,13 +186,13 @@
     }
     .input-unit {
       position: absolute;
-      right: 12px;
-      font-size: 0.72rem;
+      right: 10px;
+      font-size: 0.7rem;
       font-weight: 700;
       color: #8e8e93;
     }
 
-    /* 페이스 2열 분/초 인풋 */
+    /* 페이스 2열 인풋 */
     .pace-inputs-wrap {
       display: flex;
       align-items: center;
@@ -198,12 +206,12 @@
     }
     .pace-col input {
       width: 100%;
-      height: 44px;
+      height: 42px;
       background: #f4f6f8;
       border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: 12px;
-      padding: 0 28px 0 12px;
-      font-size: 0.9rem;
+      padding: 0 24px 0 10px;
+      font-size: 0.88rem;
       font-weight: 800;
       color: #111111;
       outline: none;
@@ -214,28 +222,70 @@
       background: #ffffff;
     }
 
-    /* 거리 프리셋 칩 */
-    .dist-chips-grid {
+    /* 거리별 PB 기록 아코디언 카드 */
+    .distance-pb-block {
+      background: #f8f9fa;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 18px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pb-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pb-dist-tag {
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: #111111;
+    }
+    .pb-calc-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #007aff;
+      background: rgba(0, 122, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .time-three-inputs {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .time-three-inputs input {
+      width: 100%;
+      height: 36px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+      color: #111111;
+    }
+    .time-three-inputs input:focus { border-color: #111111; }
+    .pb-sub-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
-    .dist-btn {
-      height: 38px;
-      border-radius: 11px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      background: #f4f6f8;
-      font-size: 0.75rem;
+    .pb-sub-grid input {
+      width: 100%;
+      height: 36px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 0 28px 0 8px;
+      font-size: 0.8rem;
       font-weight: 800;
-      color: #555555;
-      cursor: pointer;
-    }
-    .dist-btn.selected {
-      background: #111111;
-      color: #ffffff;
+      outline: none;
     }
 
-    /* 분석 추천 결과 카드 */
+    /* 추천 결과 영역 */
     .recom-hero-box {
       background: #111315;
       color: #ffffff;
@@ -244,7 +294,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 0.3rem;
+      margin-top: 0.2rem;
     }
     .recom-info-left span {
       display: block;
@@ -253,12 +303,12 @@
       color: #8e8e93;
     }
     .recom-info-left b {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       color: #34c759;
       letter-spacing: -0.3px;
     }
     .recom-bpm-val {
-      font-size: 2.3rem;
+      font-size: 2.2rem;
       font-weight: 900;
       letter-spacing: -1px;
       line-height: 1;
@@ -295,69 +345,192 @@
     <div class="header-nav">
       <button class="nav-circle-btn" onclick="window.location.href='main.html'">←</button>
       <div class="nav-title">
-        <h2>Cadence<span>Profile</span></h2>
+        <h2>Runner<span>Profile</span></h2>
       </div>
       <div style="width: 38px;"></div>
     </div>
 
-    <!-- 정보 입력 카드 -->
-    <div class="profile-card">
-      <div class="card-title-box">
-        <h3>맞춤형 러너 정보</h3>
-        <p>신체 조건과 목표 페이스를 기반으로 부상 방지 및 에너지 효율이 가장 높은 최적 케이던스를 산출합니다.</p>
-      </div>
+    <div class="cards-container">
 
-      <!-- 성별 -->
-      <div class="form-group">
-        <label class="form-label">성별 (Gender)</label>
-        <div class="gender-chips-row">
-          <button class="gender-chip-btn selected" id="gender-male" onclick="setGender('male')">남성</button>
-          <button class="gender-chip-btn" id="gender-female" onclick="setGender('female')">여성</button>
+      <!-- 1. 기본 신체 & 나이 정보 -->
+      <div class="profile-card">
+        <div class="card-title-box">
+          <h3>기본 신체 프로필</h3>
+          <p>러너의 체형과 신체 하중에 맞춘 최적 케이던스를 산출합니다.</p>
         </div>
-      </div>
 
-      <!-- 키 & 몸무게 -->
-      <div class="row-two-inputs">
+        <div class="row-two-inputs">
+          <div class="form-group">
+            <label class="form-label">성별 (Gender)</label>
+            <div class="gender-chips-row">
+              <button class="gender-chip-btn selected" id="gender-male" onclick="setGender('male')">남</button>
+              <button class="gender-chip-btn" id="gender-female" onclick="setGender('female')">여</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">나이 (Age)</label>
+            <div class="input-wrapper">
+              <input type="number" id="inputAge" value="30" min="10" max="99" oninput="calculateOptimalCadence()">
+              <span class="input-unit">세</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-two-inputs">
+          <div class="form-group">
+            <label class="form-label">키 (Height)</label>
+            <div class="input-wrapper">
+              <input type="number" id="inputHeight" value="175" min="120" max="230" oninput="calculateOptimalCadence()">
+              <span class="input-unit">cm</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">몸무게 (Weight)</label>
+            <div class="input-wrapper">
+              <input type="number" id="inputWeight" value="68" min="30" max="160" oninput="calculateOptimalCadence()">
+              <span class="input-unit">kg</span>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label class="form-label">키 (Height)</label>
-          <div class="input-wrapper">
-            <input type="number" id="inputHeight" value="175" min="120" max="230" oninput="calculateOptimalCadence()">
-            <span class="input-unit">cm</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">몸무게 (Weight)</label>
-          <div class="input-wrapper">
-            <input type="number" id="inputWeight" value="68" min="30" max="160" oninput="calculateOptimalCadence()">
-            <span class="input-unit">kg</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 평균 페이스 -->
-      <div class="form-group">
-        <label class="form-label">평균 페이스 (Pace)</label>
-        <div class="pace-inputs-wrap">
-          <div class="pace-col">
-            <input type="number" id="paceMin" value="5" min="2" max="15" oninput="calculateOptimalCadence()">
-            <span class="input-unit">분</span>
-          </div>
-          <span style="font-weight: 800; color: #8e8e93;">:</span>
-          <div class="pace-col">
-            <input type="number" id="paceSec" value="30" min="0" max="59" step="5" oninput="calculateOptimalCadence()">
-            <span class="input-unit">초</span>
+          <label class="form-label">평소 평균 페이스 (Average Pace)</label>
+          <div class="pace-inputs-wrap">
+            <div class="pace-col">
+              <input type="number" id="paceMin" value="5" min="2" max="15" oninput="calculateOptimalCadence()">
+              <span class="input-unit">분</span>
+            </div>
+            <span style="font-weight: 800; color: #8e8e93;">:</span>
+            <div class="pace-col">
+              <input type="number" id="paceSec" value="30" min="0" max="59" step="5" oninput="calculateOptimalCadence()">
+              <span class="input-unit">초</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 주로 뛰는 거리 -->
-      <div class="form-group">
-        <label class="form-label">주 러닝 거리 (Distance)</label>
-        <div class="dist-chips-grid">
-          <button class="dist-btn selected" id="dist-5" onclick="setDistance(5)">5 km</button>
-          <button class="dist-btn" id="dist-10" onclick="setDistance(10)">10 km</button>
-          <button class="dist-btn" id="dist-21" onclick="setDistance(21)">하프</button>
-          <button class="dist-btn" id="dist-42" onclick="setDistance(42)">풀코스</button>
+      <!-- 2. 주행 거리 기록 (최대 거리 & 주거리) -->
+      <div class="profile-card">
+        <div class="card-title-box">
+          <h3>러닝 마일리지 & 거리</h3>
+          <p>자신만의 최장 완주 거리와 평소 훈련 거리를 기록합니다.</p>
+        </div>
+
+        <div class="row-two-inputs">
+          <div class="form-group">
+            <label class="form-label">최대 완주 거리</label>
+            <div class="input-wrapper">
+              <input type="number" id="maxDistance" value="15" min="1" max="200" step="0.5">
+              <span class="input-unit">km</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">평소 주 러닝 거리</label>
+            <div class="input-wrapper">
+              <input type="number" id="weeklyDistance" value="25" min="1" max="300" oninput="calculateOptimalCadence()">
+              <span class="input-unit">km/주</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 거리별 최고 기록 (5K / 10K / Half / Full) -->
+      <div class="profile-card">
+        <div class="card-title-box">
+          <h3>거리별 PB 기록</h3>
+          <p>기록(시간)을 입력하면 속도와 페이스가 자동 계산됩니다.</p>
+        </div>
+
+        <!-- 5km -->
+        <div class="distance-pb-block">
+          <div class="pb-header">
+            <span class="pb-dist-tag">5 km</span>
+            <span class="pb-calc-badge" id="calc-5k">-- km/h · --'--"</span>
+          </div>
+          <div class="time-three-inputs">
+            <input type="number" id="t5-h" placeholder="00h" min="0" max="23" oninput="updatePbStats('5k', 5)">
+            <input type="number" id="t5-m" placeholder="26m" min="0" max="59" oninput="updatePbStats('5k', 5)">
+            <input type="number" id="t5-s" placeholder="00s" min="0" max="59" oninput="updatePbStats('5k', 5)">
+          </div>
+          <div class="pb-sub-grid">
+            <div class="input-wrapper">
+              <input type="number" id="cad-5k" placeholder="케이던스" min="100" max="240">
+              <span class="input-unit">SPM</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="spd-5k" placeholder="속도(직접입력)" step="0.1">
+              <span class="input-unit">km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10km -->
+        <div class="distance-pb-block">
+          <div class="pb-header">
+            <span class="pb-dist-tag">10 km</span>
+            <span class="pb-calc-badge" id="calc-10k">-- km/h · --'--"</span>
+          </div>
+          <div class="time-three-inputs">
+            <input type="number" id="t10-h" placeholder="00h" min="0" max="23" oninput="updatePbStats('10k', 10)">
+            <input type="number" id="t10-m" placeholder="55m" min="0" max="59" oninput="updatePbStats('10k', 10)">
+            <input type="number" id="t10-s" placeholder="00s" min="0" max="59" oninput="updatePbStats('10k', 10)">
+          </div>
+          <div class="pb-sub-grid">
+            <div class="input-wrapper">
+              <input type="number" id="cad-10k" placeholder="케이던스" min="100" max="240">
+              <span class="input-unit">SPM</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="spd-10k" placeholder="속도(직접입력)" step="0.1">
+              <span class="input-unit">km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 하프 (21.0975km) -->
+        <div class="distance-pb-block">
+          <div class="pb-header">
+            <span class="pb-dist-tag">하프 마라톤 (21.1 km)</span>
+            <span class="pb-calc-badge" id="calc-half">-- km/h · --'--"</span>
+          </div>
+          <div class="time-three-inputs">
+            <input type="number" id="thalf-h" placeholder="01h" min="0" max="23" oninput="updatePbStats('half', 21.0975)">
+            <input type="number" id="thalf-m" placeholder="58m" min="0" max="59" oninput="updatePbStats('half', 21.0975)">
+            <input type="number" id="thalf-s" placeholder="00s" min="0" max="59" oninput="updatePbStats('half', 21.0975)">
+          </div>
+          <div class="pb-sub-grid">
+            <div class="input-wrapper">
+              <input type="number" id="cad-half" placeholder="케이던스" min="100" max="240">
+              <span class="input-unit">SPM</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="spd-half" placeholder="속도(직접입력)" step="0.1">
+              <span class="input-unit">km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 풀코스 (42.195km) -->
+        <div class="distance-pb-block">
+          <div class="pb-header">
+            <span class="pb-dist-tag">풀코스 마라톤 (42.2 km)</span>
+            <span class="pb-calc-badge" id="calc-full">-- km/h · --'--"</span>
+          </div>
+          <div class="time-three-inputs">
+            <input type="number" id="tfull-h" placeholder="04h" min="0" max="23" oninput="updatePbStats('full', 42.195)">
+            <input type="number" id="tfull-m" placeholder="15m" min="0" max="59" oninput="updatePbStats('full', 42.195)">
+            <input type="number" id="tfull-s" placeholder="00s" min="0" max="59" oninput="updatePbStats('full', 42.195)">
+          </div>
+          <div class="pb-sub-grid">
+            <div class="input-wrapper">
+              <input type="number" id="cad-full" placeholder="케이던스" min="100" max="240">
+              <span class="input-unit">SPM</span>
+            </div>
+            <div class="input-wrapper">
+              <input type="number" id="spd-full" placeholder="속도(직접입력)" step="0.1">
+              <span class="input-unit">km/h</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -369,16 +542,16 @@
         </div>
         <div class="recom-bpm-val" id="recomBpmNum">178 <span style="font-size:0.9rem; font-weight:700;">BPM</span></div>
       </div>
+
     </div>
 
-    <!-- 저장 및 메인 반영 버튼 -->
-    <button class="save-profile-btn" onclick="saveAndApplyCadence()">설정 저장 및 케이던스 적용 ▶</button>
+    <!-- 저장 버튼 -->
+    <button class="save-profile-btn" onclick="saveAndApplyCadence()">프로필 저장 및 케이던스 적용 ▶</button>
 
   </div>
 
   <script>
     let currentGender = 'male';
-    let currentDistance = 5;
     let recommendedCadence = 178;
 
     function triggerHaptic(duration = 20) {
@@ -393,52 +566,70 @@
       calculateOptimalCadence();
     }
 
-    function setDistance(dist) {
-      triggerHaptic(15);
-      currentDistance = dist;
-      [5, 10, 21, 42].forEach(d => {
-        document.getElementById(`dist-${d}`).classList.toggle('selected', d === dist);
-      });
-      calculateOptimalCadence();
+    // 시간 입력 시 속도(km/h) 및 페이스(min/km) 실시간 계산
+    function updatePbStats(key, distanceKm) {
+      const h = parseInt(document.getElementById(`t${key}-h`).value) || 0;
+      const m = parseInt(document.getElementById(`t${key}-m`).value) || 0;
+      const s = parseInt(document.getElementById(`t${key}-s`).value) || 0;
+
+      const totalSec = (h * 3600) + (m * 60) + s;
+      const badge = document.getElementById(`calc-${key}`);
+      const spdInput = document.getElementById(`spd-${key}`);
+
+      if (totalSec <= 0) {
+        badge.textContent = "-- km/h · --'--\"";
+        return;
+      }
+
+      const speedKmh = (distanceKm / (totalSec / 3600)).toFixed(1);
+      const paceSecPerKm = Math.round(totalSec / distanceKm);
+      const pMin = Math.floor(paceSecPerKm / 60);
+      const pSec = String(paceSecPerKm % 60).padStart(2, '0');
+
+      badge.textContent = `${speedKmh} km/h · ${pMin}'${pSec}"`;
+      if (!spdInput.value || spdInput.dataset.autofilled === "true") {
+        spdInput.value = speedKmh;
+        spdInput.dataset.autofilled = "true";
+      }
     }
 
-    // 신체 조건 및 페이스 역학 기반 최적 케이던스 계산 공식
+    // 신체 조건, 나이, 페이스 역학 기반 케이던스 계산
     function calculateOptimalCadence() {
+      const age = parseInt(document.getElementById('inputAge').value) || 30;
       const height = parseFloat(document.getElementById('inputHeight').value) || 175;
       const weight = parseFloat(document.getElementById('inputWeight').value) || 68;
       const pMin = parseInt(document.getElementById('paceMin').value) || 5;
       const pSec = parseInt(document.getElementById('paceSec').value) || 30;
+      const weeklyKm = parseFloat(document.getElementById('weeklyDistance').value) || 20;
 
       const totalPaceSeconds = (pMin * 60) + pSec;
-      const speedKmh = 3600 / totalPaceSeconds; // km/h
+      const speedKmh = 3600 / totalPaceSeconds;
 
-      // 1. 키에 따른 기본 보폭 비율 계수
       let strideFactor = 0.65;
       if (height > 185) strideFactor = 0.62;
       else if (height < 165) strideFactor = 0.68;
 
-      // 2. 속도에 따른 이상적 보폭(m) 추정
       const estimatedStride = (height / 100) * (speedKmh / 10) * strideFactor;
-
-      // 3. 속도와 보폭을 기반으로 한 분당 발걸음(BPM) 산출
       let calculatedBpm = Math.round((speedKmh * 1000 / 60) / estimatedStride);
 
-      // 4. 과체중/부상 방지 보정 (몸무게가 나갈수록 짧은 피치 권장)
+      // BMI 과체중 관절 보호 보정
       const bmi = weight / Math.pow(height / 100, 2);
       if (bmi > 24) calculatedBpm += 2;
 
-      // 5. 거리 보정 (장거리일수록 발목 피로 최소화)
-      if (currentDistance >= 21) calculatedBpm += 2;
+      // 나이(Age) 보정 (40세 이상일수록 착지 충격 분산을 위해 피치형 권장)
+      if (age >= 45) calculatedBpm += 3;
+      else if (age >= 38) calculatedBpm += 1;
 
-      // 6. 케이던스 안전 가드레일 (160 ~ 195 BPM)
+      // 주간 마일리지 고려
+      if (weeklyKm >= 40) calculatedBpm += 2;
+
       recommendedCadence = Math.min(Math.max(calculatedBpm, 162), 195);
 
       document.getElementById('recomBpmNum').innerHTML = `${recommendedCadence} <span style="font-size:0.9rem; font-weight:700;">BPM</span>`;
 
-      // 가이드 코멘트
       const commentEl = document.getElementById('recomZoneComment');
       if (recommendedCadence >= 184) {
-        commentEl.textContent = '부상 방지 & 고속 피치 러닝';
+        commentEl.textContent = '부상 방지 & 고속 피치 주법';
       } else if (recommendedCadence >= 174) {
         commentEl.textContent = '지구력 & 무릎 관절 보호 최적';
       } else {
@@ -446,24 +637,54 @@
       }
     }
 
-    // 프로필 정보 로컬 저장 및 main.html 반영
     function saveAndApplyCadence() {
       triggerHaptic(30);
 
       const profileData = {
         gender: currentGender,
+        age: document.getElementById('inputAge').value,
         height: document.getElementById('inputHeight').value,
         weight: document.getElementById('inputWeight').value,
         paceMin: document.getElementById('paceMin').value,
         paceSec: document.getElementById('paceSec').value,
-        distance: currentDistance,
+        maxDistance: document.getElementById('maxDistance').value,
+        weeklyDistance: document.getElementById('weeklyDistance').value,
+        records: {
+          '5k': {
+            h: document.getElementById('t5-h').value,
+            m: document.getElementById('t5-m').value,
+            s: document.getElementById('t5-s').value,
+            cadence: document.getElementById('cad-5k').value,
+            speed: document.getElementById('spd-5k').value
+          },
+          '10k': {
+            h: document.getElementById('t10-h').value,
+            m: document.getElementById('t10-m').value,
+            s: document.getElementById('t10-s').value,
+            cadence: document.getElementById('cad-10k').value,
+            speed: document.getElementById('spd-10k').value
+          },
+          'half': {
+            h: document.getElementById('thalf-h').value,
+            m: document.getElementById('thalf-m').value,
+            s: document.getElementById('thalf-s').value,
+            cadence: document.getElementById('cad-half').value,
+            speed: document.getElementById('spd-half').value
+          },
+          'full': {
+            h: document.getElementById('tfull-h').value,
+            m: document.getElementById('tfull-m').value,
+            s: document.getElementById('tfull-s').value,
+            cadence: document.getElementById('cad-full').value,
+            speed: document.getElementById('spd-full').value
+          }
+        },
         optimalCadence: recommendedCadence
       };
 
       try {
         localStorage.setItem('matempa_user_profile', JSON.stringify(profileData));
 
-        // 메인 설정 화면에서 사용 중인 1번 루틴의 기본 케이던스에도 자동 반영
         const activeSlot = localStorage.getItem('matempa_active_slot') || 0;
         const savedRoutine = localStorage.getItem(`matempa_routine_slot_${activeSlot}`);
         if (savedRoutine) {
@@ -478,18 +699,37 @@
       window.location.href = 'main.html';
     }
 
-    // 기존 저장된 정보 불러오기
+    // 불러오기
     window.onload = () => {
       try {
         const saved = localStorage.getItem('matempa_user_profile');
         if (saved) {
           const data = JSON.parse(saved);
           if (data.gender) setGender(data.gender);
+          if (data.age) document.getElementById('inputAge').value = data.age;
           if (data.height) document.getElementById('inputHeight').value = data.height;
           if (data.weight) document.getElementById('inputWeight').value = data.weight;
           if (data.paceMin) document.getElementById('paceMin').value = data.paceMin;
           if (data.paceSec) document.getElementById('paceSec').value = data.paceSec;
-          if (data.distance) setDistance(data.distance);
+          if (data.maxDistance) document.getElementById('maxDistance').value = data.maxDistance;
+          if (data.weeklyDistance) document.getElementById('weeklyDistance').value = data.weeklyDistance;
+
+          if (data.records) {
+            ['5k', '10k', 'half', 'full'].forEach(distKey => {
+              const rec = data.records[distKey];
+              if (rec) {
+                if (rec.h) document.getElementById(`t${distKey}-h`).value = rec.h;
+                if (rec.m) document.getElementById(`t${distKey}-m`).value = rec.m;
+                if (rec.s) document.getElementById(`t${distKey}-s`).value = rec.s;
+                if (rec.cadence) document.getElementById(`cad-${distKey}`).value = rec.cadence;
+                if (rec.speed) document.getElementById(`spd-${distKey}`).value = rec.speed;
+              }
+            });
+            updatePbStats('5k', 5);
+            updatePbStats('10k', 10);
+            updatePbStats('half', 21.0975);
+            updatePbStats('full', 42.195);
+          }
         }
       } catch (e) {}
 
