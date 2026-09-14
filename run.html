@@ -51,25 +51,45 @@
       color: #8e8e93;
       letter-spacing: 0.5px;
     }
-    .exit-btn {
+
+    /* 우상단 오토 퍼즈 옵션 토글 버튼 */
+    .auto-pause-toggle-btn {
       background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
+      color: #8e8e93;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
+      font-size: 0.72rem;
+      font-weight: 800;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
     }
-    .exit-btn:active { transform: scale(0.94); }
+    .auto-pause-toggle-btn.active {
+      background: rgba(52, 199, 89, 0.16);
+      color: #34c759;
+      border-color: rgba(52, 199, 89, 0.35);
+    }
+    .auto-pause-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #8e8e93;
+    }
+    .auto-pause-toggle-btn.active .auto-pause-dot {
+      background: #34c759;
+      box-shadow: 0 0 6px rgba(52, 199, 89, 0.8);
+    }
 
     /* 대형 워치 메인 페이스 */
     .watch-display-large {
       width: 100%;
-      height: 460px;
+      height: 475px;
       background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
       border-radius: 46px;
-      padding: 24px 18px 20px 18px;
+      padding: 22px 18px 18px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -95,22 +115,26 @@
       border-radius: 8px;
       font-weight: 800;
     }
-    .distance-indicator-pill {
-      background: rgba(0, 122, 255, 0.15);
-      color: #007aff;
+    .auto-pause-status-pill {
+      display: none;
+      background: rgba(255, 149, 0, 0.18);
+      color: #ff9500;
       padding: 3px 10px;
       border-radius: 8px;
       font-weight: 800;
-      font-variant-numeric: tabular-nums;
+      font-size: 0.68rem;
+      letter-spacing: 0.5px;
+      animation: blink 1s infinite alternate;
     }
+    @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
 
-    /* 실시간 & 목표 케이던스 및 실시간 페이스 3열 비교 그리드 */
+    /* 케이던스 및 페이스 3열 비교 그리드 */
     .cadence-comparison-grid {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 0.4rem 0;
+      margin-top: 0.2rem;
       padding: 0 4px;
     }
 
@@ -121,11 +145,11 @@
       flex: 1;
     }
     .cadence-num {
-      font-size: 3.2rem;
+      font-size: 2.85rem;
       font-weight: 900;
       line-height: 0.95;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -2px;
+      letter-spacing: -1.5px;
     }
     .cadence-num.target {
       color: #ffffff;
@@ -137,27 +161,52 @@
     }
     .cadence-num.pace {
       color: #ff9f0a;
-      font-size: 2.85rem;
-      letter-spacing: -1.5px;
+      font-size: 2.5rem;
+      letter-spacing: -1px;
       filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25));
     }
 
     .cadence-col-label {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 800;
       letter-spacing: 0.8px;
-      margin-top: 8px;
+      margin-top: 6px;
       color: #8e8e93;
       white-space: nowrap;
     }
     .cadence-divider {
       width: 1px;
-      height: 52px;
+      height: 46px;
       background: rgba(255, 255, 255, 0.12);
     }
 
+    /* 대형 메인 이동 거리(KM) 히어로 구역 */
+    .distance-hero-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0.2rem 0;
+    }
+    .distance-hero-num {
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 0.9;
+      color: #007aff;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1.8px;
+      filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35));
+    }
+    .distance-hero-unit {
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #8e8e93;
+      letter-spacing: 1.5px;
+      margin-top: 4px;
+    }
+
     .step-progress-text {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #a0a0a5;
       font-weight: 600;
     }
@@ -165,13 +214,13 @@
     .timer-capsule-large {
       background: rgba(255, 255, 255, 0.06);
       width: 220px;
-      height: 44px;
-      border-radius: 22px;
+      height: 42px;
+      border-radius: 21px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 1.35rem;
+      font-size: 1.3rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
@@ -231,17 +280,22 @@
     <!-- 상단 헤더 -->
     <div class="run-header">
       <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
-      <button class="exit-btn" onclick="finishRun()">종료 ✕</button>
+      <!-- 종료 버튼 대신 자동 일시정지 옵션 토글 버튼 배치 -->
+      <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
+        <span class="auto-pause-dot"></span>
+        <span id="autoPauseText">AUTO PAUSE ON</span>
+      </button>
     </div>
 
     <!-- 대형 워치 페이스 -->
     <div class="watch-display-large">
       <div class="top-stat-row">
         <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
-        <span class="distance-indicator-pill" id="liveDistanceDisplay">0.00 km</span>
+        <span class="auto-pause-status-pill" id="autoPauseStatusPill">⏸ AUTO PAUSED</span>
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
+      <!-- 1. 타겟 / 실시간 케이던스 / 실시간 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -259,8 +313,14 @@
         </div>
       </div>
 
-      <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
+      <!-- 2. 중요하게 크게 표시되는 실시간 이동 거리(KM) -->
+      <div class="distance-hero-wrap">
+        <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
+        <div class="distance-hero-unit">KILOMETERS</div>
+      </div>
 
+      <!-- 3. 구간 남은 시간 및 전체 러닝 타이머 -->
+      <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
       <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
 
       <div class="watch-indicators">
@@ -271,7 +331,7 @@
       </div>
     </div>
 
-    <!-- 하단 제어 바 -->
+    <!-- 하단 러닝 제어 바 -->
     <div class="run-controls">
       <button class="run-btn btn-pause" id="pauseToggleBtn">PAUSE ||</button>
       <button class="run-btn btn-stop-finish" onclick="finishRun()">FINISH ■</button>
@@ -279,6 +339,7 @@
 
   </div>
 
+  <!-- OS 백그라운드 오디오 파이프라인 유지용 무음 오디오 -->
   <audio id="silentBackgroundAudio" loop playsinline style="display: none;"></audio>
 
   <script>
@@ -286,6 +347,10 @@
     let routine = [];
     let isRunning = false;
     let isSystemInterrupted = false;
+
+    // 자동 일시정지 옵션 플래그
+    let isAutoPauseEnabled = true;
+    let isAutoPausedNow = false;
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -300,10 +365,10 @@
     let clockTimer = null;
     let currentStepData = null;
 
-    // 이동 거리(미터 단위)
+    // 이동 거리 (미터 단위)
     let totalDistanceMeters = 0;
 
-    // 가속도 센서 기반 케이던스 변수
+    // 가속도 센서 기반 케이던스 및 움직임 감지
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
@@ -315,7 +380,7 @@
     let geoWatchId = null;
     let recentSpeeds = [];
     let lastGpsUpdateTime = 0;
-    let lastCoords = null; // 직전 위도/경도
+    let lastCoords = null;
 
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
@@ -326,6 +391,10 @@
     };
 
     const runRoutineTitle = document.getElementById('runRoutineTitle');
+    const autoPauseToggleBtn = document.getElementById('autoPauseToggleBtn');
+    const autoPauseText = document.getElementById('autoPauseText');
+    const autoPauseStatusPill = document.getElementById('autoPauseStatusPill');
+
     const runZoneBadge = document.getElementById('runZoneBadge');
     const liveDistanceDisplay = document.getElementById('liveDistanceDisplay');
     const runSoundAndMeter = document.getElementById('runSoundAndMeter');
@@ -341,15 +410,42 @@
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    // 거리 UI 갱신 함수 (km 단위)
-    function updateDistanceUI() {
-      const km = totalDistanceMeters / 1000;
-      liveDistanceDisplay.textContent = `${km.toFixed(2)} km`;
+    // 1. 자동 일시정지 옵션 토글
+    function toggleAutoPauseOption() {
+      triggerHaptic(15);
+      isAutoPauseEnabled = !isAutoPauseEnabled;
+      autoPauseToggleBtn.classList.toggle('active', isAutoPauseEnabled);
+      autoPauseText.textContent = isAutoPauseEnabled ? 'AUTO PAUSE ON' : 'AUTO PAUSE OFF';
+
+      // 끈 상태에서 정지 중이었다면 즉시 재개
+      if (!isAutoPauseEnabled && isAutoPausedNow) {
+        resumeFromAutoPause();
+      }
     }
 
-    // 하버사인(Haversine) 공식: 위도/경도로 두 점 사이 거리(미터) 계산
+    // 움직임 멈춤 감지 시 실행
+    function triggerAutoPause() {
+      if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
+      isAutoPausedNow = true;
+      autoPauseStatusPill.style.display = 'inline-block';
+      pauseTimingAndBeats();
+    }
+
+    // 움직임 재개 감지 시 실행
+    function resumeFromAutoPause() {
+      if (!isAutoPausedNow || !isRunning) return;
+      isAutoPausedNow = false;
+      autoPauseStatusPill.style.display = 'none';
+      resumeTimingAndBeats();
+    }
+
+    function updateDistanceUI() {
+      const km = totalDistanceMeters / 1000;
+      liveDistanceDisplay.textContent = km.toFixed(2);
+    }
+
     function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000; // 지구 반지름 (m)
+      const R = 6371000;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -377,7 +473,6 @@
 
         audioCtx.onstatechange = () => {
           if (!isRunning) return;
-
           if (audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') {
             if (!isSystemInterrupted) {
               isSystemInterrupted = true;
@@ -386,7 +481,7 @@
           } else if (audioCtx.state === 'running') {
             if (isSystemInterrupted) {
               isSystemInterrupted = false;
-              resumeTimingAndBeats();
+              if (!isAutoPausedNow) resumeTimingAndBeats();
             }
           }
         };
@@ -406,50 +501,48 @@
       return `${min}'${String(sec).padStart(2, '0')}"`;
     }
 
+    // 2. GPS 위치 수신 및 정지/이동 판별
     function initGeolocation() {
       if ('geolocation' in navigator && geoWatchId === null) {
         geoWatchId = navigator.geolocation.watchPosition(
           (position) => {
-            if (!isRunning || isSystemInterrupted) return;
+            if (!isRunning) return;
             const coords = position.coords;
             const now = performance.now();
             lastGpsUpdateTime = now;
 
-            // GPS 거리 누적 계산
-            if (lastCoords) {
+            if (coords.speed !== null && !isNaN(coords.speed)) {
+              if (coords.speed > 0.8) {
+                // 달리기 속도 정상 감지 -> 자동 일시정지 상태였다면 즉시 재개
+                if (isAutoPausedNow) resumeFromAutoPause();
+
+                recentSpeeds.push(coords.speed);
+                if (recentSpeeds.length > 5) recentSpeeds.shift();
+                const avgSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+                const secPerKm = 1000 / avgSpeed;
+                livePaceDisplay.textContent = formatPace(secPerKm);
+              } else if (coords.speed < 0.4) {
+                // 시속 약 1.4km 미만(정지) 감지 시 자동 일시정지 트리거
+                recentSpeeds = [];
+                livePaceDisplay.textContent = `--'--"`;
+                triggerAutoPause();
+              }
+            }
+
+            if (!isAutoPausedNow && lastCoords) {
               const dist = calculateDistanceMeters(
                 lastCoords.latitude, lastCoords.longitude,
                 coords.latitude, coords.longitude
               );
-              // 정지 상태 오차(GPS 드리프트) 필터링: 1미터 이상 80미터 이하 이동 시 누적
               if (dist >= 1.0 && dist <= 80.0) {
                 totalDistanceMeters += dist;
                 updateDistanceUI();
               }
             }
             lastCoords = { latitude: coords.latitude, longitude: coords.longitude };
-
-            // 속도 및 페이스 계산
-            if (coords.speed !== null && !isNaN(coords.speed)) {
-              if (coords.speed > 0.8) {
-                recentSpeeds.push(coords.speed);
-                if (recentSpeeds.length > 5) recentSpeeds.shift();
-
-                const avgSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
-                const secPerKm = 1000 / avgSpeed;
-                livePaceDisplay.textContent = formatPace(secPerKm);
-              } else {
-                recentSpeeds = [];
-                livePaceDisplay.textContent = `--'--"`;
-              }
-            }
           },
           (err) => {},
-          {
-            enableHighAccuracy: true,
-            maximumAge: 1000,
-            timeout: 5000
-          }
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
         );
       }
     }
@@ -479,8 +572,9 @@
       }
     }
 
+    // 3. 발걸음 감지 및 정지/재개 판별
     function handleDeviceMotion(event) {
-      if (!isRunning || isSystemInterrupted) return;
+      if (!isRunning) return;
 
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
@@ -494,11 +588,15 @@
           recentStepTimes.push(now);
           recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
 
-          // 실내 러닝 대응: GPS 수신이 없을 때(4초 이상) 걸음 기반 거리 누적
-          if (now - lastGpsUpdateTime > 4000) {
+          // 발걸음이 다시 뛰기 시작하면 정지 풀기
+          if (isAutoPausedNow) {
+            resumeFromAutoPause();
+          }
+
+          if (!isAutoPausedNow && now - lastGpsUpdateTime > 4000) {
             const currentSpm = currentCalculatedSpm || 160;
             const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
-            totalDistanceMeters += estimatedStride; // 보폭만큼 거리 누적
+            totalDistanceMeters += estimatedStride;
             updateDistanceUI();
           }
 
@@ -522,12 +620,14 @@
         }
       }
 
-      if (now - lastStepTime > 3000) {
+      // 발걸음이 2.5초 이상 발생하지 않으면 정지 상태로 간주
+      if (now - lastStepTime > 2500) {
         liveCadenceDisplay.textContent = '--';
         currentCalculatedSpm = 0;
         recentStepTimes = [];
         if (now - lastGpsUpdateTime > 4000) {
           livePaceDisplay.textContent = `--'--"`;
+          triggerAutoPause(); // GPS가 없는 환경에서도 자동 일시정지 발동
         }
       }
 
@@ -555,7 +655,7 @@
 
     function playCueSound(type) {
       initAudio();
-      if (!audioCtx || isSystemInterrupted) return;
+      if (!audioCtx || isSystemInterrupted || isAutoPausedNow) return;
       const now = audioCtx.currentTime;
       const vol = currentStepData ? currentStepData.vol : 0.8;
 
@@ -601,7 +701,7 @@
 
     function playBeep() {
       initAudio();
-      if (!audioCtx || !currentStepData || isSystemInterrupted) return;
+      if (!audioCtx || !currentStepData || isSystemInterrupted || isAutoPausedNow) return;
       const now = audioCtx.currentTime;
       const vol = currentStepData.vol;
       const basePitch = currentStepData.pitch;
@@ -671,7 +771,7 @@
     }
 
     function triggerStep() {
-      if (!isRunning || isSystemInterrupted) return;
+      if (!isRunning || isSystemInterrupted || isAutoPausedNow) return;
       const stepInCycle = currentBeatIndex % 4;
       const playSound = shouldPlaySoundInPattern(stepInCycle);
       if (playSound) playBeep();
@@ -686,7 +786,7 @@
 
     function syncBpmTimer() {
       if (beatTimer) clearInterval(beatTimer);
-      if (isRunning && !isSystemInterrupted && currentStepData) {
+      if (isRunning && !isSystemInterrupted && !isAutoPausedNow && currentStepData) {
         beatTimer = setInterval(triggerStep, (60 / currentStepData.bpm) * 1000);
       }
     }
@@ -750,6 +850,9 @@
       initGeolocation();
       isRunning = true;
       isSystemInterrupted = false;
+      isAutoPausedNow = false;
+      autoPauseStatusPill.style.display = 'none';
+
       pauseToggleBtn.textContent = 'PAUSE ||';
       pauseToggleBtn.classList.remove('paused');
 
@@ -789,7 +892,7 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && isRunning && audioCtx && audioCtx.state === 'suspended' && !isSystemInterrupted) {
+      if (!document.hidden && isRunning && audioCtx && audioCtx.state === 'suspended' && !isSystemInterrupted && !isAutoPausedNow) {
         audioCtx.resume().catch(() => {});
       }
     });
