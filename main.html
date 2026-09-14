@@ -199,103 +199,11 @@
       padding: 0 1.4rem 1.6rem 1.4rem;
     }
 
-    /* 1단: 화이트 카드 (Intervals & Presets) - 최상단 */
-    .card-white {
-      background: #ffffff;
-      color: #111111;
-      z-index: 10;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
-    }
-
-    .steps-list-wrap {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 14px;
-      padding-right: 2px;
-      touch-action: pan-y;
-    }
-    .steps-list-wrap::-webkit-scrollbar { width: 3px; }
-    .steps-list-wrap::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
-
-    .step-card-item {
-      background: #f7f8fa;
-      border: 1px solid rgba(0, 0, 0, 0.04);
-      padding: 10px 12px;
-      border-radius: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      position: relative;
-      touch-action: pan-y;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-    .step-card-item.selected {
-      border: 1.5px solid #111111;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .step-card-item.dragging-active {
-      opacity: 0.88;
-      transform: scale(1.02);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      background: #ffffff;
-      border-color: #111111;
-      z-index: 20;
-    }
-    .step-card-item.drag-over-target {
-      border-top: 2.5px dashed #111111 !important;
-    }
-
-    .step-btn-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-left: 6px;
-    }
-    .step-icon-btn.delete {
-      font-size: 1.25rem;
-      color: #c7c7cc;
-      cursor: pointer;
-      padding: 2px 4px;
-      transition: color 0.1s ease;
-    }
-    .step-icon-btn.delete:hover { color: #ff3b30; }
-
-    .preset-scroll-row {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 4px 0;
-      scrollbar-width: none;
-    }
-    .preset-scroll-row::-webkit-scrollbar { display: none; }
-    .preset-chip-dot {
-      flex: 0 0 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #f2f3f5;
-      color: #555555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .preset-chip-dot.active {
-      background: #111111;
-      color: #ffffff;
-    }
-
-    /* 2단: 검정 카드 (Cadence) */
+    /* 1. 케이던스 카드 (검정) - 최하위 레이어 (z-index: 7) */
     .card-black {
       background: #111315;
       color: #ffffff;
-      margin-top: -20px;
-      z-index: 9;
+      z-index: 7;
     }
     .card-black .card-summary-tag {
       color: #34c759;
@@ -401,7 +309,7 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 3단: 주황 카드 (Sound & Tuning) */
+    /* 2. 사운드 튜닝 카드 (주황) - z-index: 8 */
     .card-orange {
       background: #e89553;
       color: #111111;
@@ -453,12 +361,12 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 4단: 민트 카드 (Rhythm Meter) */
+    /* 3. 리듬 미터 카드 (민트) - z-index: 9 */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
       margin-top: -20px;
-      z-index: 7;
+      z-index: 9;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
     }
     .card-mint .card-summary-tag {
@@ -524,6 +432,98 @@
       outline: none;
     }
 
+    /* 4. 인터벌 프리셋 카드 (화이트) - 최상위 덮는 레이어 (z-index: 10) */
+    .card-white {
+      background: #ffffff;
+      color: #111111;
+      margin-top: -20px;
+      z-index: 10;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .steps-list-wrap {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 14px;
+      padding-right: 2px;
+      touch-action: pan-y;
+    }
+    .steps-list-wrap::-webkit-scrollbar { width: 3px; }
+    .steps-list-wrap::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+
+    .step-card-item {
+      background: #f7f8fa;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      padding: 10px 12px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      position: relative;
+      touch-action: pan-y;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .step-card-item.selected {
+      border: 1.5px solid #111111;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .step-card-item.dragging-active {
+      opacity: 0.88;
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      border-color: #111111;
+      z-index: 20;
+    }
+    .step-card-item.drag-over-target {
+      border-top: 2.5px dashed #111111 !important;
+    }
+
+    .step-btn-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-left: 6px;
+    }
+    .step-icon-btn.delete {
+      font-size: 1.25rem;
+      color: #c7c7cc;
+      cursor: pointer;
+      padding: 2px 4px;
+      transition: color 0.1s ease;
+    }
+    .step-icon-btn.delete:hover { color: #ff3b30; }
+
+    .preset-scroll-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0;
+      scrollbar-width: none;
+    }
+    .preset-scroll-row::-webkit-scrollbar { display: none; }
+    .preset-chip-dot {
+      flex: 0 0 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #f2f3f5;
+      color: #555555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .preset-chip-dot.active {
+      background: #111111;
+      color: #ffffff;
+    }
+
     .start-run-bar {
       margin-top: 1.4rem;
       width: 100%;
@@ -561,31 +561,8 @@
     <!-- 4단 스택 레이아웃 -->
     <div class="card-stack">
 
-      <!-- 1단: 화이트 카드 (Intervals & Presets) - 최상단 1순위 -->
-      <div class="stack-card card-white expanded" id="cardWhite" onclick="toggleIntervalCard()">
-        <div class="card-header-bar">
-          <div class="card-header-left">
-            <div class="card-header-title">
-              <span>Intervals & Presets</span>
-              <button class="header-copy-btn" onclick="event.stopPropagation(); duplicateSelectedStep();" title="선택된 구간 복제">복사 ⧉</button>
-            </div>
-            <div class="summary-badge-group">
-              <span class="summary-box" id="sumBoxSlot">#1</span>
-              <span class="summary-box" id="sumBoxZone">zone 1</span>
-              <span class="summary-box" id="sumBoxTime">0:01:00</span>
-            </div>
-          </div>
-          <span class="card-arrow-icon">→</span>
-        </div>
-        <div class="card-expand-body" onclick="event.stopPropagation()">
-          <div class="steps-list-wrap" id="stepsListWrap"></div>
-          <div style="font-size:0.68rem; color:#8e8e93; font-weight:700; margin-bottom:6px;">PRESET SET SLOTS</div>
-          <div class="preset-scroll-row" id="presetScrollRow"></div>
-        </div>
-      </div>
-
-      <!-- 2단: 검정 영역 (Cadence) -->
-      <div class="stack-card card-black" id="cardBlack" onclick="toggleCadenceCard()">
+      <!-- 1단: 케이던스 카드 (검정) - 최상단 배치, 계층상 맨 아래 레이어 -->
+      <div class="stack-card card-black expanded" id="cardBlack" onclick="toggleCadenceCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
             <div class="card-header-title">
@@ -602,7 +579,7 @@
             <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
           </div>
 
-          <!-- BPM 디스플레이 & 오른쪽에 배치된 화살표 -->
+          <!-- BPM 디스플레이 & 화살표 -->
           <div class="black-bpm-hero" id="bpmDialWrap">
             <div class="bpm-display-num" id="bpmDisplay" title="클릭하여 직접 입력">180</div>
             <input type="number" class="bpm-input-custom" id="bpmInputCustom" min="40" max="260">
@@ -618,7 +595,7 @@
         </div>
       </div>
 
-      <!-- 3단: 주황색 카드 (Sound & Tuning) -->
+      <!-- 2단: 사운드 튜닝 카드 (주황) -->
       <div class="stack-card card-orange" id="cardOrange" onclick="toggleSubCard('cardOrange')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -648,7 +625,7 @@
         </div>
       </div>
 
-      <!-- 4단: 민트 카드 (Rhythm Meter) -->
+      <!-- 3단: 리듬 미터 카드 (민트) -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -674,6 +651,29 @@
             <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
             <input type="number" class="mint-sec-input" id="durationSecInput" value="60" min="1" max="99999">
           </div>
+        </div>
+      </div>
+
+      <!-- 4단: 인터벌 프리셋 카드 (화이트) - 최하단 배치, 계층상 맨 위 레이어 -->
+      <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Intervals & Presets</span>
+              <button class="header-copy-btn" onclick="event.stopPropagation(); duplicateSelectedStep();" title="선택된 구간 복제">복사 ⧉</button>
+            </div>
+            <div class="summary-badge-group">
+              <span class="summary-box" id="sumBoxSlot">#1</span>
+              <span class="summary-box" id="sumBoxZone">zone 1</span>
+              <span class="summary-box" id="sumBoxTime">0:01:00</span>
+            </div>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+        <div class="card-expand-body" onclick="event.stopPropagation()">
+          <div class="steps-list-wrap" id="stepsListWrap"></div>
+          <div style="font-size:0.68rem; color:#8e8e93; font-weight:700; margin-bottom:6px;">PRESET SET SLOTS</div>
+          <div class="preset-scroll-row" id="presetScrollRow"></div>
         </div>
       </div>
 
@@ -710,10 +710,10 @@
       { durationSec: 60, bpm: 180, pitch: 600, vol: 0.8, sound: 'wood', meter: 'p1' }
     ];
 
-    const cardWhite = document.getElementById('cardWhite');
     const cardBlack = document.getElementById('cardBlack');
     const cardOrange = document.getElementById('cardOrange');
     const cardMint = document.getElementById('cardMint');
+    const cardWhite = document.getElementById('cardWhite');
 
     const bpmDisplay = document.getElementById('bpmDisplay');
     const bpmInputCustom = document.getElementById('bpmInputCustom');
@@ -849,7 +849,15 @@
     function toggleIntervalCard() {
       playClickSound();
       triggerHaptic(15);
-      cardWhite.classList.toggle('expanded');
+      const isExpanded = cardWhite.classList.contains('expanded');
+
+      if (!isExpanded) {
+        cardWhite.classList.add('expanded');
+        cardOrange.classList.remove('expanded');
+        cardMint.classList.remove('expanded');
+      } else {
+        cardWhite.classList.remove('expanded');
+      }
       updateSummaries();
     }
 
@@ -1065,7 +1073,7 @@
     function renderSteps() {
       stepsListWrap.innerHTML = '';
       if (routine.length === 0) {
-        stepsListWrap.innerHTML = '<div style="color:#8e8e93; font-size:0.75rem; padding:8px 0;">구간이 없습니다. 하단 케이던스 카드에서 [+ 추가]를 누르세요.</div>';
+        stepsListWrap.innerHTML = '<div style="color:#8e8e93; font-size:0.75rem; padding:8px 0;">구간이 없습니다. 상단 케이던스 카드에서 [+ 추가]를 누르세요.</div>';
         updateSummaries();
         return;
       }
