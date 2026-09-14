@@ -95,6 +95,14 @@
       border-radius: 8px;
       font-weight: 800;
     }
+    .distance-indicator-pill {
+      background: rgba(0, 122, 255, 0.15);
+      color: #007aff;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
 
     /* 실시간 & 목표 케이던스 및 실시간 페이스 3열 비교 그리드 */
     .cadence-comparison-grid {
@@ -226,14 +234,14 @@
       <button class="exit-btn" onclick="finishRun()">종료 ✕</button>
     </div>
 
-    <!-- 대형 워치 페이스 (Target vs Live vs Live Pace) -->
+    <!-- 대형 워치 페이스 -->
     <div class="watch-display-large">
       <div class="top-stat-row">
         <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
+        <span class="distance-indicator-pill" id="liveDistanceDisplay">0.00 km</span>
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 케이던스 및 페이스 3열 비교 디스플레이 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -271,11 +279,13 @@
 
   </div>
 
+  <audio id="silentBackgroundAudio" loop playsinline style="display: none;"></audio>
+
   <script>
     let activeSlot = 0;
     let routine = [];
     let isRunning = false;
-    let isInterrupted = false;
+    let isSystemInterrupted = false;
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -290,7 +300,10 @@
     let clockTimer = null;
     let currentStepData = null;
 
-    // 가속도 센서 기반 실시간 케이던스 변수
+    // 이동 거리(미터 단위)
+    let totalDistanceMeters = 0;
+
+    // 가속도 센서 기반 케이던스 변수
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
@@ -298,10 +311,11 @@
     const MIN_STEP_INTERVAL_MS = 220;
     let currentCalculatedSpm = 0;
 
-    // GPS 기반 실시간 페이스 변수
+    // GPS 기반 페이스 및 거리 변수
     let geoWatchId = null;
-    let recentSpeeds = []; // 최근 속도 샘플(m/s) 스무딩 버퍼
+    let recentSpeeds = [];
     let lastGpsUpdateTime = 0;
+    let lastCoords = null; // 직전 위도/경도
 
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
@@ -313,6 +327,7 @@
 
     const runRoutineTitle = document.getElementById('runRoutineTitle');
     const runZoneBadge = document.getElementById('runZoneBadge');
+    const liveDistanceDisplay = document.getElementById('liveDistanceDisplay');
     const runSoundAndMeter = document.getElementById('runSoundAndMeter');
     const targetBpmDisplay = document.getElementById('targetBpmDisplay');
     const liveCadenceDisplay = document.getElementById('liveCadenceDisplay');
@@ -320,44 +335,103 @@
     const stepRemainingText = document.getElementById('stepRemainingText');
     const runTimerDisplay = document.getElementById('runTimerDisplay');
     const pauseToggleBtn = document.getElementById('pauseToggleBtn');
+    const silentAudioEl = document.getElementById('silentBackgroundAudio');
 
     function triggerHaptic(duration = 20) {
       if (navigator.vibrate) navigator.vibrate(duration);
+    }
+
+    // 거리 UI 갱신 함수 (km 단위)
+    function updateDistanceUI() {
+      const km = totalDistanceMeters / 1000;
+      liveDistanceDisplay.textContent = `${km.toFixed(2)} km`;
+    }
+
+    // 하버사인(Haversine) 공식: 위도/경도로 두 점 사이 거리(미터) 계산
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371000; // 지구 반지름 (m)
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function startSilentAudio() {
+      if (!silentAudioEl.src) {
+        silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
+      }
+      silentAudioEl.play().catch(() => {});
+    }
+
+    function stopSilentAudio() {
+      silentAudioEl.pause();
     }
 
     function initAudio() {
       if (!audioCtx) {
         const AudioClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioClass({ latencyHint: 'interactive' });
+
+        audioCtx.onstatechange = () => {
+          if (!isRunning) return;
+
+          if (audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') {
+            if (!isSystemInterrupted) {
+              isSystemInterrupted = true;
+              pauseTimingAndBeats();
+            }
+          } else if (audioCtx.state === 'running') {
+            if (isSystemInterrupted) {
+              isSystemInterrupted = false;
+              resumeTimingAndBeats();
+            }
+          }
+        };
       }
-      if (audioCtx.state === 'suspended' && !isInterrupted) {
-        audioCtx.resume();
+
+      if (audioCtx && audioCtx.state === 'suspended' && !isSystemInterrupted) {
+        audioCtx.resume().catch(() => {});
       }
     }
 
-    // 초/km 단위를 "분'초\"" 형식 문자열로 포맷
     function formatPace(secPerKm) {
       if (!secPerKm || !isFinite(secPerKm) || secPerKm <= 0 || secPerKm > 1200) {
-        return `--'--"`; // 시속 3km 미만(걷기/정지) 또는 신호 불량
+        return `--'--"`;
       }
       const min = Math.floor(secPerKm / 60);
       const sec = Math.round(secPerKm % 60);
       return `${min}'${String(sec).padStart(2, '0')}"`;
     }
 
-    // 1. GPS 기반 실시간 속도 및 페이스 수집
     function initGeolocation() {
       if ('geolocation' in navigator && geoWatchId === null) {
         geoWatchId = navigator.geolocation.watchPosition(
           (position) => {
-            if (!isRunning) return;
+            if (!isRunning || isSystemInterrupted) return;
             const coords = position.coords;
             const now = performance.now();
             lastGpsUpdateTime = now;
 
-            // GPS speed (m/s) 가 지원되는 경우
+            // GPS 거리 누적 계산
+            if (lastCoords) {
+              const dist = calculateDistanceMeters(
+                lastCoords.latitude, lastCoords.longitude,
+                coords.latitude, coords.longitude
+              );
+              // 정지 상태 오차(GPS 드리프트) 필터링: 1미터 이상 80미터 이하 이동 시 누적
+              if (dist >= 1.0 && dist <= 80.0) {
+                totalDistanceMeters += dist;
+                updateDistanceUI();
+              }
+            }
+            lastCoords = { latitude: coords.latitude, longitude: coords.longitude };
+
+            // 속도 및 페이스 계산
             if (coords.speed !== null && !isNaN(coords.speed)) {
-              if (coords.speed > 0.8) { // 최소 러닝 인식 속도 (약 2.88 km/h)
+              if (coords.speed > 0.8) {
                 recentSpeeds.push(coords.speed);
                 if (recentSpeeds.length > 5) recentSpeeds.shift();
 
@@ -370,9 +444,7 @@
               }
             }
           },
-          (err) => {
-            // 위치 권한 거부 시 실내 모드(케이던스 기반 추정치)로 자동 대응
-          },
+          (err) => {},
           {
             enableHighAccuracy: true,
             maximumAge: 1000,
@@ -388,9 +460,9 @@
         geoWatchId = null;
       }
       recentSpeeds = [];
+      lastCoords = null;
     }
 
-    // 2. 가속도 센서 초기화 및 권한 요청
     function initMotionSensor() {
       if (typeof DeviceMotionEvent !== 'undefined') {
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -407,9 +479,8 @@
       }
     }
 
-    // 3. 실시간 SPM 계산 및 GPS 미수신 시 보폭 기반 페이스 보정
     function handleDeviceMotion(event) {
-      if (!isRunning) return;
+      if (!isRunning || isSystemInterrupted) return;
 
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
@@ -421,8 +492,15 @@
         if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
           lastStepTime = now;
           recentStepTimes.push(now);
-
           recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
+
+          // 실내 러닝 대응: GPS 수신이 없을 때(4초 이상) 걸음 기반 거리 누적
+          if (now - lastGpsUpdateTime > 4000) {
+            const currentSpm = currentCalculatedSpm || 160;
+            const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
+            totalDistanceMeters += estimatedStride; // 보폭만큼 거리 누적
+            updateDistanceUI();
+          }
 
           if (recentStepTimes.length >= 3) {
             const timeSpanSec = (recentStepTimes[recentStepTimes.length - 1] - recentStepTimes[0]) / 1000;
@@ -433,9 +511,7 @@
               currentCalculatedSpm = currentSpm;
               liveCadenceDisplay.textContent = currentSpm;
 
-              // GPS 수신이 4초 이상 지연될 경우 케이던스 기반 보폭 추정 페이스 표기 (실내 러닝 대응)
               if (now - lastGpsUpdateTime > 4000) {
-                // 평균 러닝 보폭 모델: 케이던스에 비례한 추정 보폭(미터)
                 const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
                 const estimatedSpeedMs = (currentSpm / 60) * estimatedStride;
                 const secPerKm = 1000 / estimatedSpeedMs;
@@ -479,7 +555,7 @@
 
     function playCueSound(type) {
       initAudio();
-      if (!audioCtx) return;
+      if (!audioCtx || isSystemInterrupted) return;
       const now = audioCtx.currentTime;
       const vol = currentStepData ? currentStepData.vol : 0.8;
 
@@ -525,7 +601,7 @@
 
     function playBeep() {
       initAudio();
-      if (!audioCtx || !currentStepData) return;
+      if (!audioCtx || !currentStepData || isSystemInterrupted) return;
       const now = audioCtx.currentTime;
       const vol = currentStepData.vol;
       const basePitch = currentStepData.pitch;
@@ -595,7 +671,7 @@
     }
 
     function triggerStep() {
-      if (!isRunning || isInterrupted) return;
+      if (!isRunning || isSystemInterrupted) return;
       const stepInCycle = currentBeatIndex % 4;
       const playSound = shouldPlaySoundInPattern(stepInCycle);
       if (playSound) playBeep();
@@ -610,7 +686,7 @@
 
     function syncBpmTimer() {
       if (beatTimer) clearInterval(beatTimer);
-      if (isRunning && !isInterrupted && currentStepData) {
+      if (isRunning && !isSystemInterrupted && currentStepData) {
         beatTimer = setInterval(triggerStep, (60 / currentStepData.bpm) * 1000);
       }
     }
@@ -650,12 +726,30 @@
       finishRun();
     }
 
+    function pauseTimingAndBeats() {
+      baseOffsetMs = elapsedMs;
+      clearAllTimers();
+      for (let i = 0; i < 4; i++) document.getElementById(`ind-${i}`).className = 'watch-ind-step';
+    }
+
+    function resumeTimingAndBeats() {
+      startTimeMs = performance.now();
+      clockTimer = setInterval(() => {
+        const now = performance.now();
+        elapsedMs = baseOffsetMs + (now - startTimeMs);
+        runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
+        evaluateRoutine(Math.floor(elapsedMs / 1000));
+      }, 10);
+      syncBpmTimer();
+    }
+
     function startRunLoop() {
       initAudio();
+      startSilentAudio();
       initMotionSensor();
       initGeolocation();
       isRunning = true;
-      isInterrupted = false;
+      isSystemInterrupted = false;
       pauseToggleBtn.textContent = 'PAUSE ||';
       pauseToggleBtn.classList.remove('paused');
 
@@ -674,9 +768,10 @@
       isRunning = false;
       baseOffsetMs = elapsedMs;
       clearAllTimers();
+      stopSilentAudio();
       stopGeolocation();
       for (let i = 0; i < 4; i++) document.getElementById(`ind-${i}`).className = 'watch-ind-step';
-      if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+      if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
       pauseToggleBtn.textContent = 'RESUME ▶';
       pauseToggleBtn.classList.add('paused');
     }
@@ -693,8 +788,11 @@
       window.location.href = 'main.html';
     }
 
-    window.addEventListener('blur', () => { if (isRunning) pauseRun(); });
-    window.addEventListener('focus', () => { if (!isRunning && pauseToggleBtn.classList.contains('paused')) { } });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && isRunning && audioCtx && audioCtx.state === 'suspended' && !isSystemInterrupted) {
+        audioCtx.resume().catch(() => {});
+      }
+    });
 
     window.onload = () => {
       try {
