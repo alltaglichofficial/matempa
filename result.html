@@ -131,7 +131,7 @@
     .badge-master { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
     .badge-caution { background: rgba(255, 59, 48, 0.12); color: #ff3b30; }
 
-    /* 사용자 프로필 요약 카드 (텍스트 넘침 방지 개선) */
+    /* 사용자 프로필 요약 카드 */
     .profile-summary-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -148,7 +148,7 @@
       justify-content: center;
       gap: 4px;
       text-align: center;
-      min-width: 0; /* flex/grid 자식 요소의 오버플로우 방지 필수 속성 */
+      min-width: 0;
     }
     .summary-chip span {
       font-size: 0.6rem;
@@ -164,7 +164,7 @@
       font-variant-numeric: tabular-nums;
       line-height: 1.25;
       text-align: center;
-      word-break: break-word; /* 글자 수가 많을 때 안전하게 줄바꿈 */
+      word-break: break-word;
       width: 100%;
     }
 
@@ -321,6 +321,17 @@
       font-size: 0.85rem;
     }
 
+    .empty-notice-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 18px;
+      padding: 20px 14px;
+      font-size: 0.8rem;
+      color: #a0a0a5;
+      text-align: center;
+      line-height: 1.5;
+    }
+
     .bottom-btn-row {
       display: flex;
       gap: 8px;
@@ -372,7 +383,7 @@
           <h3>러너 프로필 요약</h3>
           <p class="card-sub-desc">등록된 실제 주행 데이터와 신체 스펙입니다.</p>
         </div>
-        <span class="badge-sub badge-curr">PROFILE FIT</span>
+        <span class="badge-sub badge-curr" id="profileBadge">PROFILE FIT</span>
       </div>
 
       <div class="profile-summary-grid">
@@ -493,9 +504,15 @@
       <div class="card-header-line">
         <div class="header-text-group">
           <h3 id="targetCardTitle">다음 목표 성장 제안</h3>
-          <p class="card-sub-desc" style="color: #a0a0a5;">부상 없이 점진적으로 향상하는 10% 룰 기반 목표입니다.</p>
+          <p class="card-sub-desc" id="targetCardSubDesc" style="color: #a0a0a5;">부상 없이 점진적으로 향상하는 10% 룰 기반 목표입니다.</p>
         </div>
         <span class="badge-sub badge-next" id="targetBadge">NEXT LEVEL</span>
+      </div>
+
+      <!-- 프로필이 없을 때 보여줄 안내 박스 -->
+      <div class="empty-notice-box" id="emptyNoticeBox" style="display: none;">
+        등록된 러너 프로필 데이터가 없습니다.<br>
+        하단의 <strong>'프로필 등록'</strong> 버튼을 눌러 스펙을 입력해 주세요.
       </div>
 
       <div class="metric-quad-grid" id="targetMetricGrid">
@@ -577,23 +594,33 @@
     }
 
     function calculateFullReport(p) {
-      const gender = p.gender === 'female' ? '여' : '남';
-      const age = parseInt(p.age, 10) || 30;
-      const heightCm = Math.round(parseFloat(p.height) || 175);
-      const weightKg = Math.round(parseFloat(p.weight) || 68);
+      if (!p) return null;
 
-      // [A] 프로필 요약 카드용 유저 실제 입력 데이터 파싱
-      const pMin = parseInt(p.paceMin, 10) || 5;
-      const pSec = parseInt(p.paceSec, 10) || 30;
-      const userAvgPaceSec = (pMin * 60) + pSec;
-      const userAvgPaceStr = formatMinSec(userAvgPaceSec);
+      // 1. 실제 입력된 프로필 유효성 검사 (키, 몸무게, 나이가 없으면 빈 상태 반환)
+      const age = parseInt(p.age, 10);
+      const heightCm = Math.round(parseFloat(p.height));
+      const weightKg = Math.round(parseFloat(p.weight));
+      const gender = p.gender === 'female' ? '여' : (p.gender === 'male' ? '남' : '');
 
-      const maxDist = (p.maxRun && parseFloat(p.maxRun.distance)) || 15.0;
+      const hasBio = !isNaN(age) && !isNaN(heightCm) && !isNaN(weightKg) && !!gender;
+
+      // 2. 페이스 정보 파싱
+      const pMin = parseInt(p.paceMin, 10);
+      const pSec = parseInt(p.paceSec, 10);
+      let userAvgPaceSec = 0;
+      if (!isNaN(pMin)) {
+        userAvgPaceSec = (pMin * 60) + (isNaN(pSec) ? 0 : pSec);
+      }
+      const userAvgPaceStr = userAvgPaceSec > 0 ? formatMinSec(userAvgPaceSec) : "--'--\"";
+
+      // 3. 최장 거리 및 케이던스 파싱
+      const maxDist = (p.maxRun && parseFloat(p.maxRun.distance)) || 0;
       let userCad = 0;
       if (p.maxRun && p.maxRun.cadence) userCad = parseInt(p.maxRun.cadence, 10);
       else if (p.fastestMaxRun && p.fastestMaxRun.cadence) userCad = parseInt(p.fastestMaxRun.cadence, 10);
       if (!userCad && p.records && p.records.full && p.records.full.cadence) userCad = parseInt(p.records.full.cadence, 10);
 
+      // 최고 페이스 파싱
       let fastestPaceSec = 0;
       if (p.fastestMaxRun && parseFloat(p.fastestMaxRun.distance) > 0) {
         const fDist = parseFloat(p.fastestMaxRun.distance);
@@ -606,17 +633,30 @@
           fastestPaceSec = (parseInt(p.fastestMaxRun.paceMin, 10) || 0) * 60 + (parseInt(p.fastestMaxRun.paceSec, 10) || 0);
         }
       }
-      if (fastestPaceSec <= 0 || fastestPaceSec > userAvgPaceSec) {
-        fastestPaceSec = Math.max(userAvgPaceSec - 20, 180);
+      const fastestPaceStr = fastestPaceSec > 0 ? formatMinSec(fastestPaceSec) : "--'--\"";
+
+      // 만약 신체 스펙이 없으면 계산을 진행하지 않고 기본 정보만 반환
+      if (!hasBio) {
+        return {
+          hasBio: false,
+          gender: gender || '-',
+          age: isNaN(age) ? '-' : age,
+          heightCm: isNaN(heightCm) ? '-' : heightCm,
+          weightKg: isNaN(weightKg) ? '-' : weightKg,
+          userAvgPaceStr,
+          fastestPaceStr,
+          maxDist,
+          userCad,
+          courses: null,
+          isMasterRunner: false
+        };
       }
-      const fastestPaceStr = formatMinSec(fastestPaceSec);
 
       // [B] 생체역학 기준 코스별 최대 가능 한계치 산출
       const heightM = heightCm / 100;
       const bmi = weightKg / (heightM * heightM);
 
       let bioBasePace10k = 340;
-
       if (gender === '여') bioBasePace10k += 35;
       if (age > 30) bioBasePace10k += (age - 30) * 2.0;
 
@@ -667,7 +707,7 @@
         };
       });
 
-      // [C] 다음 목표 성장 제안 및 마스터 판정
+      // [C] 다음 목표 성장 제안
       let fullPbTotalSec = 0;
       if (p.records && p.records.full) {
         const fh = parseInt(p.records.full.h, 10) || 0;
@@ -681,7 +721,7 @@
 
       if (fullPbTotalSec > 0 && fullPbTotalSec <= FULL_430_TOTAL_SEC) {
         isMasterRunner = true;
-        masterReason = `풀코스 마라톤 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 서비스 기준치(4시간 30분)보다 우수합니다.`;
+        masterReason = `풀코스 완주 기록(${formatHoursMinSec(fullPbTotalSec)})이 서비스 기준치(4시간 30분)보다 우수합니다.`;
       } else if (courseResults.full.timeSec <= FULL_430_TOTAL_SEC) {
         isMasterRunner = true;
         masterReason = `회원님의 신체 스펙 기준 풀코스 완주 예상치(${courseResults.full.timeStr})가 4시간 30분 이내입니다.`;
@@ -690,13 +730,15 @@
         masterReason = `등록된 케이던스(${userCad} SPM)가 서비스 권장 상한선(185 SPM)에 도달하였습니다.`;
       }
 
-      const targetBaseDist = maxDist >= 10 ? 10.0 : maxDist;
-      let nextGoalDist = Math.round((targetBaseDist * 1.15) * 10) / 10;
+      // 목표 거리 및 페이스 설정
+      const baseDist = maxDist > 0 ? (maxDist >= 10 ? 10.0 : maxDist) : 5.0;
+      let nextGoalDist = Math.round((baseDist * 1.15) * 10) / 10;
       if (nextGoalDist > MAX_ALLOWED_DISTANCE) nextGoalDist = MAX_ALLOWED_DISTANCE;
-      const distDiff = Math.round((nextGoalDist - targetBaseDist) * 10) / 10;
+      const distDiff = Math.round((nextGoalDist - baseDist) * 10) / 10;
 
-      const nextPaceSec = Math.max(userAvgPaceSec - 15, 180);
-      const actualPaceDiff = userAvgPaceSec - nextPaceSec;
+      const basePace = userAvgPaceSec > 0 ? userAvgPaceSec : courseResults['5k'].paceSec;
+      const nextPaceSec = Math.max(basePace - 15, 180);
+      const actualPaceDiff = basePace - nextPaceSec;
       const nextTotalSec = Math.round(nextGoalDist * nextPaceSec);
 
       const targetBaseCad = userCad || courseResults['10k'].cadence;
@@ -704,6 +746,7 @@
       const cadDiff = nextCadence - targetBaseCad;
 
       return {
+        hasBio: true,
         gender,
         age,
         heightCm,
@@ -711,8 +754,8 @@
         userAvgPaceStr,
         fastestPaceStr,
         maxDist,
-        targetBaseDist,
-        userCad: userCad || courseResults['10k'].cadence,
+        baseDist,
+        userCad,
         courses: courseResults,
         isMasterRunner,
         masterReason,
@@ -729,12 +772,51 @@
     function renderReport() {
       const res = calculateFullReport(profileData);
 
-      // 1. 프로필 요약 카드 (가독성 향상을 위해 단위를 깔끔하게 구성)
-      document.getElementById('sumBioSpec').textContent = `${res.gender}·${res.age}세 (${res.heightCm}/${res.weightKg})`;
-      document.getElementById('sumPaceGroup').textContent = `${res.userAvgPaceStr} / ${res.fastestPaceStr}`;
-      document.getElementById('sumDistCadGroup').textContent = `${res.maxDist.toFixed(1)}km / ${res.userCad}SPM`;
+      const profileBadge = document.getElementById('profileBadge');
+      const sumBioSpec = document.getElementById('sumBioSpec');
+      const sumPaceGroup = document.getElementById('sumPaceGroup');
+      const sumDistCadGroup = document.getElementById('sumDistCadGroup');
 
-      // 2. 생체역학 코스별 최대가능 수치
+      const metricGrid = document.getElementById('targetMetricGrid');
+      const masterNotice = document.getElementById('masterNoticeBox');
+      const emptyNotice = document.getElementById('emptyNoticeBox');
+      const targetBadge = document.getElementById('targetBadge');
+      const targetTitle = document.getElementById('targetCardTitle');
+      const targetSubDesc = document.getElementById('targetCardSubDesc');
+      const masterReasonText = document.getElementById('masterReasonText');
+
+      // 1. 프로필이 비어있는 경우
+      if (!res || !res.hasBio) {
+        sumBioSpec.textContent = res ? `${res.gender}·${res.age} (${res.heightCm}/${res.weightKg})` : '--';
+        sumPaceGroup.textContent = res ? `${res.userAvgPaceStr} / ${res.fastestPaceStr}` : '--';
+        sumDistCadGroup.textContent = (res && res.maxDist > 0) ? `${res.maxDist.toFixed(1)}km / ${res.userCad || '--'}SPM` : '--';
+        profileBadge.textContent = 'NO PROFILE';
+        profileBadge.className = 'badge-sub badge-caution';
+
+        ['5k', '10k', 'half', 'full'].forEach(k => {
+          document.getElementById(`pace-${k}`).textContent = "--'--\"";
+          document.getElementById(`time-${k}`).textContent = '--:--';
+          document.getElementById(`cad-${k}`).textContent = '-- SPM';
+        });
+
+        metricGrid.style.display = 'none';
+        masterNotice.style.display = 'none';
+        emptyNotice.style.display = 'block';
+        targetTitle.textContent = '목표 성장 제안 대기';
+        targetSubDesc.textContent = '프로필을 등록하시면 맞춤 목표를 제안해 드립니다.';
+        targetBadge.textContent = 'STANDBY';
+        targetBadge.className = 'badge-sub badge-caution';
+        return;
+      }
+
+      // 2. 프로필이 정상 등록된 경우
+      profileBadge.textContent = 'PROFILE FIT';
+      profileBadge.className = 'badge-sub badge-curr';
+      sumBioSpec.textContent = `${res.gender}·${res.age}세 (${res.heightCm}/${res.weightKg})`;
+      sumPaceGroup.textContent = `${res.userAvgPaceStr} / ${res.fastestPaceStr}`;
+      sumDistCadGroup.textContent = `${res.maxDist > 0 ? res.maxDist.toFixed(1) + 'km' : '--'} / ${res.userCad > 0 ? res.userCad + 'SPM' : '--'}`;
+
+      // 생체역학 코스별 최대치 바인딩
       ['5k', '10k', 'half', 'full'].forEach(k => {
         const item = res.courses[k];
         document.getElementById(`pace-${k}`).textContent = item.paceStr;
@@ -742,12 +824,7 @@
         document.getElementById(`cad-${k}`).textContent = `${item.cadence} SPM`;
       });
 
-      // 3. 목표 제안 영역 분기
-      const metricGrid = document.getElementById('targetMetricGrid');
-      const masterNotice = document.getElementById('masterNoticeBox');
-      const targetBadge = document.getElementById('targetBadge');
-      const targetTitle = document.getElementById('targetCardTitle');
-      const masterReasonText = document.getElementById('masterReasonText');
+      emptyNotice.style.display = 'none';
 
       if (res.isMasterRunner) {
         metricGrid.style.display = 'none';
@@ -755,7 +832,6 @@
         targetTitle.textContent = '러너 맞춤 가이드';
         targetBadge.textContent = 'MASTER RUNNER';
         targetBadge.className = 'badge-sub badge-master';
-
         if (res.masterReason) {
           masterReasonText.textContent = res.masterReason;
         }
@@ -763,14 +839,15 @@
         metricGrid.style.display = 'grid';
         masterNotice.style.display = 'none';
         targetTitle.textContent = '다음 목표 성장 제안';
+        targetSubDesc.textContent = '부상 없이 점진적으로 향상하는 10% 룰 기반 목표입니다.';
         targetBadge.textContent = 'NEXT LEVEL';
         targetBadge.className = 'badge-sub badge-next';
 
         document.getElementById('nextGoalDist').textContent = res.nextGoalDist.toFixed(1);
-        document.getElementById('nextDistCompare').textContent = `${res.targetBaseDist.toFixed(1)}km 기준 +${res.distDiff.toFixed(1)}km 확장`;
+        document.getElementById('nextDistCompare').textContent = `${res.baseDist.toFixed(1)}km 기준 +${res.distDiff.toFixed(1)}km 확장`;
 
         document.getElementById('nextGoalPace').textContent = formatMinSec(res.nextPaceSec);
-        document.getElementById('nextPaceCompare').textContent = `평균 대비 -${res.actualPaceDiff}초 단축`;
+        document.getElementById('nextPaceCompare').textContent = `페이스 대비 -${res.actualPaceDiff}초 단축`;
 
         document.getElementById('nextGoalTime').textContent = formatHoursMinSec(res.nextTotalSec);
 
@@ -793,20 +870,7 @@
         console.error("로컬 프로필 로드 실패:", e);
       }
 
-      if (!profileData) {
-        profileData = {
-          gender: 'male',
-          age: 30,
-          height: 175,
-          weight: 68,
-          paceMin: 5,
-          paceSec: 30,
-          weeklyDistance: 25.0,
-          maxRun: { distance: 15.0, cadence: 178 },
-          fastestMaxRun: { distance: 10.0, paceMin: 5, paceSec: 0, cadence: 178 }
-        };
-      }
-
+      // 로컬스토리지에 저장된 데이터가 없어도 더미(예시) 객체를 주입하지 않습니다.
       renderReport();
     };
   </script>
