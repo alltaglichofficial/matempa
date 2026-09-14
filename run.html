@@ -52,7 +52,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* 우상단 오토 퍼즈 옵션 토글 버튼 */
     .auto-pause-toggle-btn {
       background: rgba(255, 255, 255, 0.08);
       color: #8e8e93;
@@ -280,7 +279,6 @@
     <!-- 상단 헤더 -->
     <div class="run-header">
       <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
-      <!-- 종료 버튼 대신 자동 일시정지 옵션 토글 버튼 배치 -->
       <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
         <span class="auto-pause-dot"></span>
         <span id="autoPauseText">AUTO PAUSE ON</span>
@@ -295,7 +293,7 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 1. 타겟 / 실시간 케이던스 / 실시간 페이스 3열 비교 그리드 -->
+      <!-- 타겟 / 실시간 케이던스 / 실시간 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -313,13 +311,13 @@
         </div>
       </div>
 
-      <!-- 2. 중요하게 크게 표시되는 실시간 이동 거리(KM) -->
+      <!-- 대형 메인 실시간 이동 거리(KM) -->
       <div class="distance-hero-wrap">
         <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
         <div class="distance-hero-unit">KILOMETERS</div>
       </div>
 
-      <!-- 3. 구간 남은 시간 및 전체 러닝 타이머 -->
+      <!-- 구간 남은 시간 및 전체 타이머 -->
       <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
       <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
 
@@ -339,7 +337,6 @@
 
   </div>
 
-  <!-- OS 백그라운드 오디오 파이프라인 유지용 무음 오디오 -->
   <audio id="silentBackgroundAudio" loop playsinline style="display: none;"></audio>
 
   <script>
@@ -348,9 +345,13 @@
     let isRunning = false;
     let isSystemInterrupted = false;
 
-    // 자동 일시정지 옵션 플래그
+    // 자동 일시정지 옵션 플래그 및 기준 좌표
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
+    let autoPauseAnchorCoords = null; // 멈춘 시점의 앵커 GPS 좌표
+
+    // 재개 감지 임계값 (1m 이동 시 즉시 재개)
+    const RESUME_DISTANCE_THRESHOLD_M = 1.0;
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -365,10 +366,8 @@
     let clockTimer = null;
     let currentStepData = null;
 
-    // 이동 거리 (미터 단위)
     let totalDistanceMeters = 0;
 
-    // 가속도 센서 기반 케이던스 및 움직임 감지
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
@@ -376,7 +375,6 @@
     const MIN_STEP_INTERVAL_MS = 220;
     let currentCalculatedSpm = 0;
 
-    // GPS 기반 페이스 및 거리 변수
     let geoWatchId = null;
     let recentSpeeds = [];
     let lastGpsUpdateTime = 0;
@@ -410,31 +408,30 @@
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    // 1. 자동 일시정지 옵션 토글
     function toggleAutoPauseOption() {
       triggerHaptic(15);
       isAutoPauseEnabled = !isAutoPauseEnabled;
       autoPauseToggleBtn.classList.toggle('active', isAutoPauseEnabled);
       autoPauseText.textContent = isAutoPauseEnabled ? 'AUTO PAUSE ON' : 'AUTO PAUSE OFF';
 
-      // 끈 상태에서 정지 중이었다면 즉시 재개
       if (!isAutoPauseEnabled && isAutoPausedNow) {
         resumeFromAutoPause();
       }
     }
 
-    // 움직임 멈춤 감지 시 실행
+    // 멈춤 시점의 위치를 앵커로 기록
     function triggerAutoPause() {
       if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = true;
+      autoPauseAnchorCoords = lastCoords ? { ...lastCoords } : null;
       autoPauseStatusPill.style.display = 'inline-block';
       pauseTimingAndBeats();
     }
 
-    // 움직임 재개 감지 시 실행
     function resumeFromAutoPause() {
       if (!isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = false;
+      autoPauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
       resumeTimingAndBeats();
     }
@@ -501,7 +498,6 @@
       return `${min}'${String(sec).padStart(2, '0')}"`;
     }
 
-    // 2. GPS 위치 수신 및 정지/이동 판별
     function initGeolocation() {
       if ('geolocation' in navigator && geoWatchId === null) {
         geoWatchId = navigator.geolocation.watchPosition(
@@ -511,34 +507,50 @@
             const now = performance.now();
             lastGpsUpdateTime = now;
 
-            if (coords.speed !== null && !isNaN(coords.speed)) {
-              if (coords.speed > 0.8) {
-                // 달리기 속도 정상 감지 -> 자동 일시정지 상태였다면 즉시 재개
-                if (isAutoPausedNow) resumeFromAutoPause();
-
-                recentSpeeds.push(coords.speed);
-                if (recentSpeeds.length > 5) recentSpeeds.shift();
-                const avgSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
-                const secPerKm = 1000 / avgSpeed;
-                livePaceDisplay.textContent = formatPace(secPerKm);
-              } else if (coords.speed < 0.4) {
-                // 시속 약 1.4km 미만(정지) 감지 시 자동 일시정지 트리거
-                recentSpeeds = [];
-                livePaceDisplay.textContent = `--'--"`;
-                triggerAutoPause();
+            // [재개 조건: 1m 이상 이동 감지]
+            if (isAutoPausedNow) {
+              if (autoPauseAnchorCoords) {
+                const distFromAnchor = calculateDistanceMeters(
+                  autoPauseAnchorCoords.latitude, autoPauseAnchorCoords.longitude,
+                  coords.latitude, coords.longitude
+                );
+                if (distFromAnchor >= RESUME_DISTANCE_THRESHOLD_M) {
+                  resumeFromAutoPause();
+                }
+              } else if (coords.speed !== null && coords.speed >= 0.4) {
+                // 앵커 좌표가 아직 없을 경우 가벼운 보행 속도 이상 감지 시 재개
+                resumeFromAutoPause();
               }
             }
 
+            // 정지 감지 (속도가 0.35m/s 미만으로 떨어진 경우)
+            if (!isAutoPausedNow && coords.speed !== null && !isNaN(coords.speed) && coords.speed < 0.35) {
+              recentSpeeds = [];
+              livePaceDisplay.textContent = `--'--"`;
+              triggerAutoPause();
+            }
+
+            // 거리 누적 (정상 주행 시)
             if (!isAutoPausedNow && lastCoords) {
               const dist = calculateDistanceMeters(
                 lastCoords.latitude, lastCoords.longitude,
                 coords.latitude, coords.longitude
               );
-              if (dist >= 1.0 && dist <= 80.0) {
+              if (dist >= 0.8 && dist <= 80.0) {
                 totalDistanceMeters += dist;
                 updateDistanceUI();
               }
             }
+
+            // 실시간 페이스 갱신
+            if (!isAutoPausedNow && coords.speed !== null && coords.speed >= 0.5) {
+              recentSpeeds.push(coords.speed);
+              if (recentSpeeds.length > 5) recentSpeeds.shift();
+              const avgSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+              const secPerKm = 1000 / avgSpeed;
+              livePaceDisplay.textContent = formatPace(secPerKm);
+            }
+
             lastCoords = { latitude: coords.latitude, longitude: coords.longitude };
           },
           (err) => {},
@@ -554,6 +566,7 @@
       }
       recentSpeeds = [];
       lastCoords = null;
+      autoPauseAnchorCoords = null;
     }
 
     function initMotionSensor() {
@@ -572,7 +585,6 @@
       }
     }
 
-    // 3. 발걸음 감지 및 정지/재개 판별
     function handleDeviceMotion(event) {
       if (!isRunning) return;
 
@@ -582,13 +594,14 @@
       const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
       const now = performance.now();
 
+      // 발걸음 충격 감지
       if (magnitude > STEP_THRESHOLD && lastAccelMagnitude <= STEP_THRESHOLD) {
         if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
           lastStepTime = now;
           recentStepTimes.push(now);
           recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
 
-          // 발걸음이 다시 뛰기 시작하면 정지 풀기
+          // [재개 보조 조건: 발걸음이 감지되면 지체 없이 즉시 재개]
           if (isAutoPausedNow) {
             resumeFromAutoPause();
           }
@@ -620,14 +633,14 @@
         }
       }
 
-      // 발걸음이 2.5초 이상 발생하지 않으면 정지 상태로 간주
+      // 발걸음이 2.5초 이상 멈추면 정지 감지 (GPS 신호 지연 시 대비)
       if (now - lastStepTime > 2500) {
         liveCadenceDisplay.textContent = '--';
         currentCalculatedSpm = 0;
         recentStepTimes = [];
         if (now - lastGpsUpdateTime > 4000) {
           livePaceDisplay.textContent = `--'--"`;
-          triggerAutoPause(); // GPS가 없는 환경에서도 자동 일시정지 발동
+          triggerAutoPause();
         }
       }
 
@@ -851,6 +864,7 @@
       isRunning = true;
       isSystemInterrupted = false;
       isAutoPausedNow = false;
+      autoPauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
 
       pauseToggleBtn.textContent = 'PAUSE ||';
