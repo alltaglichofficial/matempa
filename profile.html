@@ -102,13 +102,15 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .card-title-box.collapsible-header {
-      cursor: pointer;
+    .card-title-box {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       padding-bottom: 0.6rem;
+    }
+    .card-title-box.collapsible-header {
+      cursor: pointer;
     }
     .header-text-group {
       flex: 1;
@@ -135,6 +137,27 @@
       align-items: flex-end;
       gap: 4px;
     }
+
+    .card-reset-btn {
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #8e8e93;
+      padding: 3px 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.15s ease;
+    }
+    .card-reset-btn:active {
+      background: rgba(255, 59, 48, 0.12);
+      color: #ff3b30;
+      border-color: rgba(255, 59, 48, 0.2);
+    }
+
     .toggle-arrow {
       font-size: 0.75rem;
       color: #8e8e93;
@@ -397,67 +420,72 @@
 
     <div class="cards-container">
 
-      <!-- 1. 기본 신체 프로필 & 주간 거리 -->
+      <!-- 1. 기본 신체 프로필 & 주간 거리 (기본값 제거 및 Placeholder 적용) -->
       <div class="profile-card" id="card-basic">
         <div class="card-title-box">
-          <h3 style="font-size: 1rem; font-weight: 800; color: #111;">기본 신체 프로필</h3>
-          <p style="font-size: 0.7rem; color: #8e8e93; margin-top: 2px;">체형과 주행 습관에 맞춘 러너 프로필을 구성합니다.</p>
+          <div class="header-text-group">
+            <h3>기본 신체 프로필</h3>
+            <p>체형과 주행 습관에 맞춘 러너 프로필을 구성합니다.</p>
+          </div>
+          <button class="card-reset-btn" onclick="resetBasicProfile()">↺ 초기화</button>
         </div>
 
-        <div class="row-two-inputs">
-          <div class="form-group">
-            <label class="form-label">성별 (Gender)</label>
-            <div class="gender-chips-row">
-              <button class="gender-chip-btn selected" id="gender-male" onclick="setGender('male')">남</button>
-              <button class="gender-chip-btn" id="gender-female" onclick="setGender('female')">여</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">나이 (Age)</label>
-            <div class="input-wrapper">
-              <input type="number" id="inputAge" value="30" min="10" max="99">
-              <span class="input-unit">세</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="row-two-inputs">
-          <div class="form-group">
-            <label class="form-label">키 (Height)</label>
-            <div class="input-wrapper">
-              <input type="number" id="inputHeight" value="175" min="120" max="230" step="1">
-              <span class="input-unit">cm</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">몸무게 (Weight)</label>
-            <div class="input-wrapper">
-              <input type="number" id="inputWeight" value="68" min="30" max="160" step="1">
-              <span class="input-unit">kg</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="row-two-inputs">
-          <div class="form-group">
-            <label class="form-label">평균 페이스</label>
-            <div class="pace-inputs-wrap">
-              <div class="pace-col">
-                <input type="number" id="paceMin" value="5" min="2" max="15">
-                <span class="input-unit">분</span>
+        <div class="card-body-content">
+          <div class="row-two-inputs">
+            <div class="form-group">
+              <label class="form-label">성별 (Gender)</label>
+              <div class="gender-chips-row">
+                <button class="gender-chip-btn" id="gender-male" onclick="setGender('male')">남</button>
+                <button class="gender-chip-btn" id="gender-female" onclick="setGender('female')">여</button>
               </div>
-              <span style="font-weight: 800; color: #8e8e93;">:</span>
-              <div class="pace-col">
-                <input type="number" id="paceSec" value="30" min="0" max="59" step="5">
-                <span class="input-unit">초</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">나이 (Age)</label>
+              <div class="input-wrapper">
+                <input type="number" id="inputAge" placeholder="예: 30" min="10" max="99" enterkeyhint="done">
+                <span class="input-unit">세</span>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">주간 러닝 거리</label>
-            <div class="input-wrapper">
-              <input type="number" id="weeklyDistance" value="25.00" min="0" max="300" step="0.01">
-              <span class="input-unit">km</span>
+
+          <div class="row-two-inputs">
+            <div class="form-group">
+              <label class="form-label">키 (Height)</label>
+              <div class="input-wrapper">
+                <input type="number" id="inputHeight" placeholder="예: 175" min="120" max="230" step="1" enterkeyhint="done">
+                <span class="input-unit">cm</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">몸무게 (Weight)</label>
+              <div class="input-wrapper">
+                <input type="number" id="inputWeight" placeholder="예: 68" min="30" max="160" step="1" enterkeyhint="done">
+                <span class="input-unit">kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-two-inputs">
+            <div class="form-group">
+              <label class="form-label">평균 페이스</label>
+              <div class="pace-inputs-wrap">
+                <div class="pace-col">
+                  <input type="number" id="paceMin" placeholder="분" min="2" max="15" enterkeyhint="done">
+                  <span class="input-unit">분</span>
+                </div>
+                <span style="font-weight: 800; color: #8e8e93;">:</span>
+                <div class="pace-col">
+                  <input type="number" id="paceSec" placeholder="초" min="0" max="59" step="5" enterkeyhint="done">
+                  <span class="input-unit">초</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">주간 러닝 거리</label>
+              <div class="input-wrapper">
+                <input type="number" id="weeklyDistance" placeholder="0.00" min="0" max="300" step="0.01" enterkeyhint="done">
+                <span class="input-unit">km</span>
+              </div>
             </div>
           </div>
         </div>
@@ -465,13 +493,16 @@
 
       <!-- 2. 최장 거리 기록 -->
       <div class="profile-card collapsed" id="card-max">
-        <div class="card-title-box collapsible-header" onclick="toggleCard('card-max')">
+        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-max')">
           <div class="header-text-group">
             <h3>최장 거리 기록</h3>
             <p>개인 최대 완주 거리와 기록을 보관합니다.</p>
           </div>
           <div class="header-right-meta">
-            <span class="toggle-arrow">▼</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="card-reset-btn" onclick="resetMaxRecord(event)">↺ 초기화</button>
+              <span class="toggle-arrow">▼</span>
+            </div>
             <span class="header-summary-badge" id="badge-summary-max">--</span>
           </div>
         </div>
@@ -484,28 +515,28 @@
             </div>
             <div class="form-group">
               <div class="input-wrapper">
-                <input type="number" id="maxDistance" value="15.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onMaxDistanceOrTimeChange()">
+                <input type="number" id="maxDistance" value="15.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onMaxDistanceOrTimeChange()" enterkeyhint="done">
                 <span class="input-unit">km</span>
               </div>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="tmax-h" placeholder="시" min="0" max="99" oninput="onMaxDistanceOrTimeChange(true)">
-              <input type="number" id="tmax-m" placeholder="분" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
-              <input type="number" id="tmax-s" placeholder="초" min="0" max="59" oninput="onMaxDistanceOrTimeChange()">
+              <input type="number" id="tmax-h" placeholder="시" min="0" max="99" oninput="onMaxDistanceOrTimeChange(true)" enterkeyhint="done">
+              <input type="number" id="tmax-m" placeholder="분" min="0" max="59" oninput="onMaxDistanceOrTimeChange()" enterkeyhint="done">
+              <input type="number" id="tmax-s" placeholder="초" min="0" max="59" oninput="onMaxDistanceOrTimeChange()" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-max" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-max" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="pmax-min" placeholder="분" min="2" max="15" oninput="onMaxPaceChange()">
+                  <input type="number" id="pmax-min" placeholder="분" min="2" max="15" oninput="onMaxPaceChange()" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="pmax-sec" placeholder="초" min="0" max="59" oninput="onMaxPaceChange()">
+                  <input type="number" id="pmax-sec" placeholder="초" min="0" max="59" oninput="onMaxPaceChange()" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -516,13 +547,16 @@
 
       <!-- 3. 최단시간 최장거리 기록 -->
       <div class="profile-card collapsed" id="card-fastest-max">
-        <div class="card-title-box collapsible-header" onclick="toggleCard('card-fastest-max')">
+        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-fastest-max')">
           <div class="header-text-group">
             <h3>최단시간 최장거리 기록</h3>
             <p>가장 빠른 속도로 주파한 최장거리 기록입니다.</p>
           </div>
           <div class="header-right-meta">
-            <span class="toggle-arrow">▼</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="card-reset-btn" onclick="resetFastestRecord(event)">↺ 초기화</button>
+              <span class="toggle-arrow">▼</span>
+            </div>
             <span class="header-summary-badge" id="badge-summary-fastest">--</span>
           </div>
         </div>
@@ -535,28 +569,28 @@
             </div>
             <div class="form-group">
               <div class="input-wrapper">
-                <input type="number" id="fastestDistance" value="10.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onFastestDistanceOrTimeChange()">
+                <input type="number" id="fastestDistance" value="10.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onFastestDistanceOrTimeChange()" enterkeyhint="done">
                 <span class="input-unit">km</span>
               </div>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="tfastest-h" placeholder="시" min="0" max="99" oninput="onFastestDistanceOrTimeChange(true)">
-              <input type="number" id="tfastest-m" placeholder="분" min="0" max="59" oninput="onFastestDistanceOrTimeChange()">
-              <input type="number" id="tfastest-s" placeholder="초" min="0" max="59" oninput="onFastestDistanceOrTimeChange()">
+              <input type="number" id="tfastest-h" placeholder="시" min="0" max="99" oninput="onFastestDistanceOrTimeChange(true)" enterkeyhint="done">
+              <input type="number" id="tfastest-m" placeholder="분" min="0" max="59" oninput="onFastestDistanceOrTimeChange()" enterkeyhint="done">
+              <input type="number" id="tfastest-s" placeholder="초" min="0" max="59" oninput="onFastestDistanceOrTimeChange()" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-fastest" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-fastest" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="pfastest-min" placeholder="분" min="2" max="15" oninput="onFastestPaceChange()">
+                  <input type="number" id="pfastest-min" placeholder="분" min="2" max="15" oninput="onFastestPaceChange()" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="pfastest-sec" placeholder="초" min="0" max="59" oninput="onFastestPaceChange()">
+                  <input type="number" id="pfastest-sec" placeholder="초" min="0" max="59" oninput="onFastestPaceChange()" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -567,7 +601,7 @@
 
       <!-- 4. 대회별 PB 기록 -->
       <div class="profile-card collapsed" id="card-pb">
-        <div class="card-title-box collapsible-header" onclick="toggleCard('card-pb')">
+        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-pb')">
           <div class="header-text-group">
             <h3>대회별 PB 기록</h3>
             <p>시간과 페이스 변경 시 상호 자동 연동 계산됩니다.</p>
@@ -586,23 +620,23 @@
               <span class="pb-calc-badge" id="calc-5k">--'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="t5k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('5k', 5.00, true, true)">
-              <input type="number" id="t5k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('5k', 5.00)">
-              <input type="number" id="t5k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('5k', 5.00)">
+              <input type="number" id="t5k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('5k', 5.00, true, true)" enterkeyhint="done">
+              <input type="number" id="t5k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('5k', 5.00)" enterkeyhint="done">
+              <input type="number" id="t5k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('5k', 5.00)" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-5k" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-5k" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="p5k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('5k', 5.00)">
+                  <input type="number" id="p5k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('5k', 5.00)" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="p5k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('5k', 5.00)">
+                  <input type="number" id="p5k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('5k', 5.00)" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -616,23 +650,23 @@
               <span class="pb-calc-badge" id="calc-10k">--'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="t10k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('10k', 10.00, true, true)">
-              <input type="number" id="t10k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('10k', 10.00)">
-              <input type="number" id="t10k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('10k', 10.00)">
+              <input type="number" id="t10k-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('10k', 10.00, true, true)" enterkeyhint="done">
+              <input type="number" id="t10k-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('10k', 10.00)" enterkeyhint="done">
+              <input type="number" id="t10k-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('10k', 10.00)" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-10k" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-10k" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="p10k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('10k', 10.00)">
+                  <input type="number" id="p10k-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('10k', 10.00)" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="p10k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('10k', 10.00)">
+                  <input type="number" id="p10k-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('10k', 10.00)" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -646,23 +680,23 @@
               <span class="pb-calc-badge" id="calc-half">--'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="thalf-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('half', 21.0975, true, true)">
-              <input type="number" id="thalf-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
-              <input type="number" id="thalf-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)">
+              <input type="number" id="thalf-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('half', 21.0975, true, true)" enterkeyhint="done">
+              <input type="number" id="thalf-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)" enterkeyhint="done">
+              <input type="number" id="thalf-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('half', 21.0975)" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-half" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-half" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="phalf-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('half', 21.0975)">
+                  <input type="number" id="phalf-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('half', 21.0975)" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="phalf-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('half', 21.0975)">
+                  <input type="number" id="phalf-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('half', 21.0975)" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -676,23 +710,23 @@
               <span class="pb-calc-badge" id="calc-full">--'--"</span>
             </div>
             <div class="time-three-inputs">
-              <input type="number" id="tfull-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('full', 42.195, true, true)">
-              <input type="number" id="tfull-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
-              <input type="number" id="tfull-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('full', 42.195)">
+              <input type="number" id="tfull-h" placeholder="시" min="0" max="23" oninput="onPbTimeChange('full', 42.195, true, true)" enterkeyhint="done">
+              <input type="number" id="tfull-m" placeholder="분" min="0" max="59" oninput="onPbTimeChange('full', 42.195)" enterkeyhint="done">
+              <input type="number" id="tfull-s" placeholder="초" min="0" max="59" oninput="onPbTimeChange('full', 42.195)" enterkeyhint="done">
             </div>
             <div class="pb-sub-grid">
               <div class="input-wrapper">
-                <input type="number" id="cad-full" placeholder="케이던스" min="100" max="240">
+                <input type="number" id="cad-full" placeholder="케이던스" min="100" max="240" enterkeyhint="done">
                 <span class="input-unit">SPM</span>
               </div>
               <div class="pb-pace-inline-wrap">
                 <div class="pace-col">
-                  <input type="number" id="pfull-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('full', 42.195)">
+                  <input type="number" id="pfull-min" placeholder="분" min="2" max="15" oninput="onPbPaceChange('full', 42.195)" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="pfull-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('full', 42.195)">
+                  <input type="number" id="pfull-sec" placeholder="초" min="0" max="59" oninput="onPbPaceChange('full', 42.195)" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -709,7 +743,7 @@
   </div>
 
   <script>
-    let currentGender = 'male';
+    let currentGender = null; // 초기 성별 미선택 상태
 
     function formatPace(totalSec, distKm) {
       if (distKm <= 0 || totalSec <= 0) return "--'--\"";
@@ -730,11 +764,60 @@
       updateAllSummaries();
     }
 
+    function handleCardClick(event, cardId) {
+      if (event.target.closest('.card-reset-btn')) return;
+      toggleCard(cardId);
+    }
+
     function setGender(gender) {
       triggerHaptic(15);
       currentGender = gender;
       document.getElementById('gender-male').classList.toggle('selected', gender === 'male');
       document.getElementById('gender-female').classList.toggle('selected', gender === 'female');
+    }
+
+    /* ----------------------------------------------------
+       리셋(초기화) 기능
+    ---------------------------------------------------- */
+    function resetBasicProfile() {
+      triggerHaptic(15);
+      currentGender = null;
+      document.getElementById('gender-male').classList.remove('selected');
+      document.getElementById('gender-female').classList.remove('selected');
+      document.getElementById('inputAge').value = '';
+      document.getElementById('inputHeight').value = '';
+      document.getElementById('inputWeight').value = '';
+      document.getElementById('paceMin').value = '';
+      document.getElementById('paceSec').value = '';
+      document.getElementById('weeklyDistance').value = '';
+    }
+
+    function resetMaxRecord(event) {
+      if (event) event.stopPropagation();
+      triggerHaptic(15);
+      document.getElementById('maxDistance').value = '';
+      document.getElementById('tmax-h').value = '';
+      document.getElementById('tmax-m').value = '';
+      document.getElementById('tmax-s').value = '';
+      document.getElementById('cad-max').value = '';
+      document.getElementById('pmax-min').value = '';
+      document.getElementById('pmax-sec').value = '';
+      document.getElementById('calc-max').textContent = '--';
+      document.getElementById('badge-summary-max').textContent = '--';
+    }
+
+    function resetFastestRecord(event) {
+      if (event) event.stopPropagation();
+      triggerHaptic(15);
+      document.getElementById('fastestDistance').value = '';
+      document.getElementById('tfastest-h').value = '';
+      document.getElementById('tfastest-m').value = '';
+      document.getElementById('tfastest-s').value = '';
+      document.getElementById('cad-fastest').value = '';
+      document.getElementById('pfastest-min').value = '';
+      document.getElementById('pfastest-sec').value = '';
+      document.getElementById('calc-fastest').textContent = '--';
+      document.getElementById('badge-summary-fastest').textContent = '--';
     }
 
     /* ----------------------------------------------------
@@ -1015,13 +1098,13 @@
       const profileData = {
         gender: currentGender,
         age: document.getElementById('inputAge').value,
-        height: parseInt(document.getElementById('inputHeight').value || 0, 10),
-        weight: parseInt(document.getElementById('inputWeight').value || 0, 10),
+        height: document.getElementById('inputHeight').value ? parseInt(document.getElementById('inputHeight').value, 10) : '',
+        weight: document.getElementById('inputWeight').value ? parseInt(document.getElementById('inputWeight').value, 10) : '',
         paceMin: document.getElementById('paceMin').value,
         paceSec: document.getElementById('paceSec').value,
-        weeklyDistance: parseFloat(document.getElementById('weeklyDistance').value || 0).toFixed(2),
+        weeklyDistance: document.getElementById('weeklyDistance').value ? parseFloat(document.getElementById('weeklyDistance').value).toFixed(2) : '',
         maxRun: {
-          distance: parseFloat(document.getElementById('maxDistance').value || 0).toFixed(2),
+          distance: document.getElementById('maxDistance').value ? parseFloat(document.getElementById('maxDistance').value).toFixed(2) : '',
           h: document.getElementById('tmax-h').value,
           m: document.getElementById('tmax-m').value,
           s: document.getElementById('tmax-s').value,
@@ -1030,7 +1113,7 @@
           paceSec: document.getElementById('pmax-sec').value
         },
         fastestMaxRun: {
-          distance: parseFloat(document.getElementById('fastestDistance').value || 0).toFixed(2),
+          distance: document.getElementById('fastestDistance').value ? parseFloat(document.getElementById('fastestDistance').value).toFixed(2) : '',
           h: document.getElementById('tfastest-h').value,
           m: document.getElementById('tfastest-m').value,
           s: document.getElementById('tfastest-s').value,
@@ -1082,6 +1165,22 @@
     }
 
     window.onload = () => {
+      document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            input.blur();
+          }
+        });
+      });
+
+      document.body.addEventListener('click', (e) => {
+        if (!e.target.closest('input') && !e.target.closest('button')) {
+          if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            document.activeElement.blur();
+          }
+        }
+      });
+
       try {
         const saved = localStorage.getItem('matempa_user_profile');
         if (saved) {
