@@ -102,11 +102,12 @@
       position: relative;
     }
 
+    /* 헤더 패딩: 위쪽 여백을 조금 더 확보하여 글자가 잘리지 않도록 조정 */
     .card-header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.15rem 1.4rem;
+      padding: 1.25rem 1.4rem 1.15rem 1.4rem;
     }
 
     .card-header-left {
@@ -199,11 +200,12 @@
       padding: 0 1.4rem 1.6rem 1.4rem;
     }
 
-    /* 1. 케이던스 카드 (검정) - 최하위 레이어 (z-index: 7) */
+    /* 1. 케이던스 카드 (검정) - 최하단 레이어 (z-index: 7) */
     .card-black {
       background: #111315;
       color: #ffffff;
       z-index: 7;
+      margin-top: 0;
     }
     .card-black .card-summary-tag {
       color: #34c759;
@@ -309,11 +311,11 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 2. 사운드 튜닝 카드 (주황) - z-index: 8 */
+    /* 2. 사운드 튜닝 카드 (주황) - z-index: 8, 여백 -10px로 완화 */
     .card-orange {
       background: #e89553;
       color: #111111;
-      margin-top: -20px;
+      margin-top: -10px;
       z-index: 8;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
     }
@@ -361,11 +363,11 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 3. 리듬 미터 카드 (민트) - z-index: 9 */
+    /* 3. 리듬 미터 카드 (민트) - z-index: 9, 여백 -10px로 완화 */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
-      margin-top: -20px;
+      margin-top: -10px;
       z-index: 9;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
     }
@@ -432,11 +434,11 @@
       outline: none;
     }
 
-    /* 4. 인터벌 프리셋 카드 (화이트) - 최상위 덮는 레이어 (z-index: 10) */
+    /* 4. 인터벌 프리셋 카드 (화이트) - 최상단 덮는 레이어 (z-index: 10), 여백 -10px로 완화 */
     .card-white {
       background: #ffffff;
       color: #111111;
-      margin-top: -20px;
+      margin-top: -10px;
       z-index: 10;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
@@ -561,7 +563,7 @@
     <!-- 4단 스택 레이아웃 -->
     <div class="card-stack">
 
-      <!-- 1단: 케이던스 카드 (검정) - 최상단 배치, 계층상 맨 아래 레이어 -->
+      <!-- 1단: 케이던스 카드 (검정) -->
       <div class="stack-card card-black expanded" id="cardBlack" onclick="toggleCadenceCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -654,7 +656,7 @@
         </div>
       </div>
 
-      <!-- 4단: 인터벌 프리셋 카드 (화이트) - 최하단 배치, 계층상 맨 위 레이어 -->
+      <!-- 4단: 인터벌 프리셋 카드 (화이트) -->
       <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
