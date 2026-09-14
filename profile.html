@@ -320,6 +320,11 @@
       font-weight: 900;
       color: #111111;
     }
+    .pb-header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .pb-calc-badge {
       font-size: 0.72rem;
       font-weight: 800;
@@ -420,7 +425,7 @@
 
     <div class="cards-container">
 
-      <!-- 1. 기본 신체 프로필 & 주간 거리 (기본값 제거 및 Placeholder 적용) -->
+      <!-- 1. 기본 신체 프로필 & 주간 거리 -->
       <div class="profile-card" id="card-basic">
         <div class="card-title-box">
           <div class="header-text-group">
@@ -442,7 +447,7 @@
             <div class="form-group">
               <label class="form-label">나이 (Age)</label>
               <div class="input-wrapper">
-                <input type="number" id="inputAge" placeholder="예: 30" min="10" max="99" enterkeyhint="done">
+                <input type="number" id="inputAge" min="10" max="99" enterkeyhint="done">
                 <span class="input-unit">세</span>
               </div>
             </div>
@@ -452,14 +457,14 @@
             <div class="form-group">
               <label class="form-label">키 (Height)</label>
               <div class="input-wrapper">
-                <input type="number" id="inputHeight" placeholder="예: 175" min="120" max="230" step="1" enterkeyhint="done">
+                <input type="number" id="inputHeight" min="120" max="230" step="1" enterkeyhint="done">
                 <span class="input-unit">cm</span>
               </div>
             </div>
             <div class="form-group">
               <label class="form-label">몸무게 (Weight)</label>
               <div class="input-wrapper">
-                <input type="number" id="inputWeight" placeholder="예: 68" min="30" max="160" step="1" enterkeyhint="done">
+                <input type="number" id="inputWeight" min="30" max="160" step="1" enterkeyhint="done">
                 <span class="input-unit">kg</span>
               </div>
             </div>
@@ -470,12 +475,12 @@
               <label class="form-label">평균 페이스</label>
               <div class="pace-inputs-wrap">
                 <div class="pace-col">
-                  <input type="number" id="paceMin" placeholder="분" min="2" max="15" enterkeyhint="done">
+                  <input type="number" id="paceMin" min="2" max="15" enterkeyhint="done">
                   <span class="input-unit">분</span>
                 </div>
                 <span style="font-weight: 800; color: #8e8e93;">:</span>
                 <div class="pace-col">
-                  <input type="number" id="paceSec" placeholder="초" min="0" max="59" step="5" enterkeyhint="done">
+                  <input type="number" id="paceSec" min="0" max="59" step="5" enterkeyhint="done">
                   <span class="input-unit">초</span>
                 </div>
               </div>
@@ -483,7 +488,7 @@
             <div class="form-group">
               <label class="form-label">주간 러닝 거리</label>
               <div class="input-wrapper">
-                <input type="number" id="weeklyDistance" placeholder="0.00" min="0" max="300" step="0.01" enterkeyhint="done">
+                <input type="number" id="weeklyDistance" min="0" max="300" step="0.01" enterkeyhint="done">
                 <span class="input-unit">km</span>
               </div>
             </div>
@@ -493,16 +498,13 @@
 
       <!-- 2. 최장 거리 기록 -->
       <div class="profile-card collapsed" id="card-max">
-        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-max')">
+        <div class="card-title-box collapsible-header" onclick="toggleCard('card-max')">
           <div class="header-text-group">
             <h3>최장 거리 기록</h3>
             <p>개인 최대 완주 거리와 기록을 보관합니다.</p>
           </div>
           <div class="header-right-meta">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <button class="card-reset-btn" onclick="resetMaxRecord(event)">↺ 초기화</button>
-              <span class="toggle-arrow">▼</span>
-            </div>
+            <span class="toggle-arrow">▼</span>
             <span class="header-summary-badge" id="badge-summary-max">--</span>
           </div>
         </div>
@@ -511,11 +513,14 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최대 완주 세부 기록</span>
-              <span class="pb-calc-badge" id="calc-max">--</span>
+              <div class="pb-header-right">
+                <span class="pb-calc-badge" id="calc-max">--</span>
+                <button class="card-reset-btn" onclick="resetMaxRecord()">↺ 초기화</button>
+              </div>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
-                <input type="number" id="maxDistance" value="15.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onMaxDistanceOrTimeChange()" enterkeyhint="done">
+                <input type="number" id="maxDistance" min="0.01" max="250" step="0.01" oninput="onMaxDistanceOrTimeChange()" enterkeyhint="done">
                 <span class="input-unit">km</span>
               </div>
             </div>
@@ -547,16 +552,13 @@
 
       <!-- 3. 최단시간 최장거리 기록 -->
       <div class="profile-card collapsed" id="card-fastest-max">
-        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-fastest-max')">
+        <div class="card-title-box collapsible-header" onclick="toggleCard('card-fastest-max')">
           <div class="header-text-group">
             <h3>최단시간 최장거리 기록</h3>
             <p>가장 빠른 속도로 주파한 최장거리 기록입니다.</p>
           </div>
           <div class="header-right-meta">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <button class="card-reset-btn" onclick="resetFastestRecord(event)">↺ 초기화</button>
-              <span class="toggle-arrow">▼</span>
-            </div>
+            <span class="toggle-arrow">▼</span>
             <span class="header-summary-badge" id="badge-summary-fastest">--</span>
           </div>
         </div>
@@ -565,11 +567,14 @@
           <div class="distance-pb-block">
             <div class="pb-header">
               <span class="pb-dist-tag">최단시간 완주 기록</span>
-              <span class="pb-calc-badge" id="calc-fastest">--</span>
+              <div class="pb-header-right">
+                <span class="pb-calc-badge" id="calc-fastest">--</span>
+                <button class="card-reset-btn" onclick="resetFastestRecord()">↺ 초기화</button>
+              </div>
             </div>
             <div class="form-group">
               <div class="input-wrapper">
-                <input type="number" id="fastestDistance" value="10.00" min="0.01" max="250" step="0.01" placeholder="거리 입력" oninput="onFastestDistanceOrTimeChange()" enterkeyhint="done">
+                <input type="number" id="fastestDistance" min="0.01" max="250" step="0.01" oninput="onFastestDistanceOrTimeChange()" enterkeyhint="done">
                 <span class="input-unit">km</span>
               </div>
             </div>
@@ -601,7 +606,7 @@
 
       <!-- 4. 대회별 PB 기록 -->
       <div class="profile-card collapsed" id="card-pb">
-        <div class="card-title-box collapsible-header" onclick="handleCardClick(event, 'card-pb')">
+        <div class="card-title-box collapsible-header" onclick="toggleCard('card-pb')">
           <div class="header-text-group">
             <h3>대회별 PB 기록</h3>
             <p>시간과 페이스 변경 시 상호 자동 연동 계산됩니다.</p>
@@ -743,7 +748,7 @@
   </div>
 
   <script>
-    let currentGender = null; // 초기 성별 미선택 상태
+    let currentGender = null;
 
     function formatPace(totalSec, distKm) {
       if (distKm <= 0 || totalSec <= 0) return "--'--\"";
@@ -762,11 +767,6 @@
       const card = document.getElementById(cardId);
       card.classList.toggle('collapsed');
       updateAllSummaries();
-    }
-
-    function handleCardClick(event, cardId) {
-      if (event.target.closest('.card-reset-btn')) return;
-      toggleCard(cardId);
     }
 
     function setGender(gender) {
@@ -792,8 +792,7 @@
       document.getElementById('weeklyDistance').value = '';
     }
 
-    function resetMaxRecord(event) {
-      if (event) event.stopPropagation();
+    function resetMaxRecord() {
       triggerHaptic(15);
       document.getElementById('maxDistance').value = '';
       document.getElementById('tmax-h').value = '';
@@ -806,8 +805,7 @@
       document.getElementById('badge-summary-max').textContent = '--';
     }
 
-    function resetFastestRecord(event) {
-      if (event) event.stopPropagation();
+    function resetFastestRecord() {
       triggerHaptic(15);
       document.getElementById('fastestDistance').value = '';
       document.getElementById('tfastest-h').value = '';
