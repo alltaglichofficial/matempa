@@ -280,6 +280,11 @@
     }
 
     .watch-indicators { display: flex; gap: 8px; margin-bottom: 2px; }
+    .run-sound-controls {
+      margin-top: 10px;
+      margin-bottom: 2px;
+      width: min(92%, 360px);
+    }
     .watch-ind-step {
       width: 24px;
       height: 4px;
@@ -434,20 +439,6 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 인라인 실시간 사운드 조절 바 -->
-      <div class="inline-sound-control-card">
-        <div class="sound-row">
-          <span class="sound-label">VOL</span>
-          <input type="range" class="inline-slider" id="inlineVolSlider" min="0" max="100" value="100" oninput="updateInlineSound()">
-          <span class="sound-value-text" id="inlineVolText">100%</span>
-        </div>
-        <div class="sound-row">
-          <span class="sound-label">PITCH</span>
-          <input type="range" class="inline-slider" id="inlinePitchSlider" min="50" max="150" value="100" oninput="updateInlineSound()">
-          <span class="sound-value-text" id="inlinePitchText">1.0x</span>
-        </div>
-      </div>
-
       <!-- 케이던스 및 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
@@ -481,6 +472,20 @@
         <div class="watch-ind-step" id="ind-1"></div>
         <div class="watch-ind-step" id="ind-2"></div>
         <div class="watch-ind-step" id="ind-3"></div>
+      </div>
+
+      <!-- 깜빡이 아래 실시간 사운드 조절 -->
+      <div class="inline-sound-control-card run-sound-controls">
+        <div class="sound-row">
+          <span class="sound-label">VOL</span>
+          <input type="range" class="inline-slider" id="inlineVolSlider" min="0" max="100" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlineVolText">100%</span>
+        </div>
+        <div class="sound-row">
+          <span class="sound-label">PITCH</span>
+          <input type="range" class="inline-slider" id="inlinePitchSlider" min="50" max="150" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlinePitchText">1.0x</span>
+        </div>
       </div>
     </div>
 
@@ -533,15 +538,25 @@
    * - GPS가 오래 끊긴 상태에서는 거리 변화만으로 자동 일시정지하지 않음
    */
   const GPS_STALE_FOR_FALLBACK_MS = 5000;
-  const AUTO_PAUSE_CONFIRM_MS = 6000;
   const MIN_VALID_RUN_SPEED = 0.7;
-  const RESUME_GPS_DISTANCE_M = 4.0;
   const MIN_GPS_DISTANCE_M = 1.2;
   const MAX_GPS_DISTANCE_M = 60.0;
   const GPS_MAX_ACCURACY_M = 25.0;
 
   let autoPauseIdleSince = 0;
   let pauseAnchorCoords = null;
+
+  // GPS 기반 실제 정지 판정
+  let stationarySince = 0;
+  let lastMeaningfulMovementTime = 0;
+  let lastGpsPosition = null;
+  let lastGpsPositionTime = 0;
+  let lastGpsSpeed = 0;
+
+  // Nike Run Club 스타일에 가깝게: 짧게 멈춘 뒤 자동 일시정지
+  const AUTO_PAUSE_CONFIRM_MS = 3500;
+  const GPS_STATIONARY_RADIUS_M = 3.0;
+  const GPS_RESUME_DISTANCE_M = 4.0;
 
   let currentStepIndex = 0;
   let currentBeatIndex = 0;
@@ -675,7 +690,9 @@
 
     isAutoPausedNow = true;
     autoPauseIdleSince = 0;
-    pauseAnchorCoords = lastCoords ? { ...lastCoords } : null;
+    pauseAnchorCoords = lastGpsPosition
+      ? { ...lastGpsPosition }
+      : (lastCoords ? { ...lastCoords } : null);
 
     autoPauseStatusPill.style.display = 'inline-block';
 
@@ -830,9 +847,6 @@
         const coords = position.coords;
         const now = performance.now();
 
-        lastGpsUpdateTime = now;
-
-        // 정확도가 너무 낮은 GPS는 거리 계산에는 사용하지 않는다.
         const accuracy = Number(coords.accuracy);
         if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > GPS_MAX_ACCURACY_M) {
           return;
@@ -843,23 +857,48 @@
             ? coords.speed
             : 0;
 
-        let gpsMovedMeters = 0;
+        let movedMeters = 0;
+        let positionIntervalSec = 0;
 
-        if (lastCoords) {
-          gpsMovedMeters = calculateDistanceMeters(
-            lastCoords.latitude,
-            lastCoords.longitude,
+        if (lastGpsPosition) {
+          movedMeters = calculateDistanceMeters(
+            lastGpsPosition.latitude,
+            lastGpsPosition.longitude,
             coords.latitude,
             coords.longitude
           );
+
+          positionIntervalSec =
+            (now - lastGpsPositionTime) / 1000;
+        }
+
+        lastGpsUpdateTime = now;
+        lastGpsSpeed = speed;
+
+        /*
+         * 핵심:
+         * "watchPosition이 계속 들어온다"는 것은 움직이고 있다는 뜻이 아니다.
+         * 기존 코드는 GPS가 1초마다 들어오면 lastGpsUpdateTime이 계속 갱신되어
+         * 가만히 있어도 AUTO PAUSE가 절대 실행되지 않을 수 있었다.
+         *
+         * 이제는 실제 위치 이동량 + GPS speed를 이용해 정지 여부를 판단한다.
+         */
+        const gpsMoving =
+          speed >= MIN_VALID_RUN_SPEED ||
+          movedMeters >= GPS_STATIONARY_RADIUS_M;
+
+        if (gpsMoving) {
+          stationarySince = 0;
+          lastMeaningfulMovementTime = now;
+        } else {
+          if (stationarySince === 0) {
+            stationarySince = now;
+          }
         }
 
         /*
-         * 자동 일시정지 상태:
-         * - GPS가 실제로 움직이거나
-         * - GPS 속도가 충분하거나
-         * - 모션 센서가 다시 발걸음을 감지하면
-         * 재개할 수 있다.
+         * 자동 일시정지 중이면 GPS로 실제 이동이 시작됐는지 확인.
+         * 정지 상태에서 폰을 살짝 흔드는 정도는 재개 조건으로 사용하지 않는다.
          */
         if (isAutoPausedNow) {
           const anchorMoved = pauseAnchorCoords
@@ -869,81 +908,84 @@
                 coords.latitude,
                 coords.longitude
               )
-            : gpsMovedMeters;
+            : movedMeters;
 
           if (
-            anchorMoved >= RESUME_GPS_DISTANCE_M &&
+            anchorMoved >= GPS_RESUME_DISTANCE_M &&
             speed >= MIN_VALID_RUN_SPEED
           ) {
             resumeFromAutoPause();
-          } else {
-            lastCoords = {
-              latitude: coords.latitude,
-              longitude: coords.longitude
-            };
-            lastGoodGpsTime = now;
-            return;
           }
+
+          lastGpsPosition = {
+            latitude: coords.latitude,
+            longitude: coords.longitude
+          };
+          lastGpsPositionTime = now;
+          return;
         }
 
         /*
-         * GPS 거리 누적:
-         * 너무 작은 움직임은 GPS 흔들림으로 보고 무시.
-         * 너무 큰 점프도 무시.
+         * 거리 누적:
+         * GPS를 거리의 1차 기준으로 사용.
+         * 아주 작은 GPS 흔들림은 거리에서 제외.
          */
         if (
-          lastCoords &&
-          gpsMovedMeters >= MIN_GPS_DISTANCE_M &&
-          gpsMovedMeters <= MAX_GPS_DISTANCE_M
+          lastGpsPosition &&
+          movedMeters >= MIN_GPS_DISTANCE_M &&
+          movedMeters <= MAX_GPS_DISTANCE_M
         ) {
-          /*
-           * 속도 정보가 없는 기기에서도 GPS 자체의 이동은 허용.
-           * 단, 매우 큰 순간 이동은 위에서 이미 차단한다.
-           */
-          addDistance(gpsMovedMeters);
+          addDistance(movedMeters);
         }
 
+        /*
+         * 페이스:
+         * 실제 GPS speed가 있을 때만 갱신.
+         * 멈추면 즉시 0으로 취급해서 이전의 빠른 속도가 남지 않도록 한다.
+         */
         if (speed >= MIN_VALID_RUN_SPEED && speed <= 8.5) {
           recentSpeeds.push(speed);
           if (recentSpeeds.length > 5) recentSpeeds.shift();
 
           currentCalculatedSpeed =
-            recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+            recentSpeeds.reduce((a, b) => a + b, 0) /
+            recentSpeeds.length;
 
           updatePaceFromSpeed(currentCalculatedSpeed);
-        } else if (gpsMovedMeters >= MIN_GPS_DISTANCE_M) {
-          // coords.speed가 비어 있어도 최근 GPS 이동으로 대략적인 페이스 계산
-          const elapsedGpsSec = lastGoodGpsTime > 0
-            ? (now - lastGoodGpsTime) / 1000
-            : 0;
-
-          if (elapsedGpsSec > 0.5 && elapsedGpsSec < 15) {
-            const derivedSpeed = gpsMovedMeters / elapsedGpsSec;
-            if (derivedSpeed >= MIN_VALID_RUN_SPEED && derivedSpeed <= 8.5) {
-              recentSpeeds.push(derivedSpeed);
-              if (recentSpeeds.length > 5) recentSpeeds.shift();
-
-              currentCalculatedSpeed =
-                recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
-
-              updatePaceFromSpeed(currentCalculatedSpeed);
-            }
-          }
-        } else if (now - lastGpsUpdateTime > 4000) {
-          recentSpeeds = [];
+        } else if (!gpsMoving) {
           currentCalculatedSpeed = 0;
+          recentSpeeds = [];
           livePaceDisplay.textContent = `--'--"`;
+        } else if (
+          positionIntervalSec > 0.5 &&
+          positionIntervalSec < 15 &&
+          movedMeters >= GPS_STATIONARY_RADIUS_M
+        ) {
+          const derivedSpeed = movedMeters / positionIntervalSec;
+
+          if (
+            derivedSpeed >= MIN_VALID_RUN_SPEED &&
+            derivedSpeed <= 8.5
+          ) {
+            recentSpeeds.push(derivedSpeed);
+            if (recentSpeeds.length > 5) recentSpeeds.shift();
+
+            currentCalculatedSpeed =
+              recentSpeeds.reduce((a, b) => a + b, 0) /
+              recentSpeeds.length;
+
+            updatePaceFromSpeed(currentCalculatedSpeed);
+          }
         }
 
-        lastCoords = {
+        lastGpsPosition = {
           latitude: coords.latitude,
           longitude: coords.longitude
         };
-        lastGoodGpsTime = now;
+        lastGpsPositionTime = now;
       },
       (err) => {
-        // GPS 오류가 나더라도 러닝 자체를 중단하지 않는다.
-        // 모션 센서 fallback이 계속 작동할 수 있다.
+        // GPS 오류가 나도 러닝 자체는 중단하지 않는다.
       },
       {
         enableHighAccuracy: true,
@@ -961,9 +1003,14 @@
 
     recentSpeeds = [];
     lastCoords = null;
+    lastGpsPosition = null;
     pauseAnchorCoords = null;
     lastGpsUpdateTime = 0;
     lastGoodGpsTime = 0;
+    lastGpsPositionTime = 0;
+    lastGpsSpeed = 0;
+    stationarySince = 0;
+    lastMeaningfulMovementTime = 0;
   }
 
   function initMotionSensor() {
@@ -1043,10 +1090,6 @@
                 livePaceDisplay.textContent = formatPace(secPerKm);
               }
 
-              // 자동 일시정지 중 발걸음이 다시 잡히면 즉시 재개
-              if (isAutoPausedNow) {
-                resumeFromAutoPause();
-              }
             }
           }
         }
@@ -1441,38 +1484,44 @@
    * 3) GPS와 모션 모두 일정 시간 동안 정지 상태일 때만 PAUSE
    */
   function checkAutoPauseState(now) {
-    if (!isAutoPauseEnabled || !isRunning || isAutoPausedNow) return;
+    if (!isAutoPauseEnabled || !isRunning) return;
 
-    const gpsFresh =
+    /*
+     * 자동 일시정지 상태에서는 별도 판단을 하지 않는다.
+     * GPS가 실제 이동을 확인하면 initGeolocation()에서 resumeFromAutoPause().
+     */
+    if (isAutoPausedNow) return;
+
+    /*
+     * GPS가 살아 있고,
+     * 3m 이상 이동하지 않았으며,
+     * GPS speed도 0.7m/s 미만이면 실제 정지 후보.
+     *
+     * 여기서 "GPS가 업데이트되고 있느냐"가 아니라
+     * "GPS가 실제로 움직임을 보고 있느냐"를 판단한다.
+     */
+    const gpsAvailable =
       lastGpsUpdateTime > 0 &&
-      now - lastGpsUpdateTime <= 4000;
+      now - lastGpsUpdateTime <= 5000;
 
-    const motionActive =
-      lastStepTime > 0 &&
-      now - lastStepTime <= 2500 &&
-      currentCalculatedSpm >= 110;
-
-    const speedActive =
-      currentCalculatedSpeed >= MIN_VALID_RUN_SPEED;
-
-    // GPS가 최근이고 속도/모션이 잡히면 확실히 움직이는 상태
-    if ((gpsFresh && speedActive) || motionActive) {
-      autoPauseIdleSince = 0;
+    if (!gpsAvailable) {
+      // GPS가 끊긴 동안에는 자동 PAUSE를 걸지 않는다.
+      stationarySince = 0;
       return;
     }
 
-    // GPS가 오래 끊겼다면 "GPS 정지"만으로 자동 일시정지하지 않는다.
-    if (!gpsFresh && !motionActive) {
-      autoPauseIdleSince = 0;
+    const gpsStationary =
+      lastGpsSpeed < MIN_VALID_RUN_SPEED &&
+      stationarySince > 0;
+
+    if (!gpsStationary) {
+      stationarySince = 0;
       return;
     }
 
-    // GPS가 살아있고, 모션도 없고, 속도도 없을 때만 정지 후보
-    if (autoPauseIdleSince === 0) {
-      autoPauseIdleSince = now;
-    }
-
-    if (now - autoPauseIdleSince >= AUTO_PAUSE_CONFIRM_MS) {
+    if (
+      now - stationarySince >= AUTO_PAUSE_CONFIRM_MS
+    ) {
       triggerAutoPause();
     }
   }
@@ -1535,6 +1584,8 @@
     startTimeMs = now;
     lastDistanceTickTime = now;
     autoPauseIdleSince = 0;
+    stationarySince = 0;
+    lastMeaningfulMovementTime = now;
 
     clockTimer = setInterval(() => {
       const currentNow = performance.now();
