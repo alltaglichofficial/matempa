@@ -442,7 +442,7 @@
       position: relative;
     }
     .white-unit-input {
-      width: 46px;
+      width: 44px;
       height: 32px;
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.12);
@@ -465,6 +465,25 @@
       font-weight: 800;
       color: #8e8e93;
       pointer-events: none;
+    }
+
+    /* 분/초 설정 전용 확인 버튼 */
+    .btn-time-confirm {
+      height: 32px;
+      padding: 0 10px;
+      background: #111111;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-time-confirm:active {
+      transform: scale(0.94);
+      background: #333333;
     }
 
     .steps-list-wrap {
@@ -507,29 +526,6 @@
     }
     .step-card-item.drag-over-target {
       border-top: 2.5px dashed #111111 !important;
-    }
-
-    /* 하단 구간 목록 내 개별 분/초 조절 버튼 스타일 */
-    .step-time-adjuster {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      margin-top: 5px;
-    }
-    .time-adj-btn {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 6px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #333333;
-      padding: 2px 5px;
-      cursor: pointer;
-      transition: background 0.1s ease;
-    }
-    .time-adj-btn:active {
-      background: #e5e5ea;
-      transform: scale(0.95);
     }
 
     .step-btn-group {
@@ -713,7 +709,7 @@
         <div class="card-accordion-collapse">
           <div class="card-expand-body" onclick="event.stopPropagation()">
             
-            <!-- 시간 설정 바: 왼쪽(요약) + 오른쪽(기본 입력 분/초) -->
+            <!-- 시간 설정 바: 좌측 요약 + 우측 분/초 입력창 및 [설정] 버튼 -->
             <div class="interval-duration-box">
               <div class="total-stat-summary-badge" id="totalStatSummaryBadge">
                 <span id="statZones">총 1구간</span>
@@ -729,6 +725,7 @@
                   <input type="number" class="white-unit-input" id="durationSecInput" value="0" min="0" max="59">
                   <span class="custom-unit-text">초</span>
                 </div>
+                <button class="btn-time-confirm" id="confirmTimeBtn" title="선택된 구간에 시간 적용">설정</button>
               </div>
             </div>
 
@@ -784,6 +781,7 @@
     
     const durationMinInput = document.getElementById('durationMinInput');
     const durationSecInput = document.getElementById('durationSecInput');
+    const confirmTimeBtn = document.getElementById('confirmTimeBtn');
     const statZones = document.getElementById('statZones');
     const statTime = document.getElementById('statTime');
 
@@ -1128,30 +1126,6 @@
       saveRoutine();
     };
 
-    // 하단 리스트의 개별 구간 시간(초 단위 delta) 증감 처리
-    window.adjustStepDuration = function(idx, deltaSec) {
-      playClickSound();
-      triggerHaptic(15);
-      if (!routine[idx]) return;
-
-      let currentSec = parseInt(routine[idx].durationSec) || 0;
-      let updatedSec = currentSec + deltaSec;
-      if (updatedSec < 1) updatedSec = 1; // 최소 1초 이상 유지
-
-      routine[idx].durationSec = updatedSec;
-
-      // 만약 조작한 행이 현재 선택된 행이라면 상단 분/초 입력창에도 함께 반영
-      if (selectedStepIndex === idx) {
-        const m = Math.floor(updatedSec / 60);
-        const s = updatedSec % 60;
-        durationMinInput.value = m;
-        durationSecInput.value = s;
-        durationSec = updatedSec;
-      }
-
-      saveRoutine();
-    };
-
     let dragSrcIndex = null;
     let longPressTimer = null;
     let isLongPressActive = false;
@@ -1176,17 +1150,8 @@
 
         item.innerHTML = `
           <div style="flex: 1;">
-            <div>
-              <b>${idx + 1}구간</b>: <span style="font-weight:800; color:#111;">${timeText}</span> (${step.bpm} BPM)
-              <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
-            </div>
-            <!-- 하단 구간별 분, 초 조절 버튼 그룹 (상단 추가 기능과 완전 분리) -->
-            <div class="step-time-adjuster" onclick="event.stopPropagation();">
-              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, -60)">-1분</button>
-              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, 60)">+1분</button>
-              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, -10)">-10초</button>
-              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, 10)">+10초</button>
-            </div>
+            <b>${idx + 1}구간</b>: <span style="font-weight:800; color:#111;">${timeText}</span> (${step.bpm} BPM)
+            <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
           </div>
           <div class="step-btn-group">
             <span class="step-icon-btn delete" title="구간 삭제" onclick="event.stopPropagation(); removeStep(${idx});">&times;</span>
@@ -1344,6 +1309,19 @@
     durationMinInput.addEventListener('input', syncDurationFromInputs);
     durationSecInput.addEventListener('input', syncDurationFromInputs);
 
+    // 분, 초 입력란 우측 [설정] 버튼 클릭 이벤트
+    confirmTimeBtn.onclick = () => {
+      playClickSound();
+      triggerHaptic(20);
+      if (routine.length === 0 || selectedStepIndex === null || !routine[selectedStepIndex]) {
+        alert("시간을 적용할 구간을 먼저 목록에서 선택해주세요.");
+        return;
+      }
+      syncDurationFromInputs();
+      routine[selectedStepIndex].durationSec = durationSec;
+      saveRoutine();
+    };
+
     function setSound(type) {
       playClickSound();
       triggerHaptic(15);
@@ -1380,7 +1358,7 @@
       runTestFourBeats();
     };
 
-    // 상단 [+ 추가] 버튼: 현재 설정된 분/초 값을 사용하여 새 구간 추가
+    // 상단 [+ 추가] 버튼
     document.getElementById('addStepBtn').onclick = () => {
       playClickSound();
       triggerHaptic(25);
@@ -1400,7 +1378,7 @@
       updateSummaries();
     };
 
-    // 상단 [수정] 버튼: 현재 설정된 BPM, 사운드, 분/초 값을 선택된 구간에 일괄 반영
+    // 상단 [수정] 버튼
     document.getElementById('updateStepBtn').onclick = () => {
       playClickSound();
       triggerHaptic(20);
