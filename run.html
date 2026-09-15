@@ -44,43 +44,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.8rem;
-    }
-    .header-left-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      margin-bottom: 0.6rem;
     }
     .routine-name-badge {
       font-size: 0.85rem;
       font-weight: 800;
       color: #8e8e93;
       letter-spacing: 0.5px;
-    }
-
-    .header-btn-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sound-opt-trigger-btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.12s ease;
-    }
-    .sound-opt-trigger-btn:active {
-      transform: scale(0.92);
-      background: rgba(255, 255, 255, 0.18);
     }
 
     .auto-pause-toggle-btn {
@@ -116,10 +86,10 @@
     /* 대형 워치 메인 페이스 */
     .watch-display-large {
       width: 100%;
-      height: 475px;
+      height: 505px;
       background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
       border-radius: 46px;
-      padding: 22px 18px 18px 18px;
+      padding: 18px 16px 16px 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -158,13 +128,64 @@
     }
     @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
 
+    /* 화면 인라인 사운드 조절 바 (모달 없이 화면에서 즉시 조절) */
+    .inline-sound-control-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .sound-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sound-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #8e8e93;
+      min-width: 44px;
+    }
+    .sound-value-text {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #34c759;
+      min-width: 32px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .inline-slider {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.16);
+      outline: none;
+    }
+    .inline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
     /* 케이던스 및 페이스 3열 비교 그리드 */
     .cadence-comparison-grid {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 0.2rem;
+      margin-top: 0.1rem;
       padding: 0 4px;
     }
 
@@ -175,7 +196,7 @@
       flex: 1;
     }
     .cadence-num {
-      font-size: 2.85rem;
+      font-size: 2.6rem;
       font-weight: 900;
       line-height: 0.95;
       font-variant-numeric: tabular-nums;
@@ -191,22 +212,22 @@
     }
     .cadence-num.pace {
       color: #ff9f0a;
-      font-size: 2.5rem;
+      font-size: 2.35rem;
       letter-spacing: -1px;
       filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25));
     }
 
     .cadence-col-label {
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       font-weight: 800;
       letter-spacing: 0.8px;
-      margin-top: 6px;
+      margin-top: 4px;
       color: #8e8e93;
       white-space: nowrap;
     }
     .cadence-divider {
       width: 1px;
-      height: 46px;
+      height: 42px;
       background: rgba(255, 255, 255, 0.12);
     }
 
@@ -216,10 +237,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin: 0.2rem 0;
+      margin: 0.1rem 0;
     }
     .distance-hero-num {
-      font-size: 3.5rem;
+      font-size: 3.4rem;
       font-weight: 900;
       line-height: 0.9;
       color: #007aff;
@@ -228,15 +249,15 @@
       filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35));
     }
     .distance-hero-unit {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 900;
       color: #8e8e93;
       letter-spacing: 1.5px;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
     .step-progress-text {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: #a0a0a5;
       font-weight: 600;
     }
@@ -244,13 +265,13 @@
     .timer-capsule-large {
       background: rgba(255, 255, 255, 0.06);
       width: 220px;
-      height: 42px;
-      border-radius: 21px;
+      height: 40px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
@@ -271,34 +292,80 @@
       box-shadow: 0 0 12px rgba(52, 199, 89, 0.9);
     }
 
-    /* NRC 스타일 원형 홀드(Long Press) 제어 바 */
-    .run-controls-nrc {
+    /* 하단 러닝 제어 영역 */
+    .controls-wrapper {
+      width: 100%;
+      height: 76px;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 상태 1: 러닝 진행 중 (원클릭 즉시 일시정지 바) */
+    .running-bar {
       width: 100%;
       display: flex;
-      align-items: center;
-      justify-content: space-around;
-      margin-top: 1.2rem;
-      padding: 0 10px;
     }
-
-    .nrc-hold-item {
+    .single-tap-pause-btn {
+      width: 100%;
+      height: 58px;
+      background: #ffffff;
+      color: #111111;
+      border: none;
+      border-radius: 29px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.12);
+      transition: transform 0.12s ease;
+    }
+    .single-tap-pause-btn:active { transform: scale(0.96); }
+
+    /* 상태 2: 일시정지 중 (좌: 즉시 진행 / 우: 1.25초 홀드 종료) */
+    .paused-split-bar {
+      width: 100%;
+      display: none; /* JS로 토글 */
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    .nrc-hold-circle-wrap {
+    /* 왼쪽 즉시 진행(재개) 버튼 */
+    .btn-quick-resume {
+      flex: 1.2;
+      height: 58px;
+      background: #34c759;
+      color: #ffffff;
+      border: none;
+      border-radius: 29px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(52, 199, 89, 0.25);
+      transition: transform 0.12s ease;
+    }
+    .btn-quick-resume:active { transform: scale(0.95); }
+
+    /* 오른쪽 1.25초 홀드 Finish 버튼 */
+    .finish-hold-wrap {
       position: relative;
-      width: 76px;
-      height: 76px;
+      width: 68px;
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: center;
       touch-action: none;
     }
-
-    .nrc-svg {
+    .finish-svg {
       position: absolute;
       top: 0;
       left: 0;
@@ -307,139 +374,42 @@
       transform: rotate(-90deg);
       pointer-events: none;
     }
-
-    .nrc-circle-track {
+    .finish-track {
       fill: none;
       stroke: rgba(255, 255, 255, 0.12);
       stroke-width: 4;
     }
-
-    .nrc-circle-progress {
+    .finish-progress {
       fill: none;
+      stroke: #ff3b30;
       stroke-width: 4;
       stroke-linecap: round;
-      stroke-dasharray: 213.63;
-      stroke-dashoffset: 213.63;
+      stroke-dasharray: 188.49; /* 2 * PI * 30 */
+      stroke-dashoffset: 188.49;
       transition: stroke-dashoffset 0.04s linear;
     }
-    .nrc-circle-progress.pause-ring { stroke: #ff9500; }
-    .nrc-circle-progress.resume-ring { stroke: #34c759; }
-    .nrc-circle-progress.finish-ring { stroke: #ff3b30; }
-
-    .nrc-circle-btn {
-      width: 64px;
-      height: 64px;
+    .finish-core-btn {
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      border: none;
-      font-size: 0.8rem;
+      border: 1px solid rgba(255, 59, 48, 0.4);
+      background: rgba(255, 59, 48, 0.18);
+      color: #ff3b30;
+      font-size: 0.72rem;
       font-weight: 900;
       cursor: pointer;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: transform 0.1s ease;
     }
-    .nrc-circle-btn:active { transform: scale(0.92); }
-
-    .btn-nrc-pause { background: #ffffff; color: #111111; }
-    .btn-nrc-pause.paused { background: #34c759; color: #ffffff; }
-    .btn-nrc-finish { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.35); }
-
-    .nrc-hold-hint {
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: #8e8e93;
-      letter-spacing: 0.5px;
-    }
-
-    /* 사운드 모달 */
-    .sound-modal-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 36px;
-      display: none;
-      align-items: flex-end;
-      z-index: 50;
-      overflow: hidden;
-    }
-    .sound-modal-overlay.open {
-      display: flex;
-    }
-    .sound-modal-content {
-      width: 100%;
-      background: #1c1c1e;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 32px 32px 0 0;
-      padding: 1.2rem 1.4rem 1.6rem 1.4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
-    }
-    .sound-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-    .sound-modal-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .sound-modal-close-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: #8e8e93;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .sound-modal-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .sound-label-wrap {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: #8e8e93;
-    }
-    .sound-label-wrap span:last-child {
-      color: #34c759;
-      font-variant-numeric: tabular-nums;
-    }
-    .sound-slider {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.16);
-      outline: none;
-    }
-    .sound-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #ffffff;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    .finish-core-btn:active { transform: scale(0.92); }
+    .finish-sub-text {
+      font-size: 0.5rem;
+      opacity: 0.8;
+      margin-top: 1px;
     }
   </style>
 </head>
@@ -452,16 +422,13 @@
       <div class="header-left-wrap">
         <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
       </div>
-      <div class="header-btn-group">
-        <button class="sound-opt-trigger-btn" id="soundModalOpenBtn" onclick="openSoundModal()" title="러닝 사운드 설정">🔊</button>
-        <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
-          <span class="auto-pause-dot"></span>
-          <span id="autoPauseText">AUTO PAUSE ON</span>
-        </button>
-      </div>
+      <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
+        <span class="auto-pause-dot"></span>
+        <span id="autoPauseText">AUTO PAUSE ON</span>
+      </button>
     </div>
 
-    <!-- 대형 워치 페이스 -->
+    <!-- 대형 워치 메인 페이스 -->
     <div class="watch-display-large">
       <div class="top-stat-row">
         <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
@@ -469,6 +436,21 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
+      <!-- 인라인 실시간 사운드 제어 바 (화면에서 바로 조절) -->
+      <div class="inline-sound-control-card">
+        <div class="sound-row">
+          <span class="sound-label">VOL</span>
+          <input type="range" class="inline-slider" id="inlineVolSlider" min="0" max="100" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlineVolText">100%</span>
+        </div>
+        <div class="sound-row">
+          <span class="sound-label">PITCH</span>
+          <input type="range" class="inline-slider" id="inlinePitchSlider" min="50" max="150" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlinePitchText">1.0x</span>
+        </div>
+      </div>
+
+      <!-- 케이던스 및 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -486,11 +468,13 @@
         </div>
       </div>
 
+      <!-- 대형 메인 이동 거리(KM) -->
       <div class="distance-hero-wrap">
         <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
         <div class="distance-hero-unit">KILOMETERS</div>
       </div>
 
+      <!-- 구간 남은 시간 및 전체 타이머 -->
       <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
       <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
 
@@ -502,55 +486,26 @@
       </div>
     </div>
 
-    <!-- NRC 스타일 롱프레스 제어 바 -->
-    <div class="run-controls-nrc">
-      <div class="nrc-hold-item">
-        <div class="nrc-hold-circle-wrap">
-          <svg class="nrc-svg" viewBox="0 0 80 80">
-            <circle class="nrc-circle-track" cx="40" cy="40" r="34"></circle>
-            <circle class="nrc-circle-progress pause-ring" id="pauseHoldProgress" cx="40" cy="40" r="34"></circle>
-          </svg>
-          <button class="nrc-circle-btn btn-nrc-pause" id="pauseHoldBtn">
-            <span id="pauseBtnText">PAUSE</span>
-          </button>
-        </div>
-        <span class="nrc-hold-hint">HOLD 1.2S</span>
+    <!-- 하단 러닝 제어 인터페이스 -->
+    <div class="controls-wrapper">
+      <!-- 1. 러닝 중: 원클릭 즉시 일시정지 버튼 -->
+      <div class="running-bar" id="runningBar">
+        <button class="single-tap-pause-btn" id="singleTapPauseBtn" onclick="onSingleTapPause()">PAUSE ||</button>
       </div>
 
-      <div class="nrc-hold-item">
-        <div class="nrc-hold-circle-wrap">
-          <svg class="nrc-svg" viewBox="0 0 80 80">
-            <circle class="nrc-circle-track" cx="40" cy="40" r="34"></circle>
-            <circle class="nrc-circle-progress finish-ring" id="finishHoldProgress" cx="40" cy="40" r="34"></circle>
+      <!-- 2. 일시정지 중: 좌(즉시 진행) / 우(1.25s 홀드 종료) -->
+      <div class="paused-split-bar" id="pausedSplitBar">
+        <button class="btn-quick-resume" onclick="onQuickResume()">RESUME ▶</button>
+        
+        <div class="finish-hold-wrap" id="finishHoldWrap">
+          <svg class="finish-svg" viewBox="0 0 68 68">
+            <circle class="finish-track" cx="34" cy="34" r="30"></circle>
+            <circle class="finish-progress" id="finishHoldProgress" cx="34" cy="34" r="30"></circle>
           </svg>
-          <button class="nrc-circle-btn btn-nrc-finish" id="finishHoldBtn">
+          <button class="finish-core-btn" id="finishHoldBtn">
             <span>FINISH</span>
+            <span class="finish-sub-text">1.25s</span>
           </button>
-        </div>
-        <span class="nrc-hold-hint">HOLD 1.2S</span>
-      </div>
-    </div>
-
-    <!-- 사운드 모달 -->
-    <div class="sound-modal-overlay" id="soundModalOverlay" onclick="closeSoundModal()">
-      <div class="sound-modal-content" onclick="event.stopPropagation()">
-        <div class="sound-modal-header">
-          <span class="sound-modal-title">Audio Output Control</span>
-          <button class="sound-modal-close-btn" onclick="closeSoundModal()">&times;</button>
-        </div>
-        <div class="sound-modal-row">
-          <div class="sound-label-wrap">
-            <span>VOLUME</span>
-            <span id="volumeValText">100%</span>
-          </div>
-          <input type="range" class="sound-slider" id="volumeSlider" min="0" max="100" value="100" oninput="updateSoundSettings()">
-        </div>
-        <div class="sound-modal-row">
-          <div class="sound-label-wrap">
-            <span>PITCH (TUNE)</span>
-            <span id="pitchValText">1.0x</span>
-          </div>
-          <input type="range" class="sound-slider" id="pitchSlider" min="50" max="150" value="100" oninput="updateSoundSettings()">
         </div>
       </div>
     </div>
@@ -565,22 +520,21 @@
     let isRunning = false;
     let isSystemInterrupted = false;
 
+    // 실시간 사운드 계수 (기본값)
     let runVolumeMultiplier = 1.0;
     let runPitchMultiplier = 1.0;
 
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
-    // --- 정밀 오토포즈 파라미터 (오작동 방지 핵심) ---
-    const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000; // 3초 정체 시 오토포즈
+    // --- 정밀 오토포즈 필터 파라미터 ---
+    const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000;
     let lastDistanceChangeTime = 0;
     let lastTrackedDistance = 0;
-    let pauseAnchorCoords = null;             // 포즈 걸렸을 당시의 고정 좌표
+    let pauseAnchorCoords = null;
 
-    // 최소 유효 이동 속도 (시속 약 2.5km/h = 0.7m/s 미만은 정지로 간주)
     const MIN_VALID_RUN_SPEED = 0.7; 
-    // 정지 상태에서 풀리기 위한 앵커 대비 최소 이동 거리 (GPS 튐 무시)
-    const RESUME_GPS_DISTANCE_M = 4.0; 
+    const RESUME_GPS_DISTANCE_M = 4.0;
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -599,12 +553,11 @@
     let lastDistanceTickTime = 0;
     let currentCalculatedSpeed = 0;
 
-    // 모션 센서 윈도우 필터
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
-    const STEP_THRESHOLD = 12.5;         // 손 떨림 무시를 위해 감도 상향
-    const MIN_STEP_INTERVAL_MS = 240;    // 분당 250스텝 초과 비정상 피크 차단
+    const STEP_THRESHOLD = 12.5;
+    const MIN_STEP_INTERVAL_MS = 240;
     let currentCalculatedSpm = 0;
 
     let geoWatchId = null;
@@ -635,40 +588,30 @@
     const runTimerDisplay = document.getElementById('runTimerDisplay');
     const silentAudioEl = document.getElementById('silentBackgroundAudio');
 
-    const pauseHoldBtn = document.getElementById('pauseHoldBtn');
-    const pauseBtnText = document.getElementById('pauseBtnText');
-    const pauseHoldProgress = document.getElementById('pauseHoldProgress');
+    const runningBar = document.getElementById('runningBar');
+    const pausedSplitBar = document.getElementById('pausedSplitBar');
     const finishHoldBtn = document.getElementById('finishHoldBtn');
     const finishHoldProgress = document.getElementById('finishHoldProgress');
 
-    const soundModalOverlay = document.getElementById('soundModalOverlay');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const pitchSlider = document.getElementById('pitchSlider');
-    const volumeValText = document.getElementById('volumeValText');
-    const pitchValText = document.getElementById('pitchValText');
+    const inlineVolSlider = document.getElementById('inlineVolSlider');
+    const inlinePitchSlider = document.getElementById('inlinePitchSlider');
+    const inlineVolText = document.getElementById('inlineVolText');
+    const inlinePitchText = document.getElementById('inlinePitchText');
 
     function triggerHaptic(duration = 20) {
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    function openSoundModal() {
-      triggerHaptic(15);
-      soundModalOverlay.classList.add('open');
-    }
-    function closeSoundModal() {
-      triggerHaptic(10);
-      soundModalOverlay.classList.remove('open');
-    }
-
-    function updateSoundSettings() {
-      const vol = parseInt(volumeSlider.value);
-      const pitch = parseInt(pitchSlider.value);
+    // --- 인라인 실시간 사운드 조절 로직 ---
+    function updateInlineSound() {
+      const vol = parseInt(inlineVolSlider.value);
+      const pitch = parseInt(inlinePitchSlider.value);
 
       runVolumeMultiplier = vol / 100;
       runPitchMultiplier = pitch / 100;
 
-      volumeValText.textContent = `${vol}%`;
-      pitchValText.textContent = `${(pitch / 100).toFixed(1)}x`;
+      inlineVolText.textContent = `${vol}%`;
+      inlinePitchText.textContent = `${(pitch / 100).toFixed(1)}x`;
 
       try {
         localStorage.setItem('matempa_run_vol', runVolumeMultiplier);
@@ -682,13 +625,13 @@
         const savedPitch = localStorage.getItem('matempa_run_pitch');
         if (savedVol !== null) {
           runVolumeMultiplier = parseFloat(savedVol);
-          volumeSlider.value = Math.round(runVolumeMultiplier * 100);
-          volumeValText.textContent = `${volumeSlider.value}%`;
+          inlineVolSlider.value = Math.round(runVolumeMultiplier * 100);
+          inlineVolText.textContent = `${inlineVolSlider.value}%`;
         }
         if (savedPitch !== null) {
           runPitchMultiplier = parseFloat(savedPitch);
-          pitchSlider.value = Math.round(runPitchMultiplier * 100);
-          pitchValText.textContent = `${runPitchMultiplier.toFixed(1)}x`;
+          inlinePitchSlider.value = Math.round(runPitchMultiplier * 100);
+          inlinePitchText.textContent = `${runPitchMultiplier.toFixed(1)}x`;
         }
       } catch(e) {}
     }
@@ -710,6 +653,7 @@
       pauseAnchorCoords = lastCoords ? { ...lastCoords } : null;
       autoPauseStatusPill.style.display = 'inline-block';
       pauseTimingAndBeats();
+      showPausedControlsUI();
     }
 
     function resumeFromAutoPause() {
@@ -720,11 +664,11 @@
       lastDistanceChangeTime = performance.now();
       lastTrackedDistance = totalDistanceMeters;
       resumeTimingAndBeats();
+      showRunningControlsUI();
     }
 
-    // 거리 누적 함수 (가짜 미세 변위 차단)
     function addDistance(meters) {
-      if (meters <= 0.05) return; // 5cm 이하 부동소수점 노이즈 무시
+      if (meters <= 0.05) return;
       totalDistanceMeters += meters;
       updateDistanceUI();
       lastDistanceChangeTime = performance.now();
@@ -801,34 +745,27 @@
             const now = performance.now();
             lastGpsUpdateTime = now;
 
-            // GPS 오차 반경이 20m를 넘으면 튀는 좌표이므로 무시
             if (coords.accuracy && coords.accuracy > 20) return;
-
             const speed = coords.speed !== null && !isNaN(coords.speed) ? coords.speed : 0;
 
-            // 1. 일시정지 상태일 때: 정지점(Anchor) 대비 확실히 4m 이상 멀어졌거나 유효 속도 도달 시에만 재개
             if (isAutoPausedNow) {
               let canResume = false;
               if (pauseAnchorCoords) {
-                const movedFromAnchor = calculateDistanceMeters(
+                const moved = calculateDistanceMeters(
                   pauseAnchorCoords.latitude, pauseAnchorCoords.longitude,
                   coords.latitude, coords.longitude
                 );
-                if (movedFromAnchor >= RESUME_GPS_DISTANCE_M && speed >= MIN_VALID_RUN_SPEED) {
+                if (moved >= RESUME_GPS_DISTANCE_M && speed >= MIN_VALID_RUN_SPEED) {
                   canResume = true;
                 }
               } else if (speed >= MIN_VALID_RUN_SPEED) {
                 canResume = true;
               }
 
-              if (canResume) {
-                resumeFromAutoPause();
-              } else {
-                return; // 가만히 서 있는 상태에서의 드리프트 누적 차단
-              }
+              if (canResume) resumeFromAutoPause();
+              else return;
             }
 
-            // 2. 정상 주행 시 거리 누적: 최소 1.5m 이상 이동했을 때만 거리 반영
             if (lastCoords) {
               const dist = calculateDistanceMeters(
                 lastCoords.latitude, lastCoords.longitude,
@@ -839,7 +776,6 @@
               }
             }
 
-            // 속도 및 페이스 계산
             if (speed >= MIN_VALID_RUN_SPEED) {
               recentSpeeds.push(speed);
               if (recentSpeeds.length > 5) recentSpeeds.shift();
@@ -888,37 +824,29 @@
 
     function handleDeviceMotion(event) {
       if (!isRunning) return;
-
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
 
       const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
       const now = performance.now();
 
-      // 발걸음 충격 감지 (임계값 강화)
       if (magnitude > STEP_THRESHOLD && lastAccelMagnitude <= STEP_THRESHOLD) {
         if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
           lastStepTime = now;
           recentStepTimes.push(now);
           recentStepTimes = recentStepTimes.filter(t => now - t <= 3500);
 
-          // 최근 3.5초 내에 3걸음 이상 연속으로 찍혔을 때만 실제 러닝/워킹으로 간주
           if (recentStepTimes.length >= 3) {
             const timeSpanSec = (recentStepTimes[recentStepTimes.length - 1] - recentStepTimes[0]) / 1000;
             const stepsCount = recentStepTimes.length - 1;
             const spm = Math.round((stepsCount / timeSpanSec) * 60);
 
-            // 유효 보행 케이던스(110 ~ 240)일 때만 통과
             if (spm >= 110 && spm <= 240) {
               currentCalculatedSpm = spm;
               liveCadenceDisplay.textContent = spm;
 
-              // 일시정지 상태였다면 확실한 연속 걸음 감지 시 해제
-              if (isAutoPausedNow) {
-                resumeFromAutoPause();
-              }
+              if (isAutoPausedNow) resumeFromAutoPause();
 
-              // GPS가 지연될 때 보폭 기반 거리 보충
               if (!isAutoPausedNow && now - lastGpsUpdateTime > 3500) {
                 const estimatedStride = Math.min(Math.max((spm / 180) * 0.95, 0.7), 1.25);
                 currentCalculatedSpeed = (spm / 60) * estimatedStride;
@@ -931,7 +859,6 @@
         }
       }
 
-      // 발걸음이 2.5초 이상 끊기면 케이던스 초기화
       if (now - lastStepTime > 2500) {
         liveCadenceDisplay.textContent = '--';
         currentCalculatedSpm = 0;
@@ -1162,7 +1089,6 @@
       const deltaSec = (currentTimeMs - lastDistanceTickTime) / 1000;
       lastDistanceTickTime = currentTimeMs;
 
-      // GPS 두절 시 실제 케이던스가 발생하고 있을 때만 보정
       if (currentTimeMs - lastGpsUpdateTime > 3000 && deltaSec > 0 && deltaSec < 5.0) {
         if (currentCalculatedSpm >= 120) {
           const estimatedStride = Math.min(Math.max((currentCalculatedSpm / 180) * 0.95, 0.7), 1.25);
@@ -1172,11 +1098,9 @@
       }
     }
 
-    // 3초간 유의미한 거리 무변동 감시
     function checkDistanceAutoPause(now) {
       if (!isAutoPauseEnabled || !isRunning) return;
 
-      // 최소 0.5m 이상 실제로 진전되었을 때만 갱신
       if (totalDistanceMeters - lastTrackedDistance >= 0.5) {
         lastTrackedDistance = totalDistanceMeters;
         lastDistanceChangeTime = now;
@@ -1185,6 +1109,17 @@
           triggerAutoPause();
         }
       }
+    }
+
+    // --- UI 상태 전환 함수 ---
+    function showRunningControlsUI() {
+      runningBar.style.display = 'flex';
+      pausedSplitBar.style.display = 'none';
+    }
+
+    function showPausedControlsUI() {
+      runningBar.style.display = 'none';
+      pausedSplitBar.style.display = 'flex';
     }
 
     function startRunLoop() {
@@ -1197,9 +1132,7 @@
       isAutoPausedNow = false;
       autoPauseStatusPill.style.display = 'none';
 
-      pauseBtnText.textContent = 'PAUSE';
-      pauseHoldBtn.classList.remove('paused');
-      pauseHoldProgress.className = 'nrc-circle-progress pause-ring';
+      showRunningControlsUI();
 
       const now = performance.now();
       startTimeMs = now;
@@ -1227,10 +1160,19 @@
       stopGeolocation();
       for (let i = 0; i < 4; i++) document.getElementById(`ind-${i}`).className = 'watch-ind-step';
       if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
-      
-      pauseBtnText.textContent = 'RESUME';
-      pauseHoldBtn.classList.add('paused');
-      pauseHoldProgress.className = 'nrc-circle-progress resume-ring';
+      showPausedControlsUI();
+    }
+
+    // 러닝 중 단일 탭으로 즉시 일시정지
+    function onSingleTapPause() {
+      triggerHaptic(20);
+      pauseRun();
+    }
+
+    // 일시정지 중 좌측 버튼 탭으로 즉시 러닝 진행(재개)
+    function onQuickResume() {
+      triggerHaptic(20);
+      startRunLoop();
     }
 
     function finishRun() {
@@ -1239,22 +1181,22 @@
       window.location.href = 'main.html';
     }
 
-    // NRC 롱프레스 핸들러
-    const NRC_CIRCUMFERENCE = 2 * Math.PI * 34;
-    const NRC_HOLD_DURATION_MS = 1200;
+    // --- 1.25초 (1250ms) 홀드 제어 로직 (FINISH 버튼 전용) ---
+    const FINISH_CIRCUMFERENCE = 2 * Math.PI * 30; // 188.49
+    const FINISH_HOLD_DURATION_MS = 1250; // 요청하신 1.25초 홀드 시간
 
-    function setupNrcHoldButton(buttonEl, progressEl, onCompleteCallback) {
+    function setupFinishHoldButton(buttonEl, progressEl, onCompleteCallback) {
       let holdTimer = null;
       let holdStartTime = 0;
 
       const setProgress = (percent) => {
-        const offset = NRC_CIRCUMFERENCE - (percent / 100) * NRC_CIRCUMFERENCE;
+        const offset = FINISH_CIRCUMFERENCE - (percent / 100) * FINISH_CIRCUMFERENCE;
         progressEl.style.strokeDashoffset = offset;
       };
 
       const updateProgress = (timestamp) => {
         const elapsed = timestamp - holdStartTime;
-        const percent = Math.min((elapsed / NRC_HOLD_DURATION_MS) * 100, 100);
+        const percent = Math.min((elapsed / FINISH_HOLD_DURATION_MS) * 100, 100);
         setProgress(percent);
 
         if (percent < 100) {
@@ -1287,12 +1229,7 @@
       buttonEl.addEventListener('pointercancel', cancelHold);
     }
 
-    setupNrcHoldButton(pauseHoldBtn, pauseHoldProgress, () => {
-      if (isRunning) pauseRun();
-      else startRunLoop();
-    });
-
-    setupNrcHoldButton(finishHoldBtn, finishHoldProgress, () => {
+    setupFinishHoldButton(finishHoldBtn, finishHoldProgress, () => {
       finishRun();
     });
 
