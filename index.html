@@ -92,7 +92,7 @@
       background-color: #dedede;
     }
 
-    /* 2. 헤더 타이포 (중앙 정렬) */
+    /* 2. 헤더 타이포 */
     .hero-title-wrap {
       margin-bottom: 1.4rem;
       line-height: 1.1;
@@ -115,7 +115,7 @@
       margin-top: 1px;
     }
 
-    /* 3. 중앙 카드 프레임 (runningintro.jpg 배경) */
+    /* 3. 중앙 러닝 카드 */
     .stage-card {
       width: 100%;
       height: 390px;
@@ -136,7 +136,7 @@
       display: block;
     }
 
-    /* 4. 하단 액션 독 (DO 버튼 위치 상향) */
+    /* 4. 하단 액션 독 */
     .bottom-dock {
       width: 100%;
       display: flex;
@@ -144,7 +144,7 @@
       align-items: center;
       padding: 0 1rem;
       position: relative;
-      margin-top: -15px; /* DO 버튼을 카드 쪽으로 자연스럽게 올림 */
+      margin-top: -15px;
       z-index: 10;
     }
 
@@ -184,7 +184,6 @@
       color: #48484a;
     }
 
-    /* 중앙 플로팅 DO 버튼 */
     .shutter-do-btn {
       width: 82px;
       height: 82px;
@@ -203,7 +202,7 @@
       cursor: pointer;
       text-decoration: none;
       transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      margin-top: -24px; /* 기준점보다 위로 끌어올림 */
+      margin-top: -24px;
     }
 
     .shutter-do-btn:active {
@@ -225,7 +224,7 @@
       <button class="lang-toggle-btn" id="langToggleBtn">KR</button>
     </header>
 
-    <!-- 볼드 헤더 타이포 (중앙 정렬) -->
+    <!-- 볼드 헤더 타이포 -->
     <section class="hero-title-wrap">
       <h1 id="heroLine1">Make</h1>
       <h1 id="heroLine2">your tempo</h1>
@@ -239,17 +238,17 @@
 
     <!-- 하단 액션 독 -->
     <footer class="bottom-dock">
-      <!-- 좌측 Gallery 버튼 -->
-      <button class="sub-action-btn" onclick="triggerHaptic(15)">
+      <!-- 좌측 보관함/보고서 버튼 (report.html 이동) -->
+      <button class="sub-action-btn" id="galleryBtn" onclick="triggerHaptic(15)">
         <div class="sub-icon-circle">◫</div>
         <span class="sub-label" id="galleryLabel">보관함</span>
       </button>
 
-      <!-- 중앙 상향 배치된 DO 버튼 (main.html 연결) -->
+      <!-- 중앙 DO 버튼 (main.html 이동) -->
       <button class="shutter-do-btn" id="doBtn">DO</button>
 
-      <!-- 우측 Prints 버튼 -->
-      <button class="sub-action-btn" onclick="triggerHaptic(15)">
+      <!-- 우측 기록 캘린더 버튼 (calendar.html 이동) -->
+      <button class="sub-action-btn" id="printsBtn" onclick="triggerHaptic(15)">
         <div class="sub-icon-circle">☆</div>
         <span class="sub-label" id="printsLabel">기록</span>
       </button>
@@ -264,7 +263,6 @@
       }
     }
 
-    // 언어 토글 로직 (KR <-> EN)
     const langToggleBtn = document.getElementById('langToggleBtn');
     const heroLine1 = document.getElementById('heroLine1');
     const heroLine2 = document.getElementById('heroLine2');
@@ -287,7 +285,7 @@
         heroLine2.textContent = 'your tempo';
         heroLine3.textContent = 'running';
         galleryLabel.textContent = 'Gallery';
-        printsLabel.textContent = 'Prints';
+        printsLabel.textContent = 'Calendar';
       }
       try {
         localStorage.setItem('matempa_lang', lang);
@@ -300,13 +298,24 @@
       updateLanguageUI(currentLang);
     };
 
-    // 중앙 DO 버튼 클릭 시 main.html로 이동
+    // 중앙 DO 버튼 -> main.html
     document.getElementById('doBtn').onclick = () => {
       triggerHaptic(30);
       window.location.href = 'main.html';
     };
 
-    // 초기화
+    // 좌측 보관함 버튼 -> report.html
+    document.getElementById('galleryBtn').onclick = () => {
+      triggerHaptic(20);
+      window.location.href = 'report.html';
+    };
+
+    // 우측 기록 버튼 -> calendar.html
+    document.getElementById('printsBtn').onclick = () => {
+      triggerHaptic(20);
+      window.location.href = 'calendar.html';
+    };
+
     updateLanguageUI(currentLang);
   </script>
 </body>
