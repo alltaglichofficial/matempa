@@ -93,7 +93,7 @@
     .cal-select-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .cal-select {
@@ -107,6 +107,29 @@
       outline: none;
       cursor: pointer;
       font-family: inherit;
+    }
+
+    /* 달력 모양 토글 버튼 */
+    .cal-toggle-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #f2f3f5;
+      border: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, transform 0.12s;
+    }
+    .cal-toggle-icon-btn:active {
+      transform: scale(0.92);
+      background: #e2e4e8;
+    }
+    .cal-toggle-icon-btn.active {
+      background: #111111;
+      color: #ffffff;
     }
 
     .cal-nav-btn-group {
@@ -131,6 +154,7 @@
     }
     .cal-arrow-btn:active { background: #e2e4e8; }
 
+    /* 요일 헤더 */
     .cal-weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -143,6 +167,7 @@
     .cal-weekdays span:first-child { color: #ff3b30; }
     .cal-weekdays span:last-child { color: #007aff; }
 
+    /* 일자별 그리드 */
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -205,10 +230,54 @@
       white-space: nowrap;
     }
 
-    /* 3. [신규] 달력 바로 아래 어두운 배경의 이번 달 총 러닝 결산 카드 */
-    .month-summary-card {
+    /* 1~12월 전용 월 선택 그리드 */
+    .month-picker-grid {
+      display: none; /* 기본 숨김 */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 12px 4px;
+    }
+
+    .month-picker-cell {
+      height: 58px;
+      background: #f8f9fa;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .month-picker-cell:active {
+      transform: scale(0.96);
+      background: #e5e5ea;
+    }
+    .month-picker-cell.current-active {
+      background: #111111;
+      color: #ffffff;
+      border-color: #111111;
+    }
+    .month-picker-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+    .month-picker-km-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #34c759;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .month-picker-cell.current-active .month-picker-km-badge {
+      color: #34c759;
+    }
+
+    /* 3. [개편] 달력 아래 어두운 배경의 연간 총 러닝 결산 카드 */
+    .year-summary-card {
       width: 100%;
-      background: #1c1d21; /* 배경(#f7f7f7)보다 확연히 어두운 톤 */
+      background: #1c1d21;
       color: #ffffff;
       border-radius: 24px;
       padding: 1.1rem 1.3rem;
@@ -220,19 +289,19 @@
       margin-bottom: 0.9rem;
     }
 
-    .month-summary-top {
+    .year-summary-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .month-summary-title {
+    .year-summary-title {
       font-size: 0.72rem;
       font-weight: 800;
       color: #8e8e93;
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
-    .month-summary-badge {
+    .year-summary-badge {
       font-size: 0.68rem;
       font-weight: 800;
       color: #34c759;
@@ -241,13 +310,13 @@
       border-radius: 6px;
     }
 
-    .month-summary-grid {
+    .year-summary-grid {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
 
-    .month-hero-dist {
+    .year-hero-dist {
       font-size: 2.2rem;
       font-weight: 900;
       color: #34c759;
@@ -255,29 +324,29 @@
       font-variant-numeric: tabular-nums;
       letter-spacing: -1.5px;
     }
-    .month-hero-dist span {
+    .year-hero-dist span {
       font-size: 0.8rem;
       font-weight: 800;
       color: #8e8e93;
       margin-left: 2px;
     }
 
-    .month-sub-metrics {
+    .year-sub-metrics {
       display: flex;
       gap: 12px;
       text-align: right;
     }
-    .month-metric-box {
+    .year-metric-box {
       display: flex;
       flex-direction: column;
     }
-    .month-metric-val {
+    .year-metric-val {
       font-size: 0.88rem;
       font-weight: 800;
       color: #ffffff;
       font-variant-numeric: tabular-nums;
     }
-    .month-metric-lbl {
+    .year-metric-lbl {
       font-size: 0.58rem;
       font-weight: 700;
       color: #8e8e93;
@@ -441,6 +510,8 @@
         <div class="cal-select-group">
           <select class="cal-select" id="yearSelect" onchange="onSelectChange()"></select>
           <select class="cal-select" id="monthSelect" onchange="onSelectChange()"></select>
+          <!-- [신규] 월 그리드 토글 캘린더 아이콘 버튼 -->
+          <button class="cal-toggle-icon-btn" id="calViewToggleBtn" onclick="toggleMonthPickerMode()" title="월별 모아보기">📅</button>
         </div>
         <div class="cal-nav-btn-group">
           <button class="cal-arrow-btn" onclick="changeMonth(-1)">◀</button>
@@ -448,31 +519,36 @@
         </div>
       </div>
 
-      <div class="cal-weekdays">
-        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      <!-- 모드 1: 일자별 달력 뷰 -->
+      <div id="dayCalendarWrap">
+        <div class="cal-weekdays">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="cal-grid" id="calendarDaysGrid"></div>
       </div>
 
-      <div class="cal-grid" id="calendarDaysGrid"></div>
+      <!-- 모드 2: 1~12월 전용 선택 뷰 -->
+      <div class="month-picker-grid" id="calendarMonthsGrid"></div>
     </div>
 
-    <!-- [신규] 달력 바로 아래 어두운 배경의 이번 달 총 결산 카드 -->
-    <div class="month-summary-card" id="monthSummaryCard">
-      <div class="month-summary-top">
-        <span class="month-summary-title" id="monthSummaryTitle">2026.09 월간 결산</span>
-        <span class="month-summary-badge" id="monthRunCountBadge">총 0회 러닝</span>
+    <!-- [개편] 달력 바로 아래 연간 총 러닝 결산 카드 -->
+    <div class="year-summary-card" id="yearSummaryCard">
+      <div class="year-summary-top">
+        <span class="year-summary-title" id="yearSummaryTitle">2026 연간 결산</span>
+        <span class="year-summary-badge" id="yearRunCountBadge">총 0회 러닝</span>
       </div>
-      <div class="month-summary-grid">
-        <div class="month-hero-dist">
-          <span id="monthTotalKm">0.00</span><span>KM</span>
+      <div class="year-summary-grid">
+        <div class="year-hero-dist">
+          <span id="yearTotalKm">0.00</span><span>KM</span>
         </div>
-        <div class="month-sub-metrics">
-          <div class="month-metric-box">
-            <span class="month-metric-val" id="monthTotalDuration">0:00:00</span>
-            <span class="month-metric-lbl">누적 시간</span>
+        <div class="year-sub-metrics">
+          <div class="year-metric-box">
+            <span class="year-metric-val" id="yearTotalDuration">0:00:00</span>
+            <span class="year-metric-lbl">누적 시간</span>
           </div>
-          <div class="month-metric-box">
-            <span class="month-metric-val" id="monthAvgPace">--'--"</span>
-            <span class="month-metric-lbl">평균 페이스</span>
+          <div class="year-metric-box">
+            <span class="year-metric-val" id="yearAvgPace">--'--"</span>
+            <span class="year-metric-lbl">평균 페이스</span>
           </div>
         </div>
       </div>
@@ -490,21 +566,26 @@
 
     const yearSelect = document.getElementById('yearSelect');
     const monthSelect = document.getElementById('monthSelect');
+    const calViewToggleBtn = document.getElementById('calViewToggleBtn');
+    const dayCalendarWrap = document.getElementById('dayCalendarWrap');
     const calendarDaysGrid = document.getElementById('calendarDaysGrid');
+    const calendarMonthsGrid = document.getElementById('calendarMonthsGrid');
     const detailSection = document.getElementById('detailSection');
 
-    // 월간 결산 카드 엘리먼트
-    const monthSummaryTitle = document.getElementById('monthSummaryTitle');
-    const monthRunCountBadge = document.getElementById('monthRunCountBadge');
-    const monthTotalKm = document.getElementById('monthTotalKm');
-    const monthTotalDuration = document.getElementById('monthTotalDuration');
-    const monthAvgPace = document.getElementById('monthAvgPace');
+    // 연간 결산 카드 엘리먼트
+    const yearSummaryTitle = document.getElementById('yearSummaryTitle');
+    const yearRunCountBadge = document.getElementById('yearRunCountBadge');
+    const yearTotalKm = document.getElementById('yearTotalKm');
+    const yearTotalDuration = document.getElementById('yearTotalDuration');
+    const yearAvgPace = document.getElementById('yearAvgPace');
 
     const now = new Date();
     let currentYear = now.getFullYear();
     let currentMonth = now.getMonth();
     let selectedDateString = `${currentYear}.${String(currentMonth + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
 
+    // 화면 토글 상태 플래그 (false: 일자 달력, true: 1~12월 뷰)
+    let isMonthPickerMode = false;
     let runHistory = [];
 
     function loadHistory() {
@@ -548,6 +629,15 @@
 
     function changeMonth(delta) {
       triggerHaptic(15);
+      if (isMonthPickerMode) {
+        // 월 모아보기 상태에서는 연도 변경
+        currentYear += delta;
+        yearSelect.value = currentYear;
+        renderMonthPicker();
+        updateYearSummary();
+        return;
+      }
+
       currentMonth += delta;
       if (currentMonth < 0) {
         currentMonth = 11;
@@ -569,6 +659,15 @@
       yearSelect.value = currentYear;
       monthSelect.value = currentMonth;
       selectedDateString = `${currentYear}.${String(currentMonth + 1).padStart(2, '0')}.${String(t.getDate()).padStart(2, '0')}`;
+      
+      if (isMonthPickerMode) {
+        isMonthPickerMode = false;
+        calViewToggleBtn.classList.remove('active');
+        dayCalendarWrap.style.display = 'block';
+        calendarMonthsGrid.style.display = 'none';
+        monthSelect.style.display = 'inline-block';
+      }
+
       renderCalendar();
     }
 
@@ -576,23 +675,84 @@
       return runHistory.filter(r => r.date === dateStr);
     }
 
-    // 해당 월의 총 러닝 결산 계산 및 렌더링
-    function updateMonthSummary() {
-      const targetMonthPrefix = `${currentYear}.${String(currentMonth + 1).padStart(2, '0')}`;
-      monthSummaryTitle.textContent = `${targetMonthPrefix} 월간 결산`;
+    // --- [신규] 월별 모아보기 뷰 토글 함수 ---
+    function toggleMonthPickerMode() {
+      triggerHaptic(15);
+      isMonthPickerMode = !isMonthPickerMode;
 
-      const monthRuns = runHistory.filter(r => r.date && r.date.startsWith(targetMonthPrefix));
+      if (isMonthPickerMode) {
+        calViewToggleBtn.classList.add('active');
+        dayCalendarWrap.style.display = 'none';
+        calendarMonthsGrid.style.display = 'grid';
+        monthSelect.style.display = 'none'; // 월 선택 박스는 숨김
+        renderMonthPicker();
+      } else {
+        calViewToggleBtn.classList.remove('active');
+        dayCalendarWrap.style.display = 'block';
+        calendarMonthsGrid.style.display = 'none';
+        monthSelect.style.display = 'inline-block';
+        renderCalendar();
+      }
+    }
 
-      if (monthRuns.length === 0) {
-        monthRunCountBadge.textContent = '기록 없음';
-        monthTotalKm.textContent = '0.00';
-        monthTotalDuration.textContent = '0:00:00';
-        monthAvgPace.textContent = `--'--"`;
+    // 1~12월 전용 그리드 렌더링
+    function renderMonthPicker() {
+      calendarMonthsGrid.innerHTML = '';
+
+      for (let m = 0; m < 12; m++) {
+        const monthCell = document.createElement('div');
+        monthCell.className = `month-picker-cell ${m === currentMonth ? 'current-active' : ''}`;
+
+        // 해당 월의 누적 거리 계산
+        const monthPrefix = `${currentYear}.${String(m + 1).padStart(2, '0')}`;
+        const runsInThisMonth = runHistory.filter(r => r.date && r.date.startsWith(monthPrefix));
+        const totalKm = runsInThisMonth.reduce((acc, cur) => acc + (parseFloat(cur.totalDistanceKm) || 0), 0);
+
+        let badgeText = '';
+        if (totalKm > 0) {
+          badgeText = `${totalKm.toFixed(1)} km`;
+        }
+
+        monthCell.innerHTML = `
+          <span class="month-picker-name">${m + 1}월</span>
+          ${badgeText ? `<span class="month-picker-km-badge">${badgeText}</span>` : ''}
+        `;
+
+        // 특정 월을 클릭하면 해당 월의 일자 달력 상태로 즉시 복귀
+        monthCell.onclick = () => {
+          triggerHaptic(20);
+          currentMonth = m;
+          monthSelect.value = currentMonth;
+          isMonthPickerMode = false;
+          calViewToggleBtn.classList.remove('active');
+          dayCalendarWrap.style.display = 'block';
+          calendarMonthsGrid.style.display = 'none';
+          monthSelect.style.display = 'inline-block';
+          renderCalendar();
+        };
+
+        calendarMonthsGrid.appendChild(monthCell);
+      }
+    }
+
+    // --- [개편] 선택된 연도의 총 러닝 결산 엔진 ---
+    function updateYearSummary() {
+      const targetYearPrefix = `${currentYear}.`;
+      yearSummaryTitle.textContent = `${currentYear}년 연간 결산`;
+
+      // 선택된 연도 데이터 필터링
+      const yearRuns = runHistory.filter(r => r.date && r.date.startsWith(targetYearPrefix));
+
+      if (yearRuns.length === 0) {
+        yearRunCountBadge.textContent = '기록 없음';
+        yearTotalKm.textContent = '0.00';
+        yearTotalDuration.textContent = '0:00:00';
+        yearAvgPace.textContent = `--'--"`;
         return;
       }
 
-      const totalKm = monthRuns.reduce((acc, cur) => acc + (parseFloat(cur.totalDistanceKm) || 0), 0);
-      const totalMs = monthRuns.reduce((acc, cur) => acc + (parseInt(cur.totalElapsedMs) || 0), 0);
+      const totalKm = yearRuns.reduce((acc, cur) => acc + (parseFloat(cur.totalDistanceKm) || 0), 0);
+      const totalMs = yearRuns.reduce((acc, cur) => acc + (parseInt(cur.totalElapsedMs) || 0), 0);
 
       const totalSec = Math.floor(totalMs / 1000);
       const h = Math.floor(totalSec / 3600);
@@ -605,10 +765,10 @@
       const pSec = Math.round(avgPaceSec % 60);
       const paceFormatted = `${pMin}'${String(pSec).padStart(2, '0')}"`;
 
-      monthRunCountBadge.textContent = `총 ${monthRuns.length}회 완주`;
-      monthTotalKm.textContent = totalKm.toFixed(2);
-      monthTotalDuration.textContent = durationFormatted;
-      monthAvgPace.textContent = paceFormatted;
+      yearRunCountBadge.textContent = `총 ${yearRuns.length}회 완주`;
+      yearTotalKm.textContent = totalKm.toFixed(2);
+      yearTotalDuration.textContent = durationFormatted;
+      yearAvgPace.textContent = paceFormatted;
     }
 
     function renderCalendar() {
@@ -660,12 +820,11 @@
         calendarDaysGrid.appendChild(cell);
       }
 
-      // 월간 결산 및 선택된 날짜 상세 갱신
-      updateMonthSummary();
+      updateYearSummary();
       renderDayDetail(selectedDateString);
     }
 
-    // 하단 선택된 날짜의 개별 기록 렌더링
+    // 하단 선택된 날짜 상세 세션 목록 렌더링
     function renderDayDetail(dateStr) {
       const runs = getRunsForDate(dateStr);
       detailSection.innerHTML = '';
