@@ -402,7 +402,6 @@
         <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
       </div>
       <div class="header-btn-group">
-        <!-- 독립 사운드 설정 버튼 -->
         <button class="sound-opt-trigger-btn" id="soundModalOpenBtn" onclick="openSoundModal()" title="러닝 사운드 설정">🔊</button>
         <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
           <span class="auto-pause-dot"></span>
@@ -468,7 +467,6 @@
           <span class="sound-modal-title">Audio Output Control</span>
           <button class="sound-modal-close-btn" onclick="closeSoundModal()">&times;</button>
         </div>
-        <!-- 볼륨 슬라이더 -->
         <div class="sound-modal-row">
           <div class="sound-label-wrap">
             <span>VOLUME</span>
@@ -476,7 +474,6 @@
           </div>
           <input type="range" class="sound-slider" id="volumeSlider" min="0" max="100" value="100" oninput="updateSoundSettings()">
         </div>
-        <!-- 피치 배율 슬라이더 (0.5x ~ 1.5x) -->
         <div class="sound-modal-row">
           <div class="sound-label-wrap">
             <span>PITCH (TUNE)</span>
@@ -497,16 +494,16 @@
     let isRunning = false;
     let isSystemInterrupted = false;
 
-    // run.html 전용 독립 사운드 오버라이드 계수
-    let runVolumeMultiplier = 1.0;  // 0.0 ~ 1.0
-    let runPitchMultiplier = 1.0;   // 0.5 ~ 1.5
+    let runVolumeMultiplier = 1.0;
+    let runPitchMultiplier = 1.0;
 
-    // 자동 일시정지 옵션 플래그 및 기준 좌표
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
-    let autoPauseAnchorCoords = null;
 
-    const RESUME_DISTANCE_THRESHOLD_M = 1.0;
+    // --- 거리 기반 오토포즈 감지 상태값 ---
+    const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000; // 3초간 거리 무변동 시 일시정지
+    let lastDistanceChangeTime = 0;          // 거리가 마지막으로 변한 시점(timestamp)
+    let lastTrackedDistance = 0;             // 이전 프레임의 거리(미터)
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -521,10 +518,9 @@
     let clockTimer = null;
     let currentStepData = null;
 
-    // 거리 및 연속성 보정 관련 변수
     let totalDistanceMeters = 0;
-    let lastDistanceTickTime = 0;      // 백그라운드 추측 항법(Dead Reckoning) 계산용 기준 시각
-    let currentCalculatedSpeed = 0;    // m/s 기준 속도
+    let lastDistanceTickTime = 0;
+    let currentCalculatedSpeed = 0;
 
     let recentStepTimes = [];
     let lastStepTime = 0;
@@ -572,7 +568,6 @@
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    // 독립 사운드 모달 열기/닫기
     function openSoundModal() {
       triggerHaptic(15);
       soundModalOverlay.classList.add('open');
@@ -629,7 +624,6 @@
     function triggerAutoPause() {
       if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = true;
-      autoPauseAnchorCoords = lastCoords ? { ...lastCoords } : null;
       autoPauseStatusPill.style.display = 'inline-block';
       pauseTimingAndBeats();
     }
@@ -637,9 +631,23 @@
     function resumeFromAutoPause() {
       if (!isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = false;
-      autoPauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
+      lastDistanceChangeTime = performance.now();
       resumeTimingAndBeats();
+    }
+
+    // 거리 증가를 한곳에서 안전하게 처리하고 변동 시 즉시 재개하는 헬퍼 함수
+    function addDistance(meters) {
+      if (meters <= 0) return;
+      totalDistanceMeters += meters;
+      updateDistanceUI();
+
+      lastDistanceChangeTime = performance.now();
+
+      // 거리 변동이 감지되면 즉시 오토포즈 해제 및 재개
+      if (isAutoPausedNow) {
+        resumeFromAutoPause();
+      }
     }
 
     function updateDistanceUI() {
@@ -713,47 +721,28 @@
             const now = performance.now();
             lastGpsUpdateTime = now;
 
-            // 재개 조건: 앵커 좌표로부터 이동 감지
-            if (isAutoPausedNow) {
-              if (autoPauseAnchorCoords) {
-                const distFromAnchor = calculateDistanceMeters(
-                  autoPauseAnchorCoords.latitude, autoPauseAnchorCoords.longitude,
-                  coords.latitude, coords.longitude
-                );
-                if (distFromAnchor >= RESUME_DISTANCE_THRESHOLD_M) {
-                  resumeFromAutoPause();
-                }
-              } else if (coords.speed !== null && coords.speed >= 0.4) {
-                resumeFromAutoPause();
-              }
-            }
-
-            // 정지 감지
-            if (!isAutoPausedNow && coords.speed !== null && !isNaN(coords.speed) && coords.speed < 0.35) {
-              recentSpeeds = [];
-              currentCalculatedSpeed = 0;
-              livePaceDisplay.textContent = `--'--"`;
-              triggerAutoPause();
-            }
-
-            // GPS 기반 거리 및 속도 갱신 (유효 범위 확인)
-            if (!isAutoPausedNow && lastCoords) {
+            // GPS 기반 거리 누적
+            if (lastCoords) {
               const dist = calculateDistanceMeters(
                 lastCoords.latitude, lastCoords.longitude,
                 coords.latitude, coords.longitude
               );
+              // 최소 0.8m 이상 유효 이동 발생 시 거리 추가
               if (dist >= 0.8 && dist <= 80.0) {
-                totalDistanceMeters += dist;
-                updateDistanceUI();
+                addDistance(dist);
               }
             }
 
-            if (!isAutoPausedNow && coords.speed !== null && coords.speed >= 0.5) {
+            if (coords.speed !== null && coords.speed >= 0.5) {
               recentSpeeds.push(coords.speed);
               if (recentSpeeds.length > 5) recentSpeeds.shift();
               currentCalculatedSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
               const secPerKm = 1000 / currentCalculatedSpeed;
               livePaceDisplay.textContent = formatPace(secPerKm);
+            } else if (coords.speed !== null && coords.speed < 0.3) {
+              recentSpeeds = [];
+              currentCalculatedSpeed = 0;
+              livePaceDisplay.textContent = `--'--"`;
             }
 
             lastCoords = { latitude: coords.latitude, longitude: coords.longitude };
@@ -771,7 +760,6 @@
       }
       recentSpeeds = [];
       lastCoords = null;
-      autoPauseAnchorCoords = null;
     }
 
     function initMotionSensor() {
@@ -806,17 +794,12 @@
           recentStepTimes.push(now);
           recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
 
-          if (isAutoPausedNow) {
-            resumeFromAutoPause();
-          }
-
-          // GPS 수신이 일시 중단되었을 때(예: 다른 앱 사용 시 센서 보조)
-          if (!isAutoPausedNow && now - lastGpsUpdateTime > 3500) {
+          // GPS 정체 시 보폭 기반 거리 보충
+          if (now - lastGpsUpdateTime > 3500) {
             const currentSpm = currentCalculatedSpm || 165;
             const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
-            totalDistanceMeters += estimatedStride;
             currentCalculatedSpeed = (currentSpm / 60) * estimatedStride;
-            updateDistanceUI();
+            addDistance(estimatedStride);
           }
 
           if (recentStepTimes.length >= 3) {
@@ -846,7 +829,6 @@
         if (now - lastGpsUpdateTime > 3500) {
           currentCalculatedSpeed = 0;
           livePaceDisplay.textContent = `--'--"`;
-          triggerAutoPause();
         }
       }
 
@@ -872,7 +854,6 @@
       return `${h}:${m}:${s}:${cs}`;
     }
 
-    // 전용 피치/볼륨 계수가 적용된 큐 사운드
     function playCueSound(type) {
       initAudio();
       if (!audioCtx || isSystemInterrupted || isAutoPausedNow) return;
@@ -920,7 +901,6 @@
       }
     }
 
-    // 전용 피치/볼륨 계수가 적용된 메트로놈 사운드
     function playBeep() {
       initAudio();
       if (!audioCtx || !currentStepData || isSystemInterrupted || isAutoPausedNow) return;
@@ -1063,11 +1043,12 @@
         runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
         evaluateRoutine(Math.floor(elapsedMs / 1000));
         processDeadReckoningDistance(now);
+        checkDistanceAutoPause(now);
       }, 50);
       syncBpmTimer();
     }
 
-    // 백그라운드 전환 시에도 거리 누적을 끊김 없이 보장하는 Dead Reckoning 알고리즘
+    // 백그라운드 전환 시 센서/속도 기반 거리 추정
     function processDeadReckoningDistance(currentTimeMs) {
       if (!isRunning || isAutoPausedNow) {
         lastDistanceTickTime = currentTimeMs;
@@ -1076,7 +1057,6 @@
       const deltaSec = (currentTimeMs - lastDistanceTickTime) / 1000;
       lastDistanceTickTime = currentTimeMs;
 
-      // GPS가 3초 이상 멈췄을 때(백그라운드 등) 속도/케이던스를 활용하여 거리 누적 보충
       if (currentTimeMs - lastGpsUpdateTime > 3000 && deltaSec > 0 && deltaSec < 5.0) {
         let activeSpeed = currentCalculatedSpeed;
         if (activeSpeed <= 0.2 && currentCalculatedSpm >= 100) {
@@ -1085,8 +1065,26 @@
         }
 
         if (activeSpeed > 0.4) {
-          totalDistanceMeters += activeSpeed * deltaSec;
-          updateDistanceUI();
+          addDistance(activeSpeed * deltaSec);
+        }
+      }
+    }
+
+    // 3초간 거리(KM) 변동 여부 감시 함수
+    function checkDistanceAutoPause(now) {
+      if (!isAutoPauseEnabled || !isRunning) return;
+
+      // 거리가 변동된 경우 시각 갱신
+      if (totalDistanceMeters > lastTrackedDistance) {
+        lastTrackedDistance = totalDistanceMeters;
+        lastDistanceChangeTime = now;
+        if (isAutoPausedNow) {
+          resumeFromAutoPause();
+        }
+      } else {
+        // 3초간 거리가 단 1번도 변하지 않았을 때 오토포즈 실행
+        if (!isAutoPausedNow && (now - lastDistanceChangeTime >= AUTO_PAUSE_FREEZE_LIMIT_MS)) {
+          triggerAutoPause();
         }
       }
     }
@@ -1099,20 +1097,24 @@
       isRunning = true;
       isSystemInterrupted = false;
       isAutoPausedNow = false;
-      autoPauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
 
       pauseToggleBtn.textContent = 'PAUSE ||';
       pauseToggleBtn.classList.remove('paused');
 
-      startTimeMs = performance.now();
-      lastDistanceTickTime = performance.now();
+      const now = performance.now();
+      startTimeMs = now;
+      lastDistanceTickTime = now;
+      lastDistanceChangeTime = now;
+      lastTrackedDistance = totalDistanceMeters;
+
       clockTimer = setInterval(() => {
-        const now = performance.now();
-        elapsedMs = baseOffsetMs + (now - startTimeMs);
+        const currentNow = performance.now();
+        elapsedMs = baseOffsetMs + (currentNow - startTimeMs);
         runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
         evaluateRoutine(Math.floor(elapsedMs / 1000));
-        processDeadReckoningDistance(now);
+        processDeadReckoningDistance(currentNow);
+        checkDistanceAutoPause(currentNow);
       }, 50);
 
       syncBpmTimer();
@@ -1142,7 +1144,6 @@
       window.location.href = 'main.html';
     }
 
-    // 포그라운드/백그라운드 상태 변화 처리
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         lastDistanceTickTime = performance.now();
