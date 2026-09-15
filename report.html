@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MA.TEMPA - RUN REPORT</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#0b0b0c">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: #0b0b0c;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.2rem 1.2rem 3rem 1.2rem;
+      user-select: none;
+      -webkit-user-select: none;
+      letter-spacing: -0.3px;
+    }
+
+    .app-screen {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 내비게이션 바 */
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+    .nav-circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+    .nav-circle-btn:active { transform: scale(0.92); }
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    /* 히스토리 리스트 */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 러닝 기록 카드 */
+    .report-card {
+      background: #161618;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .report-card.expanded {
+      border-color: rgba(52, 199, 89, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-main-summary {
+      padding: 1.2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #8e8e93;
+      font-weight: 700;
+    }
+    .meta-routine-tag {
+      color: #34c759;
+      background: rgba(52, 199, 89, 0.12);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .card-metrics-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 2px;
+    }
+    .distance-stat {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #007aff;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+    .distance-stat span {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #8e8e93;
+      margin-left: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .sub-metrics-group {
+      display: flex;
+      gap: 14px;
+      text-align: right;
+    }
+    .metric-sub-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-sub-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-sub-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #8e8e93;
+      margin-top: 2px;
+    }
+
+    .toggle-indicator-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.68rem;
+      color: #555558;
+      font-weight: 700;
+      padding-top: 4px;
+    }
+
+    /* 아코디언 세부 스플릿 패널 */
+    .card-split-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      background: #111112;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .report-card.expanded .card-split-details {
+      max-height: 500px;
+    }
+
+    .splits-inner-wrap {
+      padding: 1rem 1.2rem 1.2rem 1.2rem;
+    }
+    .split-table-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #8e8e93;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .split-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .split-table th {
+      color: #555558;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-align: right;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .split-table th:first-child { text-align: left; }
+    .split-table td {
+      padding: 7px 0;
+      color: #ffffff;
+      font-weight: 700;
+      text-align: right;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .split-table td:first-child {
+      text-align: left;
+      font-weight: 800;
+      color: #007aff;
+    }
+    .split-table td.split-pace {
+      color: #ff9f0a;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #8e8e93;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 3rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-screen">
+
+    <!-- 상단 내비 바 -->
+    <div class="header-nav">
+      <button class="nav-circle-btn" onclick="window.location.href='main.html'">←</button>
+      <h1 class="header-title">RUN HISTORY</h1>
+      <div style="width: 38px;"></div> <!-- 균형용 공백 -->
+    </div>
+
+    <!-- 기록 카드 리스트 -->
+    <div class="history-list" id="historyList"></div>
+
+  </div>
+
+  <script>
+    function triggerHaptic(ms = 15) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function formatSecToMinSec(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      container.innerHTML = '';
+
+      let history = [];
+      try {
+        const saved = localStorage.getItem('matempa_run_history');
+        if (saved) history = JSON.parse(saved);
+      } catch (e) {
+        history = [];
+      }
+
+      if (history.length === 0) {
+        container.innerHTML = `<div class="empty-message">저장된 러닝 기록이 없습니다.</div>`;
+        return;
+      }
+
+      const lastCompletedId = localStorage.getItem('matempa_last_completed_id');
+
+      history.forEach((record, index) => {
+        const card = document.createElement('div');
+        // 방금 완료하고 넘어온 최신 기록인 경우 자동 확장
+        const isAutoExpanded = (record.id === lastCompletedId && index === 0);
+        card.className = `report-card ${isAutoExpanded ? 'expanded' : ''}`;
+
+        // 1km 스플릿 테이블 행 구성
+        let splitRowsHtml = '';
+        if (record.splits && record.splits.length > 0) {
+          record.splits.forEach(s => {
+            const label = s.isFinalPartial ? `${s.km}km (마지막)` : `${s.km} km`;
+            splitRowsHtml += `
+              <tr>
+                <td>${label}</td>
+                <td>${formatSecToMinSec(s.splitTimeSec)}</td>
+                <td class="split-pace">${s.paceFormatted}</td>
+                <td>${s.avgSpm} SPM</td>
+              </tr>
+            `;
+          });
+        } else {
+          splitRowsHtml = `<tr><td colspan="4" style="text-align:center; color:#555558; padding:10px 0;">구간 스플릿 데이터가 없습니다.</td></tr>`;
+        }
+
+        card.innerHTML = `
+          <div class="card-main-summary">
+            <div class="card-meta-row">
+              <span>${record.date} ${record.startTime}</span>
+              <span class="meta-routine-tag">${record.routineTitle || 'ROUTINE #1'}</span>
+            </div>
+            <div class="card-metrics-grid">
+              <div class="distance-stat">
+                ${record.totalDistanceKm}<span>KM</span>
+              </div>
+              <div class="sub-metrics-group">
+                <div class="metric-sub-item">
+                  <span class="metric-sub-val">${record.totalDurationFormatted}</span>
+                  <span class="metric-sub-label">TIME</span>
+                </div>
+                <div class="metric-sub-item">
+                  <span class="metric-sub-val">${record.avgPaceFormatted}</span>
+                  <span class="metric-sub-label">AVG PACE</span>
+                </div>
+              </div>
+            </div>
+            <div class="toggle-indicator-row">
+              <span class="toggle-text">${isAutoExpanded ? '▲ 세부 옵션 접기' : '▼ 1km별 세부 옵션 보기'}</span>
+            </div>
+          </div>
+
+          <div class="card-split-details">
+            <div class="splits-inner-wrap">
+              <div class="split-table-title">1KM SPLITS BREAKDOWN</div>
+              <table class="split-table">
+                <thead>
+                  <tr>
+                    <th>구간</th>
+                    <th>시간</th>
+                    <th>페이스</th>
+                    <th>케이던스</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${splitRowsHtml}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        // 카드 탭 시 아코디언 토글
+        card.onclick = () => {
+          triggerHaptic(12);
+          const isExp = card.classList.contains('expanded');
+          card.classList.toggle('expanded');
+          const toggleText = card.querySelector('.toggle-text');
+          toggleText.textContent = isExp ? '▼ 1km별 세부 옵션 보기' : '▲ 세부 옵션 접기';
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    window.onload = () => {
+      renderHistory();
+    };
+  </script>
+</body>
+</html>
