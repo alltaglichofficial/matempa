@@ -96,7 +96,6 @@
     .stack-card {
       width: 100%;
       border-radius: 34px;
-      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
       overflow: hidden;
       cursor: pointer;
       position: relative;
@@ -180,30 +179,39 @@
 
     .card-arrow-icon {
       font-size: 0.95rem;
-      transition: transform 0.3s ease;
+      transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
     }
     .stack-card.expanded .card-arrow-icon {
       transform: rotate(90deg);
     }
 
+    /* 부드러운 그리드 트랜지션 기반의 아코디언 애니메이션 */
+    .card-accordion-collapse {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .stack-card.expanded .card-accordion-collapse {
+      grid-template-rows: 1fr;
+    }
+
     .card-expand-body {
-      max-height: 0;
-      opacity: 0;
+      min-height: 0;
       overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+      opacity: 0;
       padding: 0 1.4rem;
+      transition: opacity 0.25s ease, padding 0.35s cubic-bezier(0.25, 1, 0.5, 1);
     }
     .stack-card.expanded .card-expand-body {
-      max-height: 540px;
       opacity: 1;
       padding: 0 1.4rem 1.6rem 1.4rem;
     }
 
-    /* 1단: 케이던스 카드 (검정) - 최하단 레이어 (z-index: 8) */
+    /* 1단: 케이던스 카드 (검정) */
     .card-black {
       background: #111315;
       color: #ffffff;
-      z-index: 8;
+      z-index: 7;
       margin-top: 0;
     }
     .card-black .card-summary-tag {
@@ -310,7 +318,43 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 2단: 리듬 미터 카드 (민트) - z-index: 9, 여백 -10px */
+    /* 2단: 사운드 종류 카드 (주황) - 피치/볼륨 제외, 사운드 선택만 유지 */
+    .card-orange {
+      background: #e89553;
+      color: #111111;
+      margin-top: -10px;
+      z-index: 8;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    }
+    .card-orange .card-summary-tag {
+      color: #2c1a0b;
+    }
+
+    .sound-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 4px;
+    }
+    .sound-btn {
+      background: rgba(255, 255, 255, 0.4);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 9px 0;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .sound-btn.selected {
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 3단: 리듬 미터 카드 (민트) - 초 단위 제거, 패턴만 선택 */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
@@ -327,7 +371,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 5px;
-      margin-bottom: 1.1rem;
+      margin-top: 4px;
     }
     .meter-btn {
       background: rgba(255, 255, 255, 0.4);
@@ -340,6 +384,7 @@
       font-weight: 800;
       cursor: pointer;
       text-align: center;
+      transition: all 0.15s ease;
     }
     .meter-btn.selected {
       background: #111111;
@@ -347,41 +392,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .mint-time-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .time-chip-quick {
-      background: rgba(255, 255, 255, 0.4);
-      color: #111111;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      padding: 7px 14px;
-      border-radius: 12px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .time-chip-quick.selected {
-      background: #111111;
-      color: #ffffff;
-      font-weight: 800;
-    }
-    .mint-sec-input {
-      width: 65px;
-      height: 33px;
-      background: rgba(255, 255, 255, 0.5);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 10px;
-      color: #111111;
-      font-size: 0.88rem;
-      font-weight: 800;
-      text-align: center;
-      outline: none;
-    }
-
-    /* 3단: 인터벌 프리셋 카드 (화이트) - 최상단 덮는 레이어 (z-index: 10), 여백 -10px */
+    /* 4단: 인터벌 프리셋 카드 (화이트) - 커스텀 시간(초) 설정 통합 */
     .card-white {
       background: #ffffff;
       color: #111111;
@@ -390,8 +401,72 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
 
+    .interval-duration-box {
+      background: #f7f8fa;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .duration-label {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: #111111;
+    }
+    .duration-controls-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .time-chip-quick {
+      background: #ffffff;
+      color: #555555;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .time-chip-quick.selected {
+      background: #111111;
+      color: #ffffff;
+      border-color: #111111;
+      font-weight: 800;
+    }
+    .custom-sec-input-wrap {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .white-sec-input {
+      width: 60px;
+      height: 32px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      color: #111111;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+      padding-right: 14px;
+    }
+    .custom-sec-unit {
+      position: absolute;
+      right: 5px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #8e8e93;
+      pointer-events: none;
+    }
+
     .steps-list-wrap {
-      max-height: 200px;
+      max-height: 180px;
       overflow-y: auto;
       margin-bottom: 14px;
       padding-right: 2px;
@@ -507,7 +582,7 @@
       <button class="nav-circle-btn" onclick="playClickSound(); triggerHaptic(15); window.location.href='profile.html'">//</button>
     </div>
 
-    <!-- 3단 스택 레이아웃 (사운드 튜닝 제거 완료) -->
+    <!-- 4단 스택 레이아웃 -->
     <div class="card-stack">
 
       <!-- 1단: 케이던스 카드 (검정) -->
@@ -522,58 +597,79 @@
           <span class="card-arrow-icon">→</span>
         </div>
 
-        <div class="card-expand-body" onclick="event.stopPropagation()">
-          <div class="black-subhead-row">
-            <span style="font-size:0.75rem; color:#8e8e93; font-weight:700;" id="activeSlotBadge">ROUTINE #1</span>
-            <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
-          </div>
+        <div class="card-accordion-collapse">
+          <div class="card-expand-body" onclick="event.stopPropagation()">
+            <div class="black-subhead-row">
+              <span style="font-size:0.75rem; color:#8e8e93; font-weight:700;" id="activeSlotBadge">ROUTINE #1</span>
+              <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
+            </div>
 
-          <!-- BPM 디스플레이 & 화살표 -->
-          <div class="black-bpm-hero" id="bpmDialWrap">
-            <div class="bpm-display-num" id="bpmDisplay" title="클릭하여 직접 입력">180</div>
-            <input type="number" class="bpm-input-custom" id="bpmInputCustom" min="40" max="260">
-            <div class="bpm-arrows-side" id="bpmArrowsSide">▲<br>▼</div>
-          </div>
+            <!-- BPM 디스플레이 & 화살표 -->
+            <div class="black-bpm-hero" id="bpmDialWrap">
+              <div class="bpm-display-num" id="bpmDisplay" title="클릭하여 직접 입력">180</div>
+              <input type="number" class="bpm-input-custom" id="bpmInputCustom" min="40" max="260">
+              <div class="bpm-arrows-side" id="bpmArrowsSide">▲<br>▼</div>
+            </div>
 
-          <!-- TEST / 추가 / 수정 -->
-          <div class="black-action-capsule">
-            <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST</button>
-            <button class="capsule-btn btn-capsule-add" id="addStepBtn">+ 추가</button>
-            <button class="capsule-btn btn-capsule-mod" id="updateStepBtn">수정</button>
+            <!-- TEST / 추가 / 수정 -->
+            <div class="black-action-capsule">
+              <button class="capsule-btn btn-capsule-test" id="testToneBtn">TEST</button>
+              <button class="capsule-btn btn-capsule-add" id="addStepBtn">+ 추가</button>
+              <button class="capsule-btn btn-capsule-mod" id="updateStepBtn">수정</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 2단: 리듬 미터 카드 (민트) -->
+      <!-- 2단: 사운드 종류 카드 (주황) - 피치/볼륨 제외, 사운드 선택만 유지 -->
+      <div class="stack-card card-orange" id="cardOrange" onclick="toggleSubCard('cardOrange')">
+        <div class="card-header-bar">
+          <div class="card-header-left">
+            <div class="card-header-title">
+              <span>Sound Type</span>
+            </div>
+            <span class="card-summary-tag" id="summarySound">WOOD</span>
+          </div>
+          <span class="card-arrow-icon">→</span>
+        </div>
+        <div class="card-accordion-collapse">
+          <div class="card-expand-body" onclick="event.stopPropagation()">
+            <div class="sound-chips-grid">
+              <button class="sound-btn selected" id="s-wood" onclick="setSound('wood')">우드</button>
+              <button class="sound-btn" id="s-bass" onclick="setSound('bass')">베이스</button>
+              <button class="sound-btn" id="s-drum" onclick="setSound('drum')">드럼</button>
+              <button class="sound-btn" id="s-beep" onclick="setSound('beep')">비프</button>
+              <button class="sound-btn" id="s-click" onclick="setSound('click')">클릭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3단: 리듬 미터 카드 (민트) - 초 단위 설정 제거, 패턴만 선택 -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
             <div class="card-header-title">
               <span>Rhythm Meter</span>
             </div>
-            <span class="card-summary-tag" id="summaryMeter">●●●● · 60s</span>
+            <span class="card-summary-tag" id="summaryMeter">●●●●</span>
           </div>
           <span class="card-arrow-icon">→</span>
         </div>
-        <div class="card-expand-body" onclick="event.stopPropagation()">
-          <div class="meter-chips-grid">
-            <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
-            <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
-            <button class="meter-btn" id="m-p3" onclick="setMeter('p3')">●○●●</button>
-            <button class="meter-btn" id="m-p4" onclick="setMeter('p4')">●●○●</button>
-            <button class="meter-btn" id="m-p5" onclick="setMeter('p5')">●●●○</button>
-          </div>
-
-          <div class="mint-time-row">
-            <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
-            <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
-            <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
-            <input type="number" class="mint-sec-input" id="durationSecInput" value="60" min="1" max="99999">
+        <div class="card-accordion-collapse">
+          <div class="card-expand-body" onclick="event.stopPropagation()">
+            <div class="meter-chips-grid">
+              <button class="meter-btn selected" id="m-p1" onclick="setMeter('p1')">●●●●</button>
+              <button class="meter-btn" id="m-p2" onclick="setMeter('p2')">●○●○</button>
+              <button class="meter-btn" id="m-p3" onclick="setMeter('p3')">●○●●</button>
+              <button class="meter-btn" id="m-p4" onclick="setMeter('p4')">●●○●</button>
+              <button class="meter-btn" id="m-p5" onclick="setMeter('p5')">●●●○</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 3단: 인터벌 프리셋 카드 (화이트) -->
+      <!-- 4단: 인터벌 프리셋 카드 (화이트) - 초 단위 시간 커스텀 설정 통합 -->
       <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -589,10 +685,27 @@
           </div>
           <span class="card-arrow-icon">→</span>
         </div>
-        <div class="card-expand-body" onclick="event.stopPropagation()">
-          <div class="steps-list-wrap" id="stepsListWrap"></div>
-          <div style="font-size:0.68rem; color:#8e8e93; font-weight:700; margin-bottom:6px;">PRESET SET SLOTS</div>
-          <div class="preset-scroll-row" id="presetScrollRow"></div>
+        <div class="card-accordion-collapse">
+          <div class="card-expand-body" onclick="event.stopPropagation()">
+            <!-- 커스텀 시간(초) 설정 바 -->
+            <div class="interval-duration-box">
+              <span class="duration-label">구간 시간</span>
+              <div class="duration-controls-wrap">
+                <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
+                <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
+                <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
+                <div class="custom-sec-input-wrap">
+                  <input type="number" class="white-sec-input" id="durationSecInput" value="60" min="1" max="99999">
+                  <span class="custom-sec-unit">초</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 구간 목록 -->
+            <div class="steps-list-wrap" id="stepsListWrap"></div>
+            <div style="font-size:0.68rem; color:#8e8e93; font-weight:700; margin-bottom:6px;">PRESET SET SLOTS</div>
+            <div class="preset-scroll-row" id="presetScrollRow"></div>
+          </div>
         </div>
       </div>
 
@@ -605,7 +718,7 @@
 
   <script>
     let bpm = 180;
-    // 사운드 관련 기본값 (run.html로 이관 전 기본값 유지)
+    // 사운드 피치/볼륨은 run.html 전송을 위해 내부 표준 기본값으로 유지
     let basePitch = 600;
     let masterGain = 0.8;
     let soundType = 'wood';
@@ -630,6 +743,7 @@
     ];
 
     const cardBlack = document.getElementById('cardBlack');
+    const cardOrange = document.getElementById('cardOrange');
     const cardMint = document.getElementById('cardMint');
     const cardWhite = document.getElementById('cardWhite');
 
@@ -644,6 +758,7 @@
     const testToneBtn = document.getElementById('testToneBtn');
 
     const summaryCadence = document.getElementById('summaryCadence');
+    const summarySound = document.getElementById('summarySound');
     const summaryMeter = document.getElementById('summaryMeter');
 
     const sumBoxSlot = document.getElementById('sumBoxSlot');
@@ -730,7 +845,8 @@
 
     function updateSummaries() {
       summaryCadence.textContent = `${bpm} BPM`;
-      summaryMeter.textContent = `${METERS[meterMode] ? METERS[meterMode].label : '●●●●'} · ${durationSec}s`;
+      summarySound.textContent = soundType.toUpperCase();
+      summaryMeter.textContent = METERS[meterMode] ? METERS[meterMode].label : '●●●●';
 
       const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
       const totalTimeFormatted = formatTotalTimeHMS(totalSec);
@@ -753,6 +869,7 @@
       const targetCard = document.getElementById(cardId);
       const isExpanded = targetCard.classList.contains('expanded');
 
+      cardOrange.classList.remove('expanded');
       cardMint.classList.remove('expanded');
 
       if (!isExpanded) {
@@ -768,6 +885,7 @@
 
       if (!isExpanded) {
         cardWhite.classList.add('expanded');
+        cardOrange.classList.remove('expanded');
         cardMint.classList.remove('expanded');
       } else {
         cardWhite.classList.remove('expanded');
@@ -992,7 +1110,7 @@
         item.innerHTML = `
           <div style="flex: 1;">
             <b>${idx + 1}구간</b>: ${step.durationSec}초 (${step.bpm} BPM)
-            <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
+            <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
           </div>
           <div class="step-btn-group">
             <span class="step-icon-btn delete" title="구간 삭제" onclick="event.stopPropagation(); removeStep(${idx});">&times;</span>
@@ -1117,9 +1235,12 @@
       basePitch = step.pitch || 600;
       masterGain = step.vol || 0.8;
       soundType = step.sound || 'wood';
-      meterMode = step.meter;
+      meterMode = step.meter || 'p1';
       setQuickTime(step.durationSec, false);
 
+      ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
+        document.getElementById(`s-${s}`).classList.toggle('selected', s === soundType);
+      });
       ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(p => {
         document.getElementById(`m-${p}`).classList.toggle('selected', p === meterMode);
       });
@@ -1151,6 +1272,17 @@
       if (btn) btn.classList.add('selected');
       updateSummaries();
     });
+
+    function setSound(type) {
+      playClickSound();
+      triggerHaptic(15);
+      soundType = type;
+      ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
+        document.getElementById(`s-${s}`).classList.toggle('selected', s === type);
+      });
+      updateSummaries();
+      playBeepSound();
+    }
 
     function setMeter(meter) {
       playClickSound();
@@ -1220,6 +1352,7 @@
       bpm = 180;
       bpmDisplay.textContent = bpm;
       setQuickTime(60, false);
+      setSound('wood');
       meterMode = 'p1';
       ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
         document.getElementById(`m-${m}`).classList.toggle('selected', m === 'p1');
