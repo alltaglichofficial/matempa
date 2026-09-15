@@ -206,7 +206,7 @@
       padding: 0 1.4rem 1.6rem 1.4rem;
     }
 
-    /* 1단: 케이던스 카드 (검정) */
+    /* 1단: 케이던스 카드 */
     .card-black {
       background: #111315;
       color: #ffffff;
@@ -317,7 +317,7 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 2단: 사운드 종류 카드 (주황) */
+    /* 2단: 사운드 종류 카드 */
     .card-orange {
       background: #e89553;
       color: #111111;
@@ -353,7 +353,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 3단: 리듬 미터 카드 (민트) */
+    /* 3단: 리듬 미터 카드 */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
@@ -391,7 +391,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 4단: 인터벌 프리셋 카드 (화이트) */
+    /* 4단: 인터벌 프리셋 카드 */
     .card-white {
       background: #ffffff;
       color: #111111;
@@ -468,7 +468,7 @@
     }
 
     .steps-list-wrap {
-      max-height: 180px;
+      max-height: 220px;
       overflow-y: auto;
       margin-bottom: 14px;
       padding-right: 2px;
@@ -507,6 +507,29 @@
     }
     .step-card-item.drag-over-target {
       border-top: 2.5px dashed #111111 !important;
+    }
+
+    /* 하단 구간 목록 내 개별 분/초 조절 버튼 스타일 */
+    .step-time-adjuster {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 5px;
+    }
+    .time-adj-btn {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #333333;
+      padding: 2px 5px;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .time-adj-btn:active {
+      background: #e5e5ea;
+      transform: scale(0.95);
     }
 
     .step-btn-group {
@@ -587,7 +610,7 @@
     <!-- 4단 스택 레이아웃 -->
     <div class="card-stack">
 
-      <!-- 1단: 케이던스 카드 (검정) -->
+      <!-- 1단: 케이던스 카드 -->
       <div class="stack-card card-black expanded" id="cardBlack" onclick="toggleCadenceCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -606,7 +629,7 @@
               <button class="black-reset-pill" id="resetBtn" title="초기화">↻</button>
             </div>
 
-            <!-- BPM 디스플레이 & 화살표 -->
+            <!-- BPM 디스플레이 & 증감 휠 -->
             <div class="black-bpm-hero" id="bpmDialWrap">
               <div class="bpm-display-num" id="bpmDisplay" title="클릭하여 직접 입력">180</div>
               <input type="number" class="bpm-input-custom" id="bpmInputCustom" min="40" max="260">
@@ -623,7 +646,7 @@
         </div>
       </div>
 
-      <!-- 2단: 사운드 종류 카드 (주황) -->
+      <!-- 2단: 사운드 종류 카드 -->
       <div class="stack-card card-orange" id="cardOrange" onclick="toggleSubCard('cardOrange')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -647,7 +670,7 @@
         </div>
       </div>
 
-      <!-- 3단: 리듬 미터 카드 (민트) -->
+      <!-- 3단: 리듬 미터 카드 -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -671,7 +694,7 @@
         </div>
       </div>
 
-      <!-- 4단: 인터벌 프리셋 카드 (화이트) -->
+      <!-- 4단: 인터벌 프리셋 카드 -->
       <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -690,7 +713,7 @@
         <div class="card-accordion-collapse">
           <div class="card-expand-body" onclick="event.stopPropagation()">
             
-            <!-- 시간 설정 바: 왼쪽(총 구간/총 시간 요약) + 오른쪽(분, 초 설정) -->
+            <!-- 시간 설정 바: 왼쪽(요약) + 오른쪽(기본 입력 분/초) -->
             <div class="interval-duration-box">
               <div class="total-stat-summary-badge" id="totalStatSummaryBadge">
                 <span id="statZones">총 1구간</span>
@@ -698,12 +721,10 @@
                 <span class="time-accent" id="statTime">0:01:00</span>
               </div>
               <div class="duration-controls-wrap">
-                <!-- 분 입력 -->
                 <div class="custom-unit-input-wrap">
                   <input type="number" class="white-unit-input" id="durationMinInput" value="1" min="0" max="999">
                   <span class="custom-unit-text">분</span>
                 </div>
-                <!-- 초 입력 -->
                 <div class="custom-unit-input-wrap">
                   <input type="number" class="white-unit-input" id="durationSecInput" value="0" min="0" max="59">
                   <span class="custom-unit-text">초</span>
@@ -732,7 +753,7 @@
     let masterGain = 0.8;
     let soundType = 'wood';
     let meterMode = 'p1';
-    let durationSec = 60; // 총 지속시간(초 단위)
+    let durationSec = 60;
     let selectedStepIndex = 0;
     let currentRoutineSlot = 0;
 
@@ -865,12 +886,10 @@
       const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
       const totalTimeFormatted = formatTotalTimeHMS(totalSec);
 
-      // 상단 헤더 요약 뱃지
       sumBoxSlot.textContent = `#${currentRoutineSlot + 1}`;
       sumBoxZone.textContent = `zone ${routine.length}`;
       sumBoxTime.textContent = totalTimeFormatted;
 
-      // 구간 입력창 좌측 총 요약 뱃지
       if (statZones) statZones.textContent = `총 ${routine.length}구간`;
       if (statTime) statTime.textContent = totalTimeFormatted;
     }
@@ -1109,6 +1128,30 @@
       saveRoutine();
     };
 
+    // 하단 리스트의 개별 구간 시간(초 단위 delta) 증감 처리
+    window.adjustStepDuration = function(idx, deltaSec) {
+      playClickSound();
+      triggerHaptic(15);
+      if (!routine[idx]) return;
+
+      let currentSec = parseInt(routine[idx].durationSec) || 0;
+      let updatedSec = currentSec + deltaSec;
+      if (updatedSec < 1) updatedSec = 1; // 최소 1초 이상 유지
+
+      routine[idx].durationSec = updatedSec;
+
+      // 만약 조작한 행이 현재 선택된 행이라면 상단 분/초 입력창에도 함께 반영
+      if (selectedStepIndex === idx) {
+        const m = Math.floor(updatedSec / 60);
+        const s = updatedSec % 60;
+        durationMinInput.value = m;
+        durationSecInput.value = s;
+        durationSec = updatedSec;
+      }
+
+      saveRoutine();
+    };
+
     let dragSrcIndex = null;
     let longPressTimer = null;
     let isLongPressActive = false;
@@ -1133,8 +1176,17 @@
 
         item.innerHTML = `
           <div style="flex: 1;">
-            <b>${idx + 1}구간</b>: ${timeText} (${step.bpm} BPM)
-            <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
+            <div>
+              <b>${idx + 1}구간</b>: <span style="font-weight:800; color:#111;">${timeText}</span> (${step.bpm} BPM)
+              <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
+            </div>
+            <!-- 하단 구간별 분, 초 조절 버튼 그룹 (상단 추가 기능과 완전 분리) -->
+            <div class="step-time-adjuster" onclick="event.stopPropagation();">
+              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, -60)">-1분</button>
+              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, 60)">+1분</button>
+              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, -10)">-10초</button>
+              <button class="time-adj-btn" onclick="adjustStepDuration(${idx}, 10)">+10초</button>
+            </div>
           </div>
           <div class="step-btn-group">
             <span class="step-icon-btn delete" title="구간 삭제" onclick="event.stopPropagation(); removeStep(${idx});">&times;</span>
@@ -1328,6 +1380,7 @@
       runTestFourBeats();
     };
 
+    // 상단 [+ 추가] 버튼: 현재 설정된 분/초 값을 사용하여 새 구간 추가
     document.getElementById('addStepBtn').onclick = () => {
       playClickSound();
       triggerHaptic(25);
@@ -1347,6 +1400,7 @@
       updateSummaries();
     };
 
+    // 상단 [수정] 버튼: 현재 설정된 BPM, 사운드, 분/초 값을 선택된 구간에 일괄 반영
     document.getElementById('updateStepBtn').onclick = () => {
       playClickSound();
       triggerHaptic(20);
