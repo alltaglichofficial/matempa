@@ -185,7 +185,6 @@
       transform: rotate(90deg);
     }
 
-    /* 부드러운 그리드 트랜지션 기반의 아코디언 애니메이션 */
     .card-accordion-collapse {
       display: grid;
       grid-template-rows: 0fr;
@@ -318,7 +317,7 @@
     .btn-capsule-add { background: #ffffff; color: #111111; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
     .btn-capsule-mod { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
 
-    /* 2단: 사운드 종류 카드 (주황) - 피치/볼륨 제외, 사운드 선택만 유지 */
+    /* 2단: 사운드 종류 카드 (주황) */
     .card-orange {
       background: #e89553;
       color: #111111;
@@ -354,7 +353,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 3단: 리듬 미터 카드 (민트) - 초 단위 제거, 패턴만 선택 */
+    /* 3단: 리듬 미터 카드 (민트) */
     .card-mint {
       background: #a5c8c5;
       color: #111111;
@@ -392,7 +391,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* 4단: 인터벌 프리셋 카드 (화이트) - 커스텀 시간(초) 설정 통합 */
+    /* 4단: 인터벌 프리셋 카드 (화이트) */
     .card-white {
       background: #ffffff;
       color: #111111;
@@ -410,41 +409,40 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
+      gap: 8px;
     }
-    .duration-label {
-      font-size: 0.74rem;
-      font-weight: 800;
-      color: #111111;
-    }
-    .duration-controls-wrap {
+    
+    .total-stat-summary-badge {
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-    .time-chip-quick {
       background: #ffffff;
-      color: #555555;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 10px;
       font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .time-chip-quick.selected {
-      background: #111111;
-      color: #ffffff;
-      border-color: #111111;
       font-weight: 800;
+      color: #111111;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      white-space: nowrap;
     }
-    .custom-sec-input-wrap {
+    .total-stat-summary-badge .time-accent {
+      color: #007aff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .duration-controls-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .custom-unit-input-wrap {
       display: flex;
       align-items: center;
       position: relative;
     }
-    .white-sec-input {
-      width: 60px;
+    .white-unit-input {
+      width: 46px;
       height: 32px;
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.12);
@@ -455,10 +453,14 @@
       text-align: center;
       outline: none;
       padding-right: 14px;
+      font-variant-numeric: tabular-nums;
     }
-    .custom-sec-unit {
+    .white-unit-input:focus {
+      border-color: #111111;
+    }
+    .custom-unit-text {
       position: absolute;
-      right: 5px;
+      right: 4px;
       font-size: 0.65rem;
       font-weight: 800;
       color: #8e8e93;
@@ -621,7 +623,7 @@
         </div>
       </div>
 
-      <!-- 2단: 사운드 종류 카드 (주황) - 피치/볼륨 제외, 사운드 선택만 유지 -->
+      <!-- 2단: 사운드 종류 카드 (주황) -->
       <div class="stack-card card-orange" id="cardOrange" onclick="toggleSubCard('cardOrange')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -645,7 +647,7 @@
         </div>
       </div>
 
-      <!-- 3단: 리듬 미터 카드 (민트) - 초 단위 설정 제거, 패턴만 선택 -->
+      <!-- 3단: 리듬 미터 카드 (민트) -->
       <div class="stack-card card-mint" id="cardMint" onclick="toggleSubCard('cardMint')">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -669,7 +671,7 @@
         </div>
       </div>
 
-      <!-- 4단: 인터벌 프리셋 카드 (화이트) - 초 단위 시간 커스텀 설정 통합 -->
+      <!-- 4단: 인터벌 프리셋 카드 (화이트) -->
       <div class="stack-card card-white" id="cardWhite" onclick="toggleIntervalCard()">
         <div class="card-header-bar">
           <div class="card-header-left">
@@ -687,16 +689,24 @@
         </div>
         <div class="card-accordion-collapse">
           <div class="card-expand-body" onclick="event.stopPropagation()">
-            <!-- 커스텀 시간(초) 설정 바 -->
+            
+            <!-- 시간 설정 바: 왼쪽(총 구간/총 시간 요약) + 오른쪽(분, 초 설정) -->
             <div class="interval-duration-box">
-              <span class="duration-label">구간 시간</span>
+              <div class="total-stat-summary-badge" id="totalStatSummaryBadge">
+                <span id="statZones">총 1구간</span>
+                <span style="color:#d1d1d6;">|</span>
+                <span class="time-accent" id="statTime">0:01:00</span>
+              </div>
               <div class="duration-controls-wrap">
-                <button class="time-chip-quick selected" id="t-60" onclick="setQuickTime(60)">60s</button>
-                <button class="time-chip-quick" id="t-300" onclick="setQuickTime(300)">300s</button>
-                <button class="time-chip-quick" id="t-600" onclick="setQuickTime(600)">600s</button>
-                <div class="custom-sec-input-wrap">
-                  <input type="number" class="white-sec-input" id="durationSecInput" value="60" min="1" max="99999">
-                  <span class="custom-sec-unit">초</span>
+                <!-- 분 입력 -->
+                <div class="custom-unit-input-wrap">
+                  <input type="number" class="white-unit-input" id="durationMinInput" value="1" min="0" max="999">
+                  <span class="custom-unit-text">분</span>
+                </div>
+                <!-- 초 입력 -->
+                <div class="custom-unit-input-wrap">
+                  <input type="number" class="white-unit-input" id="durationSecInput" value="0" min="0" max="59">
+                  <span class="custom-unit-text">초</span>
                 </div>
               </div>
             </div>
@@ -718,12 +728,11 @@
 
   <script>
     let bpm = 180;
-    // 사운드 피치/볼륨은 run.html 전송을 위해 내부 표준 기본값으로 유지
     let basePitch = 600;
     let masterGain = 0.8;
     let soundType = 'wood';
     let meterMode = 'p1';
-    let durationSec = 60;
+    let durationSec = 60; // 총 지속시간(초 단위)
     let selectedStepIndex = 0;
     let currentRoutineSlot = 0;
 
@@ -751,7 +760,12 @@
     const bpmInputCustom = document.getElementById('bpmInputCustom');
     const bpmArrowsSide = document.getElementById('bpmArrowsSide');
     const bpmDialWrap = document.getElementById('bpmDialWrap');
+    
+    const durationMinInput = document.getElementById('durationMinInput');
     const durationSecInput = document.getElementById('durationSecInput');
+    const statZones = document.getElementById('statZones');
+    const statTime = document.getElementById('statTime');
+
     const stepsListWrap = document.getElementById('stepsListWrap');
     const presetScrollRow = document.getElementById('presetScrollRow');
     const activeSlotBadge = document.getElementById('activeSlotBadge');
@@ -851,9 +865,14 @@
       const totalSec = routine.reduce((acc, cur) => acc + (parseInt(cur.durationSec) || 0), 0);
       const totalTimeFormatted = formatTotalTimeHMS(totalSec);
 
+      // 상단 헤더 요약 뱃지
       sumBoxSlot.textContent = `#${currentRoutineSlot + 1}`;
       sumBoxZone.textContent = `zone ${routine.length}`;
       sumBoxTime.textContent = totalTimeFormatted;
+
+      // 구간 입력창 좌측 총 요약 뱃지
+      if (statZones) statZones.textContent = `총 ${routine.length}구간`;
+      if (statTime) statTime.textContent = totalTimeFormatted;
     }
 
     function toggleCadenceCard() {
@@ -1107,9 +1126,14 @@
         item.className = `step-card-item ${idx === selectedStepIndex ? 'selected' : ''}`;
         item.dataset.index = idx;
 
+        const secVal = parseInt(step.durationSec) || 0;
+        const m = Math.floor(secVal / 60);
+        const s = secVal % 60;
+        const timeText = m > 0 ? (s > 0 ? `${m}분 ${s}초` : `${m}분`) : `${s}초`;
+
         item.innerHTML = `
           <div style="flex: 1;">
-            <b>${idx + 1}구간</b>: ${step.durationSec}초 (${step.bpm} BPM)
+            <b>${idx + 1}구간</b>: ${timeText} (${step.bpm} BPM)
             <span style="color:#8e8e93; font-size:0.68rem; margin-left:4px;">${step.sound.toUpperCase()} | ${METERS[step.meter] ? METERS[step.meter].label : ''}</span>
           </div>
           <div class="step-btn-group">
@@ -1236,7 +1260,12 @@
       masterGain = step.vol || 0.8;
       soundType = step.sound || 'wood';
       meterMode = step.meter || 'p1';
-      setQuickTime(step.durationSec, false);
+      
+      durationSec = parseInt(step.durationSec) || 60;
+      const m = Math.floor(durationSec / 60);
+      const s = durationSec % 60;
+      durationMinInput.value = m;
+      durationSecInput.value = s;
 
       ['wood', 'bass', 'drum', 'beep', 'click'].forEach(s => {
         document.getElementById(`s-${s}`).classList.toggle('selected', s === soundType);
@@ -1254,24 +1283,14 @@
       renderSteps();
     }
 
-    function setQuickTime(sec, shouldPlaySound = true) {
-      if (shouldPlaySound) playClickSound();
-      triggerHaptic(15);
-      durationSec = sec;
-      durationSecInput.value = sec;
-      ['t-60', 't-300', 't-600'].forEach(id => document.getElementById(id).classList.remove('selected'));
-      const btn = document.getElementById(`t-${sec}`);
-      if (btn) btn.classList.add('selected');
-      updateSummaries();
+    function syncDurationFromInputs() {
+      const minVal = parseInt(durationMinInput.value) || 0;
+      const secVal = parseInt(durationSecInput.value) || 0;
+      durationSec = Math.max(1, (minVal * 60) + secVal);
     }
 
-    durationSecInput.addEventListener('input', (e) => {
-      durationSec = parseInt(e.target.value) || 60;
-      ['t-60', 't-300', 't-600'].forEach(id => document.getElementById(id).classList.remove('selected'));
-      const btn = document.getElementById(`t-${durationSec}`);
-      if (btn) btn.classList.add('selected');
-      updateSummaries();
-    });
+    durationMinInput.addEventListener('input', syncDurationFromInputs);
+    durationSecInput.addEventListener('input', syncDurationFromInputs);
 
     function setSound(type) {
       playClickSound();
@@ -1312,9 +1331,9 @@
     document.getElementById('addStepBtn').onclick = () => {
       playClickSound();
       triggerHaptic(25);
-      const sec = parseInt(durationSecInput.value) || 60;
+      syncDurationFromInputs();
       routine.push({
-        durationSec: sec,
+        durationSec: durationSec,
         bpm: bpm,
         pitch: basePitch,
         vol: masterGain,
@@ -1332,8 +1351,9 @@
       playClickSound();
       triggerHaptic(20);
       if (!routine[selectedStepIndex]) return;
+      syncDurationFromInputs();
       routine[selectedStepIndex] = {
-        durationSec: parseInt(durationSecInput.value) || 60,
+        durationSec: durationSec,
         bpm: bpm,
         pitch: basePitch,
         vol: masterGain,
@@ -1351,7 +1371,9 @@
       triggerHaptic(30);
       bpm = 180;
       bpmDisplay.textContent = bpm;
-      setQuickTime(60, false);
+      durationMinInput.value = 1;
+      durationSecInput.value = 0;
+      durationSec = 60;
       setSound('wood');
       meterMode = 'p1';
       ['p1', 'p2', 'p3', 'p4', 'p5'].forEach(m => {
