@@ -128,7 +128,7 @@
     }
     @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
 
-    /* 화면 인라인 사운드 조절 바 (모달 없이 화면에서 즉시 조절) */
+    /* 화면 인라인 사운드 조절 바 */
     .inline-sound-control-card {
       width: 100%;
       background: rgba(255, 255, 255, 0.05);
@@ -302,7 +302,7 @@
       justify-content: center;
     }
 
-    /* 상태 1: 러닝 진행 중 (원클릭 즉시 일시정지 바) */
+    /* 러닝 중 단일 탭 일시정지 바 */
     .running-bar {
       width: 100%;
       display: flex;
@@ -326,16 +326,15 @@
     }
     .single-tap-pause-btn:active { transform: scale(0.96); }
 
-    /* 상태 2: 일시정지 중 (좌: 즉시 진행 / 우: 1.25초 홀드 종료) */
+    /* 일시정지 중 2분할 제어 바 */
     .paused-split-bar {
       width: 100%;
-      display: none; /* JS로 토글 */
+      display: none;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
 
-    /* 왼쪽 즉시 진행(재개) 버튼 */
     .btn-quick-resume {
       flex: 1.2;
       height: 58px;
@@ -355,7 +354,6 @@
     }
     .btn-quick-resume:active { transform: scale(0.95); }
 
-    /* 오른쪽 1.25초 홀드 Finish 버튼 */
     .finish-hold-wrap {
       position: relative;
       width: 68px;
@@ -384,7 +382,7 @@
       stroke: #ff3b30;
       stroke-width: 4;
       stroke-linecap: round;
-      stroke-dasharray: 188.49; /* 2 * PI * 30 */
+      stroke-dasharray: 188.49;
       stroke-dashoffset: 188.49;
       transition: stroke-dashoffset 0.04s linear;
     }
@@ -436,7 +434,7 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 인라인 실시간 사운드 제어 바 (화면에서 바로 조절) -->
+      <!-- 인라인 실시간 사운드 조절 바 -->
       <div class="inline-sound-control-card">
         <div class="sound-row">
           <span class="sound-label">VOL</span>
@@ -488,12 +486,12 @@
 
     <!-- 하단 러닝 제어 인터페이스 -->
     <div class="controls-wrapper">
-      <!-- 1. 러닝 중: 원클릭 즉시 일시정지 버튼 -->
+      <!-- 1. 러닝 중: 원클릭 일시정지 -->
       <div class="running-bar" id="runningBar">
         <button class="single-tap-pause-btn" id="singleTapPauseBtn" onclick="onSingleTapPause()">PAUSE ||</button>
       </div>
 
-      <!-- 2. 일시정지 중: 좌(즉시 진행) / 우(1.25s 홀드 종료) -->
+      <!-- 2. 일시정지 중: 좌(즉시 진행) / 우(1.25s 홀드 완료) -->
       <div class="paused-split-bar" id="pausedSplitBar">
         <button class="btn-quick-resume" onclick="onQuickResume()">RESUME ▶</button>
         
@@ -520,14 +518,14 @@
     let isRunning = false;
     let isSystemInterrupted = false;
 
-    // 실시간 사운드 계수 (기본값)
+    // 실시간 사운드 계수
     let runVolumeMultiplier = 1.0;
     let runPitchMultiplier = 1.0;
 
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
-    // --- 정밀 오토포즈 필터 파라미터 ---
+    // 3초 거리 무변동 오토포즈 필터
     const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000;
     let lastDistanceChangeTime = 0;
     let lastTrackedDistance = 0;
@@ -553,6 +551,13 @@
     let lastDistanceTickTime = 0;
     let currentCalculatedSpeed = 0;
 
+    // --- [1km 스플릿 및 런 세션 데이터 추적 변수] ---
+    let runSessionStartTime = null; 
+    let splits = [];                
+    let lastSplitDistanceM = 0;     
+    let lastSplitTimeMs = 0;        
+
+    // 모션 센서 윈도우 필터
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
@@ -602,7 +607,6 @@
       if (navigator.vibrate) navigator.vibrate(duration);
     }
 
-    // --- 인라인 실시간 사운드 조절 로직 ---
     function updateInlineSound() {
       const vol = parseInt(inlineVolSlider.value);
       const pitch = parseInt(inlinePitchSlider.value);
@@ -667,11 +671,35 @@
       showRunningControlsUI();
     }
 
+    // 거리 누적 및 1km 단위 스플릿 자동 감지
     function addDistance(meters) {
       if (meters <= 0.05) return;
       totalDistanceMeters += meters;
       updateDistanceUI();
       lastDistanceChangeTime = performance.now();
+
+      // 1km(1000m) 통과 감지
+      const currentKmMarker = Math.floor(totalDistanceMeters / 1000);
+      const recordedKmMarker = Math.floor(lastSplitDistanceM / 1000);
+
+      if (currentKmMarker > recordedKmMarker) {
+        const splitDistance = totalDistanceMeters - lastSplitDistanceM;
+        const splitTimeMs = elapsedMs - lastSplitTimeMs;
+        const splitSec = splitTimeMs / 1000;
+        const splitPaceSec = (splitSec / (splitDistance / 1000));
+
+        splits.push({
+          km: currentKmMarker,
+          splitDistanceM: Math.round(splitDistance),
+          splitTimeSec: Math.round(splitSec),
+          paceFormatted: formatPace(splitPaceSec),
+          avgSpm: currentCalculatedSpm || targetBpmDisplay.textContent
+        });
+
+        lastSplitDistanceM = totalDistanceMeters;
+        lastSplitTimeMs = elapsedMs;
+        triggerHaptic(30);
+      }
     }
 
     function updateDistanceUI() {
@@ -1111,7 +1139,6 @@
       }
     }
 
-    // --- UI 상태 전환 함수 ---
     function showRunningControlsUI() {
       runningBar.style.display = 'flex';
       pausedSplitBar.style.display = 'none';
@@ -1131,6 +1158,10 @@
       isSystemInterrupted = false;
       isAutoPausedNow = false;
       autoPauseStatusPill.style.display = 'none';
+
+      if (!runSessionStartTime) {
+        runSessionStartTime = new Date();
+      }
 
       showRunningControlsUI();
 
@@ -1163,27 +1194,73 @@
       showPausedControlsUI();
     }
 
-    // 러닝 중 단일 탭으로 즉시 일시정지
     function onSingleTapPause() {
       triggerHaptic(20);
       pauseRun();
     }
 
-    // 일시정지 중 좌측 버튼 탭으로 즉시 러닝 진행(재개)
     function onQuickResume() {
       triggerHaptic(20);
       startRunLoop();
     }
 
+    // --- [러닝 종료 및 report.html로 데이터 저장 전달] ---
     function finishRun() {
       triggerHaptic([40, 60, 40]);
       pauseRun();
-      window.location.href = 'main.html';
+
+      // 마지막 잔여 거리 스플릿 추가
+      const remainingDistM = totalDistanceMeters - lastSplitDistanceM;
+      if (remainingDistM > 50) {
+        const splitTimeMs = elapsedMs - lastSplitTimeMs;
+        const splitSec = splitTimeMs / 1000;
+        const splitPaceSec = (splitSec / (remainingDistM / 1000));
+
+        splits.push({
+          km: (totalDistanceMeters / 1000).toFixed(2),
+          splitDistanceM: Math.round(remainingDistM),
+          splitTimeSec: Math.round(splitSec),
+          paceFormatted: formatPace(splitPaceSec),
+          avgSpm: currentCalculatedSpm || targetBpmDisplay.textContent,
+          isFinalPartial: true
+        });
+      }
+
+      // 전체 평균 페이스 계산
+      const totalKm = totalDistanceMeters / 1000;
+      const totalElapsedSec = elapsedMs / 1000;
+      const avgPaceSec = totalKm > 0 ? (totalElapsedSec / totalKm) : 0;
+
+      const now = runSessionStartTime || new Date();
+      const runRecord = {
+        id: 'run_' + Date.now(),
+        date: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
+        startTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+        routineTitle: runRoutineTitle.textContent,
+        totalDistanceKm: (totalDistanceMeters / 1000).toFixed(2),
+        totalElapsedMs: elapsedMs,
+        totalDurationFormatted: runTimerDisplay.textContent,
+        avgPaceFormatted: formatPace(avgPaceSec),
+        routineZones: routine.length,
+        splits: splits
+      };
+
+      try {
+        const existing = localStorage.getItem('matempa_run_history');
+        const history = existing ? JSON.parse(existing) : [];
+        history.unshift(runRecord);
+        localStorage.setItem('matempa_run_history', JSON.stringify(history));
+        localStorage.setItem('matempa_last_completed_id', runRecord.id);
+      } catch (e) {
+        console.error("데이터 저장 실패", e);
+      }
+
+      window.location.href = 'report.html';
     }
 
-    // --- 1.25초 (1250ms) 홀드 제어 로직 (FINISH 버튼 전용) ---
-    const FINISH_CIRCUMFERENCE = 2 * Math.PI * 30; // 188.49
-    const FINISH_HOLD_DURATION_MS = 1250; // 요청하신 1.25초 홀드 시간
+    // FINISH 1.25초 홀드 제어
+    const FINISH_CIRCUMFERENCE = 2 * Math.PI * 30; 
+    const FINISH_HOLD_DURATION_MS = 1250; 
 
     function setupFinishHoldButton(buttonEl, progressEl, onCompleteCallback) {
       let holdTimer = null;
