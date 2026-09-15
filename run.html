@@ -318,7 +318,7 @@
       fill: none;
       stroke-width: 4;
       stroke-linecap: round;
-      stroke-dasharray: 213.63; /* 2 * PI * 34 */
+      stroke-dasharray: 213.63;
       stroke-dashoffset: 213.63;
       transition: stroke-dashoffset 0.04s linear;
     }
@@ -353,7 +353,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* 단독 사운드 설정 모달 시트 */
+    /* 사운드 모달 */
     .sound-modal-overlay {
       position: absolute;
       top: 0;
@@ -469,7 +469,6 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 타겟 / 실시간 케이던스 / 실시간 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -487,13 +486,11 @@
         </div>
       </div>
 
-      <!-- 대형 메인 실시간 이동 거리(KM) -->
       <div class="distance-hero-wrap">
         <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
         <div class="distance-hero-unit">KILOMETERS</div>
       </div>
 
-      <!-- 구간 남은 시간 및 전체 타이머 -->
       <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
       <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
 
@@ -507,7 +504,6 @@
 
     <!-- NRC 스타일 롱프레스 제어 바 -->
     <div class="run-controls-nrc">
-      <!-- 일시정지 / 재개 버튼 -->
       <div class="nrc-hold-item">
         <div class="nrc-hold-circle-wrap">
           <svg class="nrc-svg" viewBox="0 0 80 80">
@@ -521,7 +517,6 @@
         <span class="nrc-hold-hint">HOLD 1.2S</span>
       </div>
 
-      <!-- 러닝 완료 버튼 -->
       <div class="nrc-hold-item">
         <div class="nrc-hold-circle-wrap">
           <svg class="nrc-svg" viewBox="0 0 80 80">
@@ -536,7 +531,7 @@
       </div>
     </div>
 
-    <!-- 사운드 볼륨/피치 전용 조절 모달 -->
+    <!-- 사운드 모달 -->
     <div class="sound-modal-overlay" id="soundModalOverlay" onclick="closeSoundModal()">
       <div class="sound-modal-content" onclick="event.stopPropagation()">
         <div class="sound-modal-header">
@@ -576,10 +571,16 @@
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
-    // --- 3초 거리 무변동 오토포즈 감지 상태값 ---
-    const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000; 
-    let lastDistanceChangeTime = 0;          
-    let lastTrackedDistance = 0;             
+    // --- 정밀 오토포즈 파라미터 (오작동 방지 핵심) ---
+    const AUTO_PAUSE_FREEZE_LIMIT_MS = 3000; // 3초 정체 시 오토포즈
+    let lastDistanceChangeTime = 0;
+    let lastTrackedDistance = 0;
+    let pauseAnchorCoords = null;             // 포즈 걸렸을 당시의 고정 좌표
+
+    // 최소 유효 이동 속도 (시속 약 2.5km/h = 0.7m/s 미만은 정지로 간주)
+    const MIN_VALID_RUN_SPEED = 0.7; 
+    // 정지 상태에서 풀리기 위한 앵커 대비 최소 이동 거리 (GPS 튐 무시)
+    const RESUME_GPS_DISTANCE_M = 4.0; 
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -598,11 +599,12 @@
     let lastDistanceTickTime = 0;
     let currentCalculatedSpeed = 0;
 
+    // 모션 센서 윈도우 필터
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
-    const STEP_THRESHOLD = 11.8;
-    const MIN_STEP_INTERVAL_MS = 220;
+    const STEP_THRESHOLD = 12.5;         // 손 떨림 무시를 위해 감도 상향
+    const MIN_STEP_INTERVAL_MS = 240;    // 분당 250스텝 초과 비정상 피크 차단
     let currentCalculatedSpm = 0;
 
     let geoWatchId = null;
@@ -705,6 +707,7 @@
     function triggerAutoPause() {
       if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = true;
+      pauseAnchorCoords = lastCoords ? { ...lastCoords } : null;
       autoPauseStatusPill.style.display = 'inline-block';
       pauseTimingAndBeats();
     }
@@ -712,22 +715,19 @@
     function resumeFromAutoPause() {
       if (!isAutoPausedNow || !isRunning) return;
       isAutoPausedNow = false;
+      pauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
       lastDistanceChangeTime = performance.now();
+      lastTrackedDistance = totalDistanceMeters;
       resumeTimingAndBeats();
     }
 
-    // 거리 증가 감지 및 즉시 재개
+    // 거리 누적 함수 (가짜 미세 변위 차단)
     function addDistance(meters) {
-      if (meters <= 0) return;
+      if (meters <= 0.05) return; // 5cm 이하 부동소수점 노이즈 무시
       totalDistanceMeters += meters;
       updateDistanceUI();
-
       lastDistanceChangeTime = performance.now();
-
-      if (isAutoPausedNow) {
-        resumeFromAutoPause();
-      }
     }
 
     function updateDistanceUI() {
@@ -801,23 +801,52 @@
             const now = performance.now();
             lastGpsUpdateTime = now;
 
+            // GPS 오차 반경이 20m를 넘으면 튀는 좌표이므로 무시
+            if (coords.accuracy && coords.accuracy > 20) return;
+
+            const speed = coords.speed !== null && !isNaN(coords.speed) ? coords.speed : 0;
+
+            // 1. 일시정지 상태일 때: 정지점(Anchor) 대비 확실히 4m 이상 멀어졌거나 유효 속도 도달 시에만 재개
+            if (isAutoPausedNow) {
+              let canResume = false;
+              if (pauseAnchorCoords) {
+                const movedFromAnchor = calculateDistanceMeters(
+                  pauseAnchorCoords.latitude, pauseAnchorCoords.longitude,
+                  coords.latitude, coords.longitude
+                );
+                if (movedFromAnchor >= RESUME_GPS_DISTANCE_M && speed >= MIN_VALID_RUN_SPEED) {
+                  canResume = true;
+                }
+              } else if (speed >= MIN_VALID_RUN_SPEED) {
+                canResume = true;
+              }
+
+              if (canResume) {
+                resumeFromAutoPause();
+              } else {
+                return; // 가만히 서 있는 상태에서의 드리프트 누적 차단
+              }
+            }
+
+            // 2. 정상 주행 시 거리 누적: 최소 1.5m 이상 이동했을 때만 거리 반영
             if (lastCoords) {
               const dist = calculateDistanceMeters(
                 lastCoords.latitude, lastCoords.longitude,
                 coords.latitude, coords.longitude
               );
-              if (dist >= 0.8 && dist <= 80.0) {
+              if (dist >= 1.5 && dist <= 50.0 && speed >= 0.4) {
                 addDistance(dist);
               }
             }
 
-            if (coords.speed !== null && coords.speed >= 0.5) {
-              recentSpeeds.push(coords.speed);
+            // 속도 및 페이스 계산
+            if (speed >= MIN_VALID_RUN_SPEED) {
+              recentSpeeds.push(speed);
               if (recentSpeeds.length > 5) recentSpeeds.shift();
               currentCalculatedSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
               const secPerKm = 1000 / currentCalculatedSpeed;
               livePaceDisplay.textContent = formatPace(secPerKm);
-            } else if (coords.speed !== null && coords.speed < 0.3) {
+            } else {
               recentSpeeds = [];
               currentCalculatedSpeed = 0;
               livePaceDisplay.textContent = `--'--"`;
@@ -838,6 +867,7 @@
       }
       recentSpeeds = [];
       lastCoords = null;
+      pauseAnchorCoords = null;
     }
 
     function initMotionSensor() {
@@ -865,31 +895,34 @@
       const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
       const now = performance.now();
 
+      // 발걸음 충격 감지 (임계값 강화)
       if (magnitude > STEP_THRESHOLD && lastAccelMagnitude <= STEP_THRESHOLD) {
         if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
           lastStepTime = now;
           recentStepTimes.push(now);
-          recentStepTimes = recentStepTimes.filter(t => now - t <= 4000);
+          recentStepTimes = recentStepTimes.filter(t => now - t <= 3500);
 
-          if (now - lastGpsUpdateTime > 3500) {
-            const currentSpm = currentCalculatedSpm || 165;
-            const estimatedStride = Math.min(Math.max((currentSpm / 180) * 0.95, 0.7), 1.25);
-            currentCalculatedSpeed = (currentSpm / 60) * estimatedStride;
-            addDistance(estimatedStride);
-          }
-
+          // 최근 3.5초 내에 3걸음 이상 연속으로 찍혔을 때만 실제 러닝/워킹으로 간주
           if (recentStepTimes.length >= 3) {
             const timeSpanSec = (recentStepTimes[recentStepTimes.length - 1] - recentStepTimes[0]) / 1000;
             const stepsCount = recentStepTimes.length - 1;
             const spm = Math.round((stepsCount / timeSpanSec) * 60);
 
-            if (spm >= 100 && spm <= 250) {
+            // 유효 보행 케이던스(110 ~ 240)일 때만 통과
+            if (spm >= 110 && spm <= 240) {
               currentCalculatedSpm = spm;
               liveCadenceDisplay.textContent = spm;
 
-              if (now - lastGpsUpdateTime > 3500) {
+              // 일시정지 상태였다면 확실한 연속 걸음 감지 시 해제
+              if (isAutoPausedNow) {
+                resumeFromAutoPause();
+              }
+
+              // GPS가 지연될 때 보폭 기반 거리 보충
+              if (!isAutoPausedNow && now - lastGpsUpdateTime > 3500) {
                 const estimatedStride = Math.min(Math.max((spm / 180) * 0.95, 0.7), 1.25);
                 currentCalculatedSpeed = (spm / 60) * estimatedStride;
+                addDistance(estimatedStride);
                 const secPerKm = 1000 / currentCalculatedSpeed;
                 livePaceDisplay.textContent = formatPace(secPerKm);
               }
@@ -898,14 +931,11 @@
         }
       }
 
+      // 발걸음이 2.5초 이상 끊기면 케이던스 초기화
       if (now - lastStepTime > 2500) {
         liveCadenceDisplay.textContent = '--';
         currentCalculatedSpm = 0;
         recentStepTimes = [];
-        if (now - lastGpsUpdateTime > 3500) {
-          currentCalculatedSpeed = 0;
-          livePaceDisplay.textContent = `--'--"`;
-        }
       }
 
       lastAccelMagnitude = magnitude;
@@ -1132,29 +1162,24 @@
       const deltaSec = (currentTimeMs - lastDistanceTickTime) / 1000;
       lastDistanceTickTime = currentTimeMs;
 
+      // GPS 두절 시 실제 케이던스가 발생하고 있을 때만 보정
       if (currentTimeMs - lastGpsUpdateTime > 3000 && deltaSec > 0 && deltaSec < 5.0) {
-        let activeSpeed = currentCalculatedSpeed;
-        if (activeSpeed <= 0.2 && currentCalculatedSpm >= 100) {
+        if (currentCalculatedSpm >= 120) {
           const estimatedStride = Math.min(Math.max((currentCalculatedSpm / 180) * 0.95, 0.7), 1.25);
-          activeSpeed = (currentCalculatedSpm / 60) * estimatedStride;
-        }
-
-        if (activeSpeed > 0.4) {
+          const activeSpeed = (currentCalculatedSpm / 60) * estimatedStride;
           addDistance(activeSpeed * deltaSec);
         }
       }
     }
 
-    // 3초간 거리 무변동 감시
+    // 3초간 유의미한 거리 무변동 감시
     function checkDistanceAutoPause(now) {
       if (!isAutoPauseEnabled || !isRunning) return;
 
-      if (totalDistanceMeters > lastTrackedDistance) {
+      // 최소 0.5m 이상 실제로 진전되었을 때만 갱신
+      if (totalDistanceMeters - lastTrackedDistance >= 0.5) {
         lastTrackedDistance = totalDistanceMeters;
         lastDistanceChangeTime = now;
-        if (isAutoPausedNow) {
-          resumeFromAutoPause();
-        }
       } else {
         if (!isAutoPausedNow && (now - lastDistanceChangeTime >= AUTO_PAUSE_FREEZE_LIMIT_MS)) {
           triggerAutoPause();
@@ -1214,9 +1239,9 @@
       window.location.href = 'main.html';
     }
 
-    // --- NRC 스타일 롱프레스(Hold) 제어 인터랙션 ---
-    const NRC_CIRCUMFERENCE = 2 * Math.PI * 34; // 213.63
-    const NRC_HOLD_DURATION_MS = 1200; // 1.2초 홀드 지속시간
+    // NRC 롱프레스 핸들러
+    const NRC_CIRCUMFERENCE = 2 * Math.PI * 34;
+    const NRC_HOLD_DURATION_MS = 1200;
 
     function setupNrcHoldButton(buttonEl, progressEl, onCompleteCallback) {
       let holdTimer = null;
@@ -1262,16 +1287,11 @@
       buttonEl.addEventListener('pointercancel', cancelHold);
     }
 
-    // 일시정지 / 재개 홀드 바인딩
     setupNrcHoldButton(pauseHoldBtn, pauseHoldProgress, () => {
-      if (isRunning) {
-        pauseRun();
-      } else {
-        startRunLoop();
-      }
+      if (isRunning) pauseRun();
+      else startRunLoop();
     });
 
-    // 종료 홀드 바인딩
     setupNrcHoldButton(finishHoldBtn, finishHoldProgress, () => {
       finishRun();
     });
