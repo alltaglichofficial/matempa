@@ -19,7 +19,7 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 1.2rem 1.2rem 3rem 1.2rem;
+      padding: 1.2rem 1.2rem 3.5rem 1.2rem;
       user-select: none;
       -webkit-user-select: none;
       letter-spacing: -0.3px;
@@ -30,6 +30,7 @@
       max-width: 360px;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     /* 상단 내비게이션 바 */
@@ -60,18 +61,77 @@
       letter-spacing: -0.4px;
     }
 
-    /* 히스토리 리스트 */
+    /* 히스토리 메인 컨테이너 */
     .history-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 1.8rem;
     }
 
-    /* 러닝 기록 카드 */
+    /* 1. 월 단위 그룹 섹션 */
+    .month-group-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .month-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0 4px 6px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .month-group-title {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .month-group-stat {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #34c759;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 2. 일자 단위 그룹 섹션 */
+    .date-sub-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .date-sub-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 4px;
+    }
+    .date-sub-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #007aff;
+    }
+    .date-sub-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #8e8e93;
+      letter-spacing: -0.2px;
+    }
+
+    /* 러닝 카드 리스트 */
+    .date-card-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .report-card {
       background: #161618;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
+      border-radius: 22px;
       overflow: hidden;
       cursor: pointer;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -82,7 +142,7 @@
     }
 
     .card-main-summary {
-      padding: 1.2rem 1.2rem;
+      padding: 1.1rem 1.1rem;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -96,12 +156,36 @@
       color: #8e8e93;
       font-weight: 700;
     }
+    .meta-left-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .meta-routine-tag {
       color: #34c759;
       background: rgba(52, 199, 89, 0.12);
       padding: 2px 8px;
       border-radius: 6px;
       font-weight: 800;
+    }
+
+    .card-delete-btn {
+      background: rgba(255, 59, 48, 0.12);
+      border: 1px solid rgba(255, 59, 48, 0.25);
+      color: #ff3b30;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+    .card-delete-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 59, 48, 0.25);
     }
 
     .card-metrics-grid {
@@ -111,7 +195,7 @@
       margin-top: 2px;
     }
     .distance-stat {
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       font-weight: 900;
       color: #007aff;
       font-variant-numeric: tabular-nums;
@@ -171,7 +255,7 @@
     }
 
     .splits-inner-wrap {
-      padding: 1rem 1.2rem 1.2rem 1.2rem;
+      padding: 1rem 1.1rem 1.1rem 1.1rem;
     }
     .split-table-title {
       font-size: 0.72rem;
@@ -219,6 +303,66 @@
       font-weight: 700;
       padding: 3rem 0;
     }
+
+    /* 삭제 확인 모달 */
+    .confirm-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .confirm-modal-box {
+      width: 100%;
+      max-width: 300px;
+      background: #1c1c1e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .confirm-modal-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+    .confirm-modal-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .modal-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .modal-btn:active { transform: scale(0.95); }
+    .btn-modal-cancel {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    .btn-modal-delete {
+      background: #ff3b30;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(255, 59, 48, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -229,11 +373,22 @@
     <div class="header-nav">
       <button class="nav-circle-btn" onclick="window.location.href='main.html'">←</button>
       <h1 class="header-title">RUN HISTORY</h1>
-      <div style="width: 38px;"></div> <!-- 균형용 공백 -->
+      <div style="width: 38px;"></div>
     </div>
 
-    <!-- 기록 카드 리스트 -->
+    <!-- 계층화된 기록 카드 리스트 컨테이너 -->
     <div class="history-list" id="historyList"></div>
+
+    <!-- 삭제 확인 팝업 모달 -->
+    <div class="confirm-modal-overlay" id="deleteModalOverlay">
+      <div class="confirm-modal-box">
+        <div class="confirm-modal-title">이 러닝 기록을<br>삭제하겠습니까?</div>
+        <div class="confirm-modal-btn-group">
+          <button class="modal-btn btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
+          <button class="modal-btn btn-modal-delete" onclick="confirmDelete()">삭제</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -246,6 +401,82 @@
       const m = Math.floor(sec / 60);
       const s = sec % 60;
       return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    let recordIdToDelete = null;
+    const deleteModalOverlay = document.getElementById('deleteModalOverlay');
+
+    function openDeleteModal(recordId) {
+      triggerHaptic(20);
+      recordIdToDelete = recordId;
+      deleteModalOverlay.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      triggerHaptic(10);
+      recordIdToDelete = null;
+      deleteModalOverlay.style.display = 'none';
+    }
+
+    function confirmDelete() {
+      if (!recordIdToDelete) return;
+      triggerHaptic(30);
+
+      try {
+        const saved = localStorage.getItem('matempa_run_history');
+        let history = saved ? JSON.parse(saved) : [];
+
+        history = history.filter(item => item.id !== recordIdToDelete);
+        localStorage.setItem('matempa_run_history', JSON.stringify(history));
+
+        const lastCompletedId = localStorage.getItem('matempa_last_completed_id');
+        if (lastCompletedId === recordIdToDelete) {
+          localStorage.removeItem('matempa_last_completed_id');
+        }
+      } catch (e) {
+        console.error("기록 삭제 실패", e);
+      }
+
+      closeDeleteModal();
+      renderHistory();
+    }
+
+    // 날짜 문자열(YYYY.MM.DD)을 요일이 포함된 레이블로 포맷팅
+    function formatDateLabel(dateStr) {
+      const parts = dateStr.split('.').map(p => parseInt(p, 10));
+      if (parts.length < 3) return dateStr;
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      return `${parts[1]}월 ${parts[2]}일 (${weekdays[d.getDay()]})`;
+    }
+
+    // 히스토리를 연·월 -> 일자 계층으로 그룹화
+    function groupHistory(history) {
+      const monthMap = {};
+
+      history.forEach(item => {
+        const dateStr = item.date || '기타';
+        // 'YYYY.MM' 키 추출
+        const monthKey = dateStr.length >= 7 ? dateStr.substring(0, 7) : '기타';
+
+        if (!monthMap[monthKey]) {
+          monthMap[monthKey] = {
+            totalKm: 0,
+            runCount: 0,
+            dates: {}
+          };
+        }
+
+        monthMap[monthKey].totalKm += parseFloat(item.totalDistanceKm) || 0;
+        monthMap[monthKey].runCount += 1;
+
+        if (!monthMap[monthKey].dates[dateStr]) {
+          monthMap[monthKey].dates[dateStr] = [];
+        }
+        monthMap[monthKey].dates[dateStr].push(item);
+      });
+
+      return monthMap;
     }
 
     function renderHistory() {
@@ -266,87 +497,134 @@
       }
 
       const lastCompletedId = localStorage.getItem('matempa_last_completed_id');
+      const groupedData = groupHistory(history);
 
-      history.forEach((record, index) => {
-        const card = document.createElement('div');
-        // 방금 완료하고 넘어온 최신 기록인 경우 자동 확장
-        const isAutoExpanded = (record.id === lastCompletedId && index === 0);
-        card.className = `report-card ${isAutoExpanded ? 'expanded' : ''}`;
+      // 월 키 역순 정렬 (최신 월이 위로)
+      const sortedMonths = Object.keys(groupedData).sort().reverse();
 
-        // 1km 스플릿 테이블 행 구성
-        let splitRowsHtml = '';
-        if (record.splits && record.splits.length > 0) {
-          record.splits.forEach(s => {
-            const label = s.isFinalPartial ? `${s.km}km (마지막)` : `${s.km} km`;
-            splitRowsHtml += `
-              <tr>
-                <td>${label}</td>
-                <td>${formatSecToMinSec(s.splitTimeSec)}</td>
-                <td class="split-pace">${s.paceFormatted}</td>
-                <td>${s.avgSpm} SPM</td>
-              </tr>
-            `;
-          });
-        } else {
-          splitRowsHtml = `<tr><td colspan="4" style="text-align:center; color:#555558; padding:10px 0;">구간 스플릿 데이터가 없습니다.</td></tr>`;
-        }
+      sortedMonths.forEach(monthKey => {
+        const monthData = groupedData[monthKey];
+        const monthSection = document.createElement('section');
+        monthSection.className = 'month-group-section';
 
-        card.innerHTML = `
-          <div class="card-main-summary">
-            <div class="card-meta-row">
-              <span>${record.date} ${record.startTime}</span>
-              <span class="meta-routine-tag">${record.routineTitle || 'ROUTINE #1'}</span>
-            </div>
-            <div class="card-metrics-grid">
-              <div class="distance-stat">
-                ${record.totalDistanceKm}<span>KM</span>
-              </div>
-              <div class="sub-metrics-group">
-                <div class="metric-sub-item">
-                  <span class="metric-sub-val">${record.totalDurationFormatted}</span>
-                  <span class="metric-sub-label">TIME</span>
-                </div>
-                <div class="metric-sub-item">
-                  <span class="metric-sub-val">${record.avgPaceFormatted}</span>
-                  <span class="metric-sub-label">AVG PACE</span>
-                </div>
-              </div>
-            </div>
-            <div class="toggle-indicator-row">
-              <span class="toggle-text">${isAutoExpanded ? '▲ 세부 옵션 접기' : '▼ 1km별 세부 옵션 보기'}</span>
-            </div>
-          </div>
+        // 월 헤더 라벨 포맷 (예: 2026년 9월)
+        const mParts = monthKey.split('.');
+        const monthLabel = mParts.length === 2 ? `${mParts[0]}년 ${parseInt(mParts[1], 10)}월` : monthKey;
 
-          <div class="card-split-details">
-            <div class="splits-inner-wrap">
-              <div class="split-table-title">1KM SPLITS BREAKDOWN</div>
-              <table class="split-table">
-                <thead>
-                  <tr>
-                    <th>구간</th>
-                    <th>시간</th>
-                    <th>페이스</th>
-                    <th>케이던스</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${splitRowsHtml}
-                </tbody>
-              </table>
-            </div>
+        monthSection.innerHTML = `
+          <div class="month-group-header">
+            <span class="month-group-title">${monthLabel}</span>
+            <span class="month-group-stat">총 ${monthData.runCount}회 · ${monthData.totalKm.toFixed(1)} km</span>
           </div>
         `;
 
-        // 카드 탭 시 아코디언 토글
-        card.onclick = () => {
-          triggerHaptic(12);
-          const isExp = card.classList.contains('expanded');
-          card.classList.toggle('expanded');
-          const toggleText = card.querySelector('.toggle-text');
-          toggleText.textContent = isExp ? '▼ 1km별 세부 옵션 보기' : '▲ 세부 옵션 접기';
-        };
+        // 날짜 키 역순 정렬 (최신 일자가 위로)
+        const sortedDates = Object.keys(monthData.dates).sort().reverse();
 
-        container.appendChild(card);
+        sortedDates.forEach(dateStr => {
+          const dateRecords = monthData.dates[dateStr];
+          const dateSection = document.createElement('div');
+          dateSection.className = 'date-sub-section';
+
+          dateSection.innerHTML = `
+            <div class="date-sub-header">
+              <span class="date-sub-dot"></span>
+              <span class="date-sub-title">${formatDateLabel(dateStr)}</span>
+            </div>
+          `;
+
+          const cardStack = document.createElement('div');
+          cardStack.className = 'date-card-stack';
+
+          dateRecords.forEach(record => {
+            const card = document.createElement('div');
+            const isAutoExpanded = (record.id === lastCompletedId);
+            card.className = `report-card ${isAutoExpanded ? 'expanded' : ''}`;
+
+            let splitRowsHtml = '';
+            if (record.splits && record.splits.length > 0) {
+              record.splits.forEach(s => {
+                const label = s.isFinalPartial ? `${s.km}km (마지막)` : `${s.km} km`;
+                splitRowsHtml += `
+                  <tr>
+                    <td>${label}</td>
+                    <td>${formatSecToMinSec(s.splitTimeSec)}</td>
+                    <td class="split-pace">${s.paceFormatted}</td>
+                    <td>${s.avgSpm} SPM</td>
+                  </tr>
+                `;
+              });
+            } else {
+              splitRowsHtml = `<tr><td colspan="4" style="text-align:center; color:#555558; padding:10px 0;">구간 스플릿 데이터가 없습니다.</td></tr>`;
+            }
+
+            card.innerHTML = `
+              <div class="card-main-summary">
+                <div class="card-meta-row">
+                  <div class="meta-left-group">
+                    <span>${record.startTime} 시작</span>
+                    <span class="meta-routine-tag">${record.routineTitle || 'ROUTINE #1'}</span>
+                  </div>
+                  <button class="card-delete-btn" onclick="event.stopPropagation(); openDeleteModal('${record.id}');">
+                    삭제
+                  </button>
+                </div>
+                <div class="card-metrics-grid">
+                  <div class="distance-stat">
+                    ${record.totalDistanceKm}<span>KM</span>
+                  </div>
+                  <div class="sub-metrics-group">
+                    <div class="metric-sub-item">
+                      <span class="metric-sub-val">${record.totalDurationFormatted}</span>
+                      <span class="metric-sub-label">TIME</span>
+                    </div>
+                    <div class="metric-sub-item">
+                      <span class="metric-sub-val">${record.avgPaceFormatted}</span>
+                      <span class="metric-sub-label">AVG PACE</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="toggle-indicator-row">
+                  <span class="toggle-text">${isAutoExpanded ? '▲ 세부 옵션 접기' : '▼ 1km별 세부 옵션 보기'}</span>
+                </div>
+              </div>
+
+              <div class="card-split-details">
+                <div class="splits-inner-wrap">
+                  <div class="split-table-title">1KM SPLITS BREAKDOWN</div>
+                  <table class="split-table">
+                    <thead>
+                      <tr>
+                        <th>구간</th>
+                        <th>시간</th>
+                        <th>페이스</th>
+                        <th>케이던스</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${splitRowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            `;
+
+            card.onclick = () => {
+              triggerHaptic(12);
+              const isExp = card.classList.contains('expanded');
+              card.classList.toggle('expanded');
+              const toggleText = card.querySelector('.toggle-text');
+              toggleText.textContent = isExp ? '▼ 1km별 세부 옵션 보기' : '▲ 세부 옵션 접기';
+            };
+
+            cardStack.appendChild(card);
+          });
+
+          dateSection.appendChild(cardStack);
+          monthSection.appendChild(dateSection);
+        });
+
+        container.appendChild(monthSection);
       });
     }
 
