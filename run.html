@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MA.TEMPA - RUN (GPS CHECK)</title>
+  <title>MA.TEMPA - RUN (NATIVE SYNC)</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -11,6 +11,7 @@
   <meta name="theme-color" content="#0b0b0c">
 
   <style>
+    /* CSS 스타일은 기존의 아름다운 디자인을 100% 그대로 유지합니다 */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       background-color: #0b0b0c;
@@ -38,447 +39,100 @@
       position: relative;
     }
 
-    /* 상단 헤더 */
-    .run-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.6rem;
-    }
-    .routine-name-badge {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #8e8e93;
-      letter-spacing: 0.5px;
-    }
+    .run-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .routine-name-badge { font-size: 0.85rem; font-weight: 800; color: #8e8e93; letter-spacing: 0.5px; }
 
     .auto-pause-toggle-btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: #8e8e93;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 6px 10px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.08); color: #8e8e93; border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;
     }
-    .auto-pause-toggle-btn.active {
-      background: rgba(52, 199, 89, 0.16);
-      color: #34c759;
-      border-color: rgba(52, 199, 89, 0.35);
-    }
-    .auto-pause-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #8e8e93;
-    }
-    .auto-pause-toggle-btn.active .auto-pause-dot {
-      background: #34c759;
-      box-shadow: 0 0 6px rgba(52, 199, 89, 0.8);
-    }
+    .auto-pause-toggle-btn.active { background: rgba(52, 199, 89, 0.16); color: #34c759; border-color: rgba(52, 199, 89, 0.35); }
+    .auto-pause-dot { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; }
+    .auto-pause-toggle-btn.active .auto-pause-dot { background: #34c759; box-shadow: 0 0 6px rgba(52, 199, 89, 0.8); }
 
-    /* 실시간 GPS 진단 모니터 바 */
     .gps-diag-banner {
-      width: 100%;
-      background: rgba(28, 28, 30, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 0.68rem;
-      font-family: monospace;
+      width: 100%; background: rgba(28, 28, 30, 0.95); border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px; padding: 8px 12px; margin-bottom: 8px; display: flex; flex-direction: column;
+      gap: 4px; font-size: 0.68rem; font-family: monospace;
     }
-    .gps-diag-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-    }
-    .gps-status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .gps-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ff9500;
-    }
+    .gps-diag-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+    .gps-status-indicator { display: flex; align-items: center; gap: 5px; }
+    .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff9500; }
     .gps-dot.ok { background: #34c759; box-shadow: 0 0 6px #34c759; }
     .gps-dot.bad { background: #ff3b30; }
+    .gps-diag-row { display: flex; justify-content: space-between; color: #8e8e93; }
+    .gps-diag-row span:last-child { color: #ffffff; font-weight: 700; }
 
-    .gps-diag-row {
-      display: flex;
-      justify-content: space-between;
-      color: #8e8e93;
-    }
-    .gps-diag-row span:last-child {
-      color: #ffffff;
-      font-weight: 700;
-    }
-
-    /* 대형 워치 메인 페이스 */
     .watch-display-large {
-      width: 100%;
-      height: 485px;
-      background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
-      border-radius: 46px;
-      padding: 18px 16px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      width: 100%; height: 485px; background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
+      border-radius: 46px; padding: 18px 16px 16px 16px; display: flex; flex-direction: column;
+      justify-content: space-between; align-items: center; box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       position: relative;
     }
 
-    .top-stat-row {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      color: #8e8e93;
-      font-weight: 700;
-      padding: 0 4px;
-    }
-    .zone-indicator-pill {
-      background: rgba(52, 199, 89, 0.15);
-      color: #34c759;
-      padding: 3px 10px;
-      border-radius: 8px;
-      font-weight: 800;
-    }
+    .top-stat-row { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #8e8e93; font-weight: 700; padding: 0 4px; }
+    .zone-indicator-pill { background: rgba(52, 199, 89, 0.15); color: #34c759; padding: 3px 10px; border-radius: 8px; font-weight: 800; }
     .auto-pause-status-pill {
-      display: none;
-      background: rgba(255, 149, 0, 0.18);
-      color: #ff9500;
-      padding: 3px 10px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 0.68rem;
-      letter-spacing: 0.5px;
-      animation: blink 1s infinite alternate;
+      display: none; background: rgba(255, 149, 0, 0.18); color: #ff9500; padding: 3px 10px;
+      border-radius: 8px; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.5px; animation: blink 1s infinite alternate;
     }
     @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
 
-    /* 케이던스 및 페이스 3열 비교 그리드 */
-    .cadence-comparison-grid {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0.1rem;
-      padding: 0 4px;
-    }
+    .cadence-comparison-grid { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 0.1rem; padding: 0 4px; }
+    .cadence-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .cadence-num { font-size: 2.6rem; font-weight: 900; line-height: 0.95; font-variant-numeric: tabular-nums; letter-spacing: -1.5px; }
+    .cadence-num.target { color: #ffffff; filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1)); }
+    .cadence-num.live { color: #34c759; filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.25)); }
+    .cadence-num.pace { color: #ff9f0a; font-size: 2.35rem; letter-spacing: -1px; filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25)); }
+    .cadence-col-label { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.8px; margin-top: 4px; color: #8e8e93; white-space: nowrap; }
+    .cadence-divider { width: 1px; height: 42px; background: rgba(255, 255, 255, 0.12); }
 
-    .cadence-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-    }
-    .cadence-num {
-      font-size: 2.6rem;
-      font-weight: 900;
-      line-height: 0.95;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -1.5px;
-    }
-    .cadence-num.target {
-      color: #ffffff;
-      filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1));
-    }
-    .cadence-num.live {
-      color: #34c759;
-      filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.25));
-    }
-    .cadence-num.pace {
-      color: #ff9f0a;
-      font-size: 2.35rem;
-      letter-spacing: -1px;
-      filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25));
-    }
+    .distance-hero-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0.1rem 0; }
+    .distance-hero-num { font-size: 3.4rem; font-weight: 900; line-height: 0.9; color: #007aff; font-variant-numeric: tabular-nums; letter-spacing: -1.8px; filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35)); }
+    .distance-hero-unit { font-size: 0.72rem; font-weight: 900; color: #8e8e93; letter-spacing: 1.5px; margin-top: 3px; }
 
-    .cadence-col-label {
-      font-size: 0.58rem;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      margin-top: 4px;
-      color: #8e8e93;
-      white-space: nowrap;
-    }
-    .cadence-divider {
-      width: 1px;
-      height: 42px;
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    /* 대형 메인 이동 거리(KM) */
-    .distance-hero-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 0.1rem 0;
-    }
-    .distance-hero-num {
-      font-size: 3.4rem;
-      font-weight: 900;
-      line-height: 0.9;
-      color: #007aff;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -1.8px;
-      filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35));
-    }
-    .distance-hero-unit {
-      font-size: 0.72rem;
-      font-weight: 900;
-      color: #8e8e93;
-      letter-spacing: 1.5px;
-      margin-top: 3px;
-    }
-
-    .step-progress-text {
-      font-size: 0.76rem;
-      color: #a0a0a5;
-      font-weight: 600;
-    }
-
+    .step-progress-text { font-size: 0.76rem; color: #a0a0a5; font-weight: 600; }
     .timer-capsule-large {
-      background: rgba(255, 255, 255, 0.06);
-      width: 220px;
-      height: 40px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 1.25rem;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 1px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06); width: 220px; height: 40px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.25rem;
+      font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
     .watch-indicators { display: flex; gap: 8px; margin-bottom: 2px; }
-    .watch-ind-step {
-      width: 24px;
-      height: 4px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.1);
-      transition: background 0.08s, box-shadow 0.08s;
-    }
-    .watch-ind-step.active {
-      background: #34c759;
-      box-shadow: 0 0 12px rgba(52, 199, 89, 0.9);
-    }
+    .watch-ind-step { width: 24px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background 0.08s, box-shadow 0.08s; }
+    .watch-ind-step.active { background: #34c759; box-shadow: 0 0 12px rgba(52, 199, 89, 0.9); }
 
-    /* 실시간 사운드 조절 바 */
-    .inline-sound-control-card {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .sound-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .sound-label {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #8e8e93;
-      min-width: 44px;
-    }
-    .sound-value-text {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #34c759;
-      min-width: 32px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .inline-slider {
-      -webkit-appearance: none;
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.16);
-      outline: none;
-    }
-    .inline-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ffffff;
-      cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
-    }
+    .inline-sound-control-card { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .sound-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sound-label { font-size: 0.65rem; font-weight: 800; color: #8e8e93; min-width: 44px; }
+    .sound-value-text { font-size: 0.65rem; font-weight: 800; color: #34c759; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+    .inline-slider { -webkit-appearance: none; flex: 1; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); outline: none; }
+    .inline-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #ffffff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
-    /* 하단 러닝 제어 영역 */
-    .controls-wrapper {
-      width: 100%;
-      height: 76px;
-      margin-top: 0.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
+    .controls-wrapper { width: 100%; height: 76px; margin-top: 0.8rem; display: flex; align-items: center; justify-content: center; }
     .running-bar { width: 100%; display: flex; }
-    .single-tap-pause-btn {
-      width: 100%;
-      height: 58px;
-      background: #ffffff;
-      color: #111111;
-      border: none;
-      border-radius: 29px;
-      font-size: 1.05rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.12);
-      transition: transform 0.12s ease;
-    }
+    .single-tap-pause-btn { width: 100%; height: 58px; background: #ffffff; color: #111111; border: none; border-radius: 29px; font-size: 1.05rem; font-weight: 900; letter-spacing: 0.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(255, 255, 255, 0.12); transition: transform 0.12s ease; }
     .single-tap-pause-btn:active { transform: scale(0.96); }
 
-    .paused-split-bar {
-      width: 100%;
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .btn-quick-resume {
-      flex: 1.2;
-      height: 58px;
-      background: #34c759;
-      color: #ffffff;
-      border: none;
-      border-radius: 29px;
-      font-size: 0.95rem;
-      font-weight: 900;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 20px rgba(52, 199, 89, 0.25);
-      transition: transform 0.12s ease;
-    }
+    .paused-split-bar { width: 100%; display: none; align-items: center; justify-content: space-between; gap: 12px; }
+    .btn-quick-resume { flex: 1.2; height: 58px; background: #34c759; color: #ffffff; border: none; border-radius: 29px; font-size: 0.95rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(52, 199, 89, 0.25); transition: transform 0.12s ease; }
     .btn-quick-resume:active { transform: scale(0.95); }
 
-    .finish-hold-wrap {
-      position: relative;
-      width: 68px;
-      height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: none;
-    }
-    .finish-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
-      pointer-events: none;
-    }
+    .finish-hold-wrap { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+    .finish-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); pointer-events: none; }
     .finish-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 4; }
-    .finish-progress {
-      fill: none;
-      stroke: #ff3b30;
-      stroke-width: 4;
-      stroke-linecap: round;
-      stroke-dasharray: 188.49;
-      stroke-dashoffset: 188.49;
-      transition: stroke-dashoffset 0.04s linear;
-    }
-    .finish-core-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 59, 48, 0.4);
-      background: rgba(255, 59, 48, 0.18);
-      color: #ff3b30;
-      font-size: 0.72rem;
-      font-weight: 900;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.1s ease;
-    }
+    .finish-progress { fill: none; stroke: #ff3b30; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 188.49; stroke-dashoffset: 188.49; transition: stroke-dashoffset 0.04s linear; }
+    .finish-core-btn { width: 56px; height: 56px; border-radius: 50%; border: 1px solid rgba(255, 59, 48, 0.4); background: rgba(255, 59, 48, 0.18); color: #ff3b30; font-size: 0.72rem; font-weight: 900; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s ease; }
     .finish-core-btn:active { transform: scale(0.92); }
     .finish-sub-text { font-size: 0.5rem; opacity: 0.8; margin-top: 1px; }
 
-    /* 모달 */
-    .confirm-modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .confirm-modal-box {
-      width: 100%;
-      max-width: 310px;
-      background: #1c1c1e;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 24px;
-      padding: 1.5rem 1.2rem 1.2rem 1.2rem;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    }
+    .confirm-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 1.5rem; }
+    .confirm-modal-box { width: 100%; max-width: 310px; background: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 1.5rem 1.2rem 1.2rem 1.2rem; text-align: center; display: flex; flex-direction: column; gap: 1.2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
     .confirm-modal-title { font-size: 1.05rem; font-weight: 800; color: #ffffff; line-height: 1.4; }
     .confirm-modal-btn-group { display: flex; gap: 8px; }
-    .modal-btn {
-      flex: 1;
-      height: 46px;
-      border-radius: 23px;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
+    .modal-btn { flex: 1; height: 46px; border-radius: 23px; border: none; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: transform 0.1s ease; }
     .modal-btn:active { transform: scale(0.95); }
     .btn-modal-cancel { background: #34c759; color: #ffffff; }
     .btn-modal-confirm { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.4); }
@@ -488,7 +142,6 @@
 
   <div class="app-screen">
 
-    <!-- 상단 헤더 -->
     <div class="run-header">
       <div class="header-left-wrap">
         <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
@@ -499,26 +152,21 @@
       </button>
     </div>
 
-    <!-- 실시간 GPS 진단 모니터 -->
+    <!-- 네이티브 상태 모니터 (구 GPS 모니터) -->
     <div class="gps-diag-banner" id="gpsDiagBanner">
       <div class="gps-diag-header">
         <div class="gps-status-indicator">
           <span class="gps-dot" id="gpsDot"></span>
-          <span id="gpsStateText">GPS 초기화 중...</span>
+          <span id="gpsStateText">Flutter 센서 동기화 중...</span>
         </div>
-        <span id="gpsTickCount">수신 0회</span>
+        <span id="gpsTickCount">Native Sync 활성</span>
       </div>
       <div class="gps-diag-row">
-        <span>정확도(오차) / 속도:</span>
+        <span>정확도(보정) / 속도:</span>
         <span id="gpsAccSpeed">-- m / -- km/h</span>
-      </div>
-      <div class="gps-diag-row">
-        <span>현재 좌표:</span>
-        <span id="gpsCoordsText">위성 탐색 중</span>
       </div>
     </div>
 
-    <!-- 대형 워치 메인 페이스 -->
     <div class="watch-display-large">
       <div class="top-stat-row">
         <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
@@ -572,12 +220,10 @@
       </div>
     </div>
 
-    <!-- 하단 러닝 제어 인터페이스 -->
     <div class="controls-wrapper">
       <div class="running-bar" id="runningBar">
         <button class="single-tap-pause-btn" id="singleTapPauseBtn" onclick="onSingleTapPause()">PAUSE ||</button>
       </div>
-
       <div class="paused-split-bar" id="pausedSplitBar">
         <button class="btn-quick-resume" onclick="onQuickResume()">RESUME ▶</button>
         <div class="finish-hold-wrap" id="finishHoldWrap">
@@ -593,7 +239,6 @@
       </div>
     </div>
 
-    <!-- 기록 삭제/저장 확인 다이얼로그 모달 -->
     <div class="confirm-modal-overlay" id="deleteConfirmModal">
       <div class="confirm-modal-box">
         <div class="confirm-modal-title">기록을 삭제할까요?</div>
@@ -609,39 +254,71 @@
   <audio id="silentBackgroundAudio" loop playsinline style="display: none;"></audio>
 
   <script>
+    // ----------------------------------------------------
+    // 1. Flutter 통신 유틸리티 (JS -> Flutter)
+    // ----------------------------------------------------
+    function sendToFlutter(action, payload = {}) {
+      const message = JSON.stringify({ action: action, ...payload });
+      // Flutter WebView 설정 시 javascriptChannels 이름을 'MatempaChannel'로 지정해야 합니다.
+      if (window.MatempaChannel) {
+        window.MatempaChannel.postMessage(message);
+      } else {
+        console.log("Flutter 채널 연결 안 됨:", message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // 2. Flutter에서 데이터 받기 (Flutter -> JS)
+    // ----------------------------------------------------
+    window.updateNativeMetrics = function(dataStr) {
+      try {
+        const data = JSON.parse(dataStr);
+        // 케이던스, 페이스, 거리 업데이트
+        if (data.spm !== undefined) liveCadenceDisplay.textContent = data.spm;
+        if (data.pace !== undefined) livePaceDisplay.textContent = data.pace;
+        if (data.distanceKm !== undefined) liveDistanceDisplay.textContent = data.distanceKm;
+        
+        // 센서/GPS 상태 업데이트
+        if (data.sensorStatus !== undefined) {
+          gpsDot.className = data.sensorStatus === 'ok' ? 'gps-dot ok' : 'gps-dot bad';
+          gpsStateText.textContent = data.statusText || '센서 정상 작동 중';
+        }
+        if (data.accSpeedText !== undefined) {
+          gpsAccSpeed.textContent = data.accSpeedText;
+        }
+      } catch(e) {
+        console.error("Flutter 데이터 파싱 에러", e);
+      }
+    };
+
+    // Flutter가 판단한 오토포즈 상태를 UI에 강제 반영
+    window.setNativeAutoPauseState = function(isPaused) {
+      if (isPaused && !isAutoPausedNow) {
+        isAutoPausedNow = true;
+        autoPauseStatusPill.style.display = 'inline-block';
+        pauseRoutineTimers();
+      } else if (!isPaused && isAutoPausedNow) {
+        isAutoPausedNow = false;
+        autoPauseStatusPill.style.display = 'none';
+        resumeRoutineTimers();
+      }
+    };
+
+    // ----------------------------------------------------
+    // 3. 내부 상태 및 타이머 변수
+    // ----------------------------------------------------
     let activeSlot = 0;
     let routine = [];
     let isRunning = false;
-    let isSystemInterrupted = false;
-
+    
     let runVolumeMultiplier = 1.0;
     let runPitchMultiplier = 1.0;
-
+    
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
-    // 케이던스 및 GPS 정책
-    const AUTO_PAUSE_SPM_TRIGGER = 40;
-    const RESUME_SPM_TRIGGER = 80;
-    const RESUME_DISTANCE_M = 2.0;
-
-    let pauseAnchorCoords = null;
-    let lastStepDetectTime = 0;
-
-    // GPS 거리 필터 정책
-    const MIN_VALID_RUN_SPEED = 0.7;
-    const MAX_VALID_RUN_SPEED = 8.5;       // 30.6 km/h
-    const MIN_GPS_DISTANCE_M = 1.5;
-    const GPS_MAX_ACCURACY_M = 35.0;
-    const GPS_GOOD_ACCURACY_M = 15.0;
-    const GPS_JUMP_SPEED_MPS = 12.0;       // 순간 튐 판정용
-    const GPS_MAX_LOOKBACK_MS = 10000;
-    const GPS_STATIONARY_SPEED_MPS = 0.7;
-    const GPS_DISTANCE_CONFIRM_M = 2.0;
-
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
-
     let startTimeMs = 0;
     let baseOffsetMs = 0;
     let elapsedMs = 0;
@@ -652,58 +329,6 @@
     let clockTimer = null;
     let currentStepData = null;
 
-    let totalDistanceMeters = 0;
-    let currentCalculatedSpeed = 0;
-
-    let runSessionStartTime = null;
-    let splits = [];
-    let lastSplitDistanceM = 0;
-    let lastSplitTimeMs = 0;
-
-    // 모션 센서
-    let recentStepTimes = [];
-    let lastStepTime = 0;
-    let lastAccelMagnitude = 0;
-    const STEP_THRESHOLD = 12.5;
-    const MIN_STEP_INTERVAL_MS = 240;
-    let currentCalculatedSpm = 0;
-
-    // GPS & 진단 지표 변수
-    let geoWatchId = null;
-    let recentSpeeds = [];
-    let lastGpsPosition = null;
-    let lastGpsPositionTime = 0;
-    let lastGpsSpeed = 0;
-    let gpsUpdateCounter = 0; // GPS 수신 횟수 카운터
-
-    // GPS 거리 필터 상태
-    let acceptedGpsPosition = null;
-    let acceptedGpsTime = 0;
-    let gpsDistanceSpeed = 0;
-    let gpsMovingConfidence = 0;
-
-    let wakeLock = null;
-
-    // --- [새로 추가] 러닝 상태 임시 저장 로직 ---
-    function saveTempRunState() {
-      if (!isRunning && elapsedMs === 0) return; // 시작 전이면 저장 안 함
-      const tempState = {
-        activeSlot,
-        currentStepIndex,
-        elapsedMs,
-        totalDistanceMeters,
-        lastSplitDistanceM,
-        lastSplitTimeMs,
-        splits,
-        runSessionStartTime: runSessionStartTime ? runSessionStartTime.toISOString() : null
-      };
-      localStorage.setItem('matempa_ongoing_run', JSON.stringify(tempState));
-    }
-
-    function clearTempRunState() {
-      localStorage.removeItem('matempa_ongoing_run');
-    }
-
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
       'p2': { label: '●○●○', pattern: [1, 0, 1, 0] },
@@ -712,17 +337,15 @@
       'p5': { label: '●●●○', pattern: [1, 1, 1, 0] }
     };
 
+    // DOM 요소
     const runRoutineTitle = document.getElementById('runRoutineTitle');
     const autoPauseToggleBtn = document.getElementById('autoPauseToggleBtn');
     const autoPauseText = document.getElementById('autoPauseText');
     const autoPauseStatusPill = document.getElementById('autoPauseStatusPill');
 
-    // GPS 진단 UI 엘리먼트
     const gpsDot = document.getElementById('gpsDot');
     const gpsStateText = document.getElementById('gpsStateText');
-    const gpsTickCount = document.getElementById('gpsTickCount');
     const gpsAccSpeed = document.getElementById('gpsAccSpeed');
-    const gpsCoordsText = document.getElementById('gpsCoordsText');
 
     const runZoneBadge = document.getElementById('runZoneBadge');
     const liveDistanceDisplay = document.getElementById('liveDistanceDisplay');
@@ -756,7 +379,6 @@
       runPitchMultiplier = pitch / 100;
       inlineVolText.textContent = `${vol}%`;
       inlinePitchText.textContent = `${(pitch / 100).toFixed(1)}x`;
-
       try {
         localStorage.setItem('matempa_run_vol', runVolumeMultiplier);
         localStorage.setItem('matempa_run_pitch', runPitchMultiplier);
@@ -767,101 +389,76 @@
       try {
         const savedVol = localStorage.getItem('matempa_run_vol');
         const savedPitch = localStorage.getItem('matempa_run_pitch');
-        if (savedVol !== null) {
-          runVolumeMultiplier = parseFloat(savedVol);
-          inlineVolSlider.value = Math.round(runVolumeMultiplier * 100);
-          inlineVolText.textContent = `${inlineVolSlider.value}%`;
-        }
-        if (savedPitch !== null) {
-          runPitchMultiplier = parseFloat(savedPitch);
-          inlinePitchSlider.value = Math.round(runPitchMultiplier * 100);
-          inlinePitchText.textContent = `${runPitchMultiplier.toFixed(1)}x`;
-        }
+        if (savedVol !== null) { runVolumeMultiplier = parseFloat(savedVol); inlineVolSlider.value = Math.round(runVolumeMultiplier * 100); inlineVolText.textContent = `${inlineVolSlider.value}%`; }
+        if (savedPitch !== null) { runPitchMultiplier = parseFloat(savedPitch); inlinePitchSlider.value = Math.round(runPitchMultiplier * 100); inlinePitchText.textContent = `${runPitchMultiplier.toFixed(1)}x`; }
       } catch(e) {}
     }
 
+    // ----------------------------------------------------
+    // 4. UI 컨트롤러 (버튼 액션 -> Flutter 명령)
+    // ----------------------------------------------------
     function toggleAutoPauseOption() {
       triggerHaptic(15);
       isAutoPauseEnabled = !isAutoPauseEnabled;
       autoPauseToggleBtn.classList.toggle('active', isAutoPauseEnabled);
       autoPauseText.textContent = isAutoPauseEnabled ? 'AUTO PAUSE ON' : 'AUTO PAUSE OFF';
-      if (!isAutoPauseEnabled && isAutoPausedNow) {
-        resumeFromAutoPause();
-      }
+      
+      // Flutter 쪽에 오토포즈 설정 변경 알림
+      sendToFlutter('TOGGLE_AUTO_PAUSE', { enabled: isAutoPauseEnabled });
     }
 
-    function triggerAutoPause() {
-      if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
-      isAutoPausedNow = true;
-      pauseAnchorCoords = lastGpsPosition ? { ...lastGpsPosition } : null;
-      autoPauseStatusPill.style.display = 'inline-block';
-      pauseTimingAndBeats();
-      showPausedControlsUI();
+    function onSingleTapPause() {
+      triggerHaptic(20);
+      pauseRunUI();
+      sendToFlutter('PAUSE_RUN');
     }
 
-    function resumeFromAutoPause() {
-      if (!isAutoPausedNow || !isRunning) return;
-      isAutoPausedNow = false;
-      pauseAnchorCoords = null;
-      autoPauseStatusPill.style.display = 'none';
-      resumeTimingAndBeats();
-      showRunningControlsUI();
+    function onQuickResume() {
+      triggerHaptic(20);
+      resumeRunUI();
+      sendToFlutter('RESUME_RUN');
     }
 
-    function addDistance(meters) {
-      if (!Number.isFinite(meters) || meters <= 0.05) return;
-      totalDistanceMeters += meters;
-      updateDistanceUI();
-
-      const currentKmMarker = Math.floor(totalDistanceMeters / 1000);
-      const recordedKmMarker = Math.floor(lastSplitDistanceM / 1000);
-
-      if (currentKmMarker > recordedKmMarker) {
-        const splitDistance = totalDistanceMeters - lastSplitDistanceM;
-        const splitTimeMs = elapsedMs - lastSplitTimeMs;
-        const splitSec = splitTimeMs / 1000;
-        const splitPaceSec = splitDistance > 0 ? (splitSec / (splitDistance / 1000)) : 0;
-
-        splits.push({
-          km: currentKmMarker,
-          splitDistanceM: Math.round(splitDistance),
-          splitTimeSec: Math.round(splitSec),
-          paceFormatted: formatPace(splitPaceSec),
-          avgSpm: currentCalculatedSpm || targetBpmDisplay.textContent
-        });
-
-        lastSplitDistanceM = totalDistanceMeters;
-        lastSplitTimeMs = elapsedMs;
-        triggerHaptic(30);
-      }
+    function onFinishTriggered() {
+      pauseRunUI();
+      sendToFlutter('PAUSE_RUN');
+      deleteConfirmModal.style.display = 'flex';
+      triggerHaptic([30, 50, 40]);
     }
 
-    function updateDistanceUI() {
-      liveDistanceDisplay.textContent = (totalDistanceMeters / 1000).toFixed(2);
+    function onCancelDelete() {
+      triggerHaptic(20);
+      deleteConfirmModal.style.display = 'none';
+      
+      // 화면에 표시된 최종 기록 추출
+      const finalRecord = {
+        totalDistanceKm: liveDistanceDisplay.textContent,
+        totalElapsedMs: elapsedMs,
+        totalDurationFormatted: runTimerDisplay.textContent,
+        avgPaceFormatted: livePaceDisplay.textContent,
+        routineTitle: runRoutineTitle.textContent
+      };
+      
+      // Flutter에 최종 저장 명령 전달 (이후 페이지 전환은 Flutter에서 핸들링하거나 여기서 리다이렉트)
+      sendToFlutter('SAVE_AND_FINISH', finalRecord);
+      
+      // 임시로 report 페이지 강제 전환 (Flutter 연동 전 테스트용)
+      setTimeout(() => { window.location.href = 'report.html'; }, 300);
     }
 
-    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+    function onConfirmDelete() {
+      triggerHaptic(30);
+      deleteConfirmModal.style.display = 'none';
+      sendToFlutter('DISCARD_RUN');
+      window.location.href = 'main.html';
     }
 
+    // ----------------------------------------------------
+    // 5. 로컬 루틴 타이머 & 오디오 재생 (메트로놈 역할)
+    // ----------------------------------------------------
     function startSilentAudio() {
-      if (!silentAudioEl.src) {
-        silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
-      }
+      if (!silentAudioEl.src) silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
       silentAudioEl.play().catch(() => {});
-    }
-
-    function stopSilentAudio() {
-      silentAudioEl.pause();
     }
 
     function initAudio() {
@@ -871,433 +468,10 @@
         audioCtx = new AudioClass({ latencyHint: 'interactive' });
         audioCtx.onstatechange = () => {
           if (!isRunning || !audioCtx) return;
-          if (audioCtx.state === 'running') {
-            isSystemInterrupted = false;
-          } else if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
-            isSystemInterrupted = true;
-            audioCtx.resume().catch(() => {});
-          }
+          if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') audioCtx.resume().catch(() => {});
         };
       }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-    }
-
-    function formatPace(secPerKm) {
-      if (!secPerKm || !isFinite(secPerKm) || secPerKm <= 0 || secPerKm > 1200) return `--'--"`;
-      const min = Math.floor(secPerKm / 60);
-      const sec = Math.round(secPerKm % 60);
-      return sec === 60 ? `${min + 1}'00"` : `${min}'${String(sec).padStart(2, '0')}"`;
-    }
-
-    function updatePaceFromSpeed(speedMps) {
-      if (speedMps >= MIN_VALID_RUN_SPEED && speedMps <= 8.5) {
-        const secPerKm = 1000 / speedMps;
-        livePaceDisplay.textContent = formatPace(secPerKm);
-      }
-    }
-
-    // --- GPS 모듈 및 실시간 진단 로직 ---
-    function getPositionTime(position) {
-      const t = Number(position.timestamp);
-      return Number.isFinite(t) && t > 0 ? t : Date.now();
-    }
-
-    function isFiniteCoordinate(coords) {
-      return coords &&
-        Number.isFinite(Number(coords.latitude)) &&
-        Number.isFinite(Number(coords.longitude));
-    }
-
-    // GPS 1회 수신값의 신뢰도를 계산합니다.
-    function getGpsQuality(accuracy) {
-      if (!Number.isFinite(accuracy) || accuracy <= 0) return 0;
-      if (accuracy <= GPS_GOOD_ACCURACY_M) return 1;
-      if (accuracy <= GPS_MAX_ACCURACY_M) {
-        return 1 - ((accuracy - GPS_GOOD_ACCURACY_M) /
-          (GPS_MAX_ACCURACY_M - GPS_GOOD_ACCURACY_M)) * 0.5;
-      }
-      return 0;
-    }
-
-    // 현재 GPS 좌표에서 실제 거리 누적에 사용할 값만 선택합니다.
-    function filterAndAccumulateGpsDistance(position) {
-      const coords = position.coords;
-      const accuracy = Number(coords.accuracy);
-      const now = getPositionTime(position);
-
-      if (!isFiniteCoordinate(coords)) return;
-
-      // 최초 유효 위치는 기준점으로만 사용합니다.
-      if (!acceptedGpsPosition) {
-        acceptedGpsPosition = {
-          latitude: Number(coords.latitude),
-          longitude: Number(coords.longitude)
-        };
-        acceptedGpsTime = now;
-        gpsDistanceSpeed = 0;
-        gpsMovingConfidence = 0;
-        return;
-      }
-
-      let dtMs = now - acceptedGpsTime;
-      if (!Number.isFinite(dtMs) || dtMs <= 0) return;
-
-      // 너무 오래 끊겼다가 들어온 좌표는 한 번에 거리로 더하지 않습니다.
-      if (dtMs > GPS_MAX_LOOKBACK_MS) {
-        acceptedGpsPosition = {
-          latitude: Number(coords.latitude),
-          longitude: Number(coords.longitude)
-        };
-        acceptedGpsTime = now;
-        gpsDistanceSpeed = 0;
-        gpsMovingConfidence = 0;
-        return;
-      }
-
-      const movedMeters = calculateDistanceMeters(
-        acceptedGpsPosition.latitude,
-        acceptedGpsPosition.longitude,
-        Number(coords.latitude),
-        Number(coords.longitude)
-      );
-
-      const dtSec = dtMs / 1000;
-      const derivedSpeed = movedMeters / dtSec;
-      const reportedSpeed =
-        coords.speed !== null && Number.isFinite(Number(coords.speed)) && Number(coords.speed) >= 0
-          ? Number(coords.speed)
-          : null;
-
-      // 허용 가능한 순간 최고속도. 시간이 길수록 최대 이동거리도 비례해서 늘립니다.
-      const maxPlausibleDistance = Math.max(
-        25,
-        GPS_JUMP_SPEED_MPS * dtSec,
-        (MAX_VALID_RUN_SPEED + 2) * dtSec
-      );
-
-      // GPS가 정확하지 않은 상태에서 작은 움직임은 대부분 좌표 흔들림일 수 있습니다.
-      // 정확도가 좋으면 1.5~2m 정도부터, 나쁘면 조금 더 큰 이동만 인정합니다.
-      const noiseThreshold = Math.max(
-        MIN_GPS_DISTANCE_M,
-        Math.min(accuracy * 0.22, 6.0)
-      );
-
-      // ① 너무 큰 순간 이동 → GPS 튐으로 처리
-      if (movedMeters > maxPlausibleDistance) {
-        gpsMovingConfidence = Math.max(0, gpsMovingConfidence - 1);
-        // 튄 좌표를 기준점으로 삼지 않고, 다음 수신값에서 다시 이어붙입니다.
-        return;
-      }
-
-      // ② 거의 제자리인 작은 이동 → 누적하지 않음
-      if (movedMeters < noiseThreshold) {
-        gpsMovingConfidence = Math.max(0, gpsMovingConfidence - 0.5);
-        // 정지 중에는 기준점을 최신 좌표로 천천히 따라가 GPS 드리프트를 줄입니다.
-        if (reportedSpeed === null || reportedSpeed < GPS_STATIONARY_SPEED_MPS) {
-          acceptedGpsPosition = {
-            latitude: Number(coords.latitude),
-            longitude: Number(coords.longitude)
-          };
-          acceptedGpsTime = now;
-        }
-        gpsDistanceSpeed = 0;
-        return;
-      }
-
-      // ③ GPS 속도와 좌표로 계산한 속도가 크게 다르면 신뢰도를 낮춤
-      let speedAgreement = 1;
-      if (reportedSpeed !== null && reportedSpeed <= MAX_VALID_RUN_SPEED + 2) {
-        const speedRatioBase = Math.max(reportedSpeed, 0.8);
-        const speedRatio = derivedSpeed / speedRatioBase;
-
-        // GPS 거리로 계산한 속도가 기기 GPS 속도와 과하게 다르면 한 번 더 보수적으로 판단
-        if (speedRatio > 2.2 || speedRatio < 0.35) {
-          speedAgreement = 0.4;
-        } else if (speedRatio > 1.7 || speedRatio < 0.55) {
-          speedAgreement = 0.7;
-        }
-      }
-
-      // ④ 러닝 속도 범위를 벗어난 좌표는 거리 누적하지 않음
-      // 단, 천천히 달리는 구간은 0.7m/s까지 허용합니다.
-      const effectiveSpeed = reportedSpeed !== null ? reportedSpeed : derivedSpeed;
-      const speedIsPlausible =
-        effectiveSpeed >= MIN_VALID_RUN_SPEED &&
-        effectiveSpeed <= MAX_VALID_RUN_SPEED;
-
-      if (!speedIsPlausible && gpsMovingConfidence === 0) {
-        // GPS speed가 0으로 들어오는 기종도 있어서,
-        // 거리 기반 속도가 현실적인 경우에는 첫 1~2회 정도만 보류합니다.
-        if (derivedSpeed < MIN_VALID_RUN_SPEED) return;
-      }
-
-      // ⑤ 이동으로 확인되는 연속 좌표가 쌓일수록 신뢰도 상승
-      gpsMovingConfidence = Math.min(
-        5,
-        gpsMovingConfidence + (speedAgreement >= 0.7 ? 1 : 0.5)
-      );
-
-      // 실제 거리로 인정
-      if (
-        movedMeters >= GPS_DISTANCE_CONFIRM_M &&
-        (gpsMovingConfidence >= 1 || speedIsPlausible)
-      ) {
-        // 현재 구간 속도를 GPS 거리 기반으로 계산하고 부드럽게 평균냅니다.
-        gpsDistanceSpeed = derivedSpeed;
-
-        // 정확도가 좋고 GPS 속도가 정상이라면 기기 speed를 보정 참고값으로 사용
-        if (reportedSpeed !== null && reportedSpeed >= MIN_VALID_RUN_SPEED && reportedSpeed <= MAX_VALID_RUN_SPEED) {
-          gpsDistanceSpeed = (derivedSpeed * 0.55) + (reportedSpeed * 0.45);
-        }
-
-        addDistance(movedMeters);
-
-        acceptedGpsPosition = {
-          latitude: Number(coords.latitude),
-          longitude: Number(coords.longitude)
-        };
-        acceptedGpsTime = now;
-      } else {
-        // 아직 충분히 확실하지 않은 움직임은 기준점도 이동시키지 않아
-        // 다음 좌표에서 연속적인 방향/거리 변화를 확인할 수 있게 합니다.
-        return;
-      }
-    }
-
-    function initGeolocation() {
-      if (!('geolocation' in navigator)) {
-        gpsDot.className = 'gps-dot bad';
-        gpsStateText.textContent = 'GPS 미지원 브라우저';
-        return;
-      }
-      if (geoWatchId !== null) return;
-
-      gpsStateText.textContent = '위성 신호 탐색 중...';
-
-      geoWatchId = navigator.geolocation.watchPosition(
-        (position) => {
-          if (!isRunning) return;
-
-          const coords = position.coords;
-          const now = performance.now();
-          gpsUpdateCounter++;
-
-          const accuracy = Number(coords.accuracy);
-          const speed =
-            coords.speed !== null &&
-            !isNaN(coords.speed) &&
-            coords.speed >= 0
-              ? coords.speed
-              : 0;
-
-          const speedKmh = (speed * 3.6).toFixed(1);
-
-          // 진단 패널 갱신
-          gpsTickCount.textContent = `수신 ${gpsUpdateCounter}회`;
-          gpsCoordsText.textContent =
-            `${Number(coords.latitude).toFixed(5)}, ${Number(coords.longitude).toFixed(5)}`;
-          gpsAccSpeed.textContent =
-            `±${Number.isFinite(accuracy) ? accuracy.toFixed(1) : '--'}m / ${speedKmh} km/h`;
-
-          if (Number.isFinite(accuracy) && accuracy <= GPS_GOOD_ACCURACY_M) {
-            gpsDot.className = 'gps-dot ok';
-            gpsStateText.textContent = 'GPS 정상 수신 중 (정확)';
-          } else if (Number.isFinite(accuracy) && accuracy <= GPS_MAX_ACCURACY_M) {
-            gpsDot.className = 'gps-dot ok';
-            gpsStateText.textContent = 'GPS 수신 중 (보통)';
-          } else {
-            gpsDot.className = 'gps-dot bad';
-            gpsStateText.textContent = '신호 불안정 (오차 큼)';
-            // 부정확한 좌표는 거리 누적에 사용하지 않음
-            return;
-          }
-
-          // 오토포즈 상태에서는 거리 누적을 하지 않고 재출발만 검사
-          if (isAutoPausedNow) {
-            let anchorMoved = 0;
-
-            if (pauseAnchorCoords) {
-              anchorMoved = calculateDistanceMeters(
-                pauseAnchorCoords.latitude,
-                pauseAnchorCoords.longitude,
-                Number(coords.latitude),
-                Number(coords.longitude)
-              );
-            }
-
-            const reportedSpeed =
-              coords.speed !== null &&
-              !isNaN(coords.speed) &&
-              coords.speed >= 0
-                ? coords.speed
-                : 0;
-
-            // 케이던스 + GPS 속도 + 실제 이동을 함께 확인해야 재개
-            const hasMovement =
-              reportedSpeed >= MIN_VALID_RUN_SPEED ||
-              anchorMoved >= RESUME_DISTANCE_M;
-
-            if (
-              currentCalculatedSpm >= RESUME_SPM_TRIGGER &&
-              anchorMoved >= RESUME_DISTANCE_M &&
-              hasMovement
-            ) {
-              resumeFromAutoPause();
-
-              // 재개 직후 현재 좌표를 새 기준점으로 잡아 순간 점프를 방지
-              acceptedGpsPosition = {
-                latitude: Number(coords.latitude),
-                longitude: Number(coords.longitude)
-              };
-              acceptedGpsTime = getPositionTime(position);
-              gpsMovingConfidence = 1;
-            }
-
-            lastGpsPosition = {
-              latitude: Number(coords.latitude),
-              longitude: Number(coords.longitude)
-            };
-            lastGpsPositionTime = now;
-            lastGpsSpeed = speed;
-            return;
-          }
-
-          filterAndAccumulateGpsDistance(position);
-
-          lastGpsSpeed = speed;
-
-          // 속도는 GPS speed + 최근 수신값 평균으로 부드럽게 표시
-          const displaySpeed =
-            gpsDistanceSpeed >= MIN_VALID_RUN_SPEED
-              ? gpsDistanceSpeed
-              : speed;
-
-          if (
-            displaySpeed >= MIN_VALID_RUN_SPEED &&
-            displaySpeed <= MAX_VALID_RUN_SPEED
-          ) {
-            recentSpeeds.push(displaySpeed);
-            if (recentSpeeds.length > 6) recentSpeeds.shift();
-
-            currentCalculatedSpeed =
-              recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
-
-            updatePaceFromSpeed(currentCalculatedSpeed);
-          } else {
-            // GPS 한 번의 0 또는 이상치 때문에 즉시 pace를 지우지 않음
-            if (recentSpeeds.length > 0) {
-              currentCalculatedSpeed =
-                recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
-              updatePaceFromSpeed(currentCalculatedSpeed);
-            }
-          }
-
-          lastGpsPosition = {
-            latitude: Number(coords.latitude),
-            longitude: Number(coords.longitude)
-          };
-          lastGpsPositionTime = now;
-        },
-        (err) => {
-          gpsDot.className = 'gps-dot bad';
-          if (err.code === 1) {
-            gpsStateText.textContent = '위치 권한 거부됨';
-          } else if (err.code === 2) {
-            gpsStateText.textContent = '위치 확인 불가 (실내 등)';
-          } else {
-            gpsStateText.textContent = '수신 타임아웃';
-          }
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 1000,
-          timeout: 8000
-        }
-      );
-    }
-
-    function stopGeolocation() {
-      if (geoWatchId !== null) {
-        navigator.geolocation.clearWatch(geoWatchId);
-        geoWatchId = null;
-      }
-
-      recentSpeeds = [];
-      lastGpsPosition = null;
-      acceptedGpsPosition = null;
-      acceptedGpsTime = 0;
-      pauseAnchorCoords = null;
-      lastGpsPositionTime = 0;
-      lastGpsSpeed = 0;
-      gpsDistanceSpeed = 0;
-      gpsMovingConfidence = 0;
-    }
-
-    // 모션 센서
-    function initMotionSensor() {
-      if (typeof DeviceMotionEvent === 'undefined') return;
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(response => {
-            if (response === 'granted') {
-              window.addEventListener('devicemotion', handleDeviceMotion, { passive: true });
-            }
-          })
-          .catch(() => {});
-      } else {
-        window.addEventListener('devicemotion', handleDeviceMotion, { passive: true });
-      }
-    }
-
-    function handleDeviceMotion(event) {
-      if (!isRunning) return;
-      const acc = event.accelerationIncludingGravity;
-      if (!acc || acc.x === null || acc.y === null || acc.z === null) return;
-
-      const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-      const now = performance.now();
-
-      if (magnitude > STEP_THRESHOLD && lastAccelMagnitude <= STEP_THRESHOLD) {
-        if (now - lastStepTime > MIN_STEP_INTERVAL_MS) {
-          lastStepTime = now;
-          lastStepDetectTime = now;
-
-          recentStepTimes.push(now);
-          recentStepTimes = recentStepTimes.filter(t => now - t <= 3500);
-
-          if (recentStepTimes.length >= 3) {
-            const timeSpanSec = (recentStepTimes[recentStepTimes.length - 1] - recentStepTimes[0]) / 1000;
-            const stepsCount = recentStepTimes.length - 1;
-
-            if (timeSpanSec > 0) {
-              const spm = Math.round((stepsCount / timeSpanSec) * 60);
-
-              if (spm >= 30 && spm <= 250) {
-                currentCalculatedSpm = spm;
-                liveCadenceDisplay.textContent = spm;
-
-                if (!isAutoPausedNow && isAutoPauseEnabled && spm < AUTO_PAUSE_SPM_TRIGGER) {
-                  triggerAutoPause();
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (now - lastStepTime > 2500) {
-        currentCalculatedSpm = 0;
-        liveCadenceDisplay.textContent = '--';
-        recentStepTimes = [];
-
-        if (!isAutoPausedNow && isAutoPauseEnabled) {
-          triggerAutoPause();
-        }
-      }
-
-      lastAccelMagnitude = magnitude;
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
     }
 
     function formatSecToMinSec(totalSec) {
@@ -1323,43 +497,25 @@
       const now = audioCtx.currentTime;
       const vol = (currentStepData ? currentStepData.vol : 0.8) * runVolumeMultiplier;
       const pitchFactor = runPitchMultiplier;
-
+      // 오디오 신시사이저 로직 (기존과 동일)
       if (type === 'countdown') {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(900 * pitchFactor, now);
-        gain.gain.setValueAtTime(vol * 0.9, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.08);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.08);
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(900 * pitchFactor, now);
+        gain.gain.setValueAtTime(vol * 0.9, now); gain.gain.linearRampToValueAtTime(0.0001, now + 0.08);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.08);
       } else if (type === 'next_step') {
         [{ f: 880, t: 0 }, { f: 1320, t: 0.12 }].forEach(tone => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
-          gain.gain.setValueAtTime(vol * 0.9, now + tone.t);
-          gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.22);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + tone.t);
-          osc.stop(now + tone.t + 0.22);
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
+          gain.gain.setValueAtTime(vol * 0.9, now + tone.t); gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.22);
+          osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + tone.t); osc.stop(now + tone.t + 0.22);
         });
       } else if (type === 'complete') {
         [{ f: 659.25, t: 0 }, { f: 880, t: 0.15 }, { f: 1318.5, t: 0.3 }].forEach(tone => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
-          gain.gain.setValueAtTime(vol, now + tone.t);
-          gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.4);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + tone.t);
-          osc.stop(now + tone.t + 0.4);
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
+          gain.gain.setValueAtTime(vol, now + tone.t); gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.4);
+          osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + tone.t); osc.stop(now + tone.t + 0.4);
         });
       }
     }
@@ -1373,51 +529,27 @@
       const soundType = currentStepData.sound;
 
       if (soundType === 'drum') {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(Math.max(basePitch * 0.35, 120), now);
-        osc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
-        gain.gain.setValueAtTime(vol * 1.2, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.09);
-
-        const clickOsc = audioCtx.createOscillator();
-        const clickGain = audioCtx.createGain();
-        clickOsc.type = 'triangle';
-        clickOsc.frequency.setValueAtTime(800 * runPitchMultiplier, now);
-        clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
-        clickGain.gain.setValueAtTime(vol * 0.7, now);
-        clickGain.gain.linearRampToValueAtTime(0.0001, now + 0.02);
-        clickOsc.connect(clickGain);
-        clickGain.connect(audioCtx.destination);
-        clickOsc.start(now);
-        clickOsc.stop(now + 0.02);
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(Math.max(basePitch * 0.35, 120), now); osc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
+        gain.gain.setValueAtTime(vol * 1.2, now); gain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.09);
+        const clickOsc = audioCtx.createOscillator(); const clickGain = audioCtx.createGain();
+        clickOsc.type = 'triangle'; clickOsc.frequency.setValueAtTime(800 * runPitchMultiplier, now); clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
+        clickGain.gain.setValueAtTime(vol * 0.7, now); clickGain.gain.linearRampToValueAtTime(0.0001, now + 0.02);
+        clickOsc.connect(clickGain); clickGain.connect(audioCtx.destination); clickOsc.start(now); clickOsc.stop(now + 0.02);
         return;
       }
 
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      let dur = 0.05;
-      let startFreq = basePitch;
-      let wave = 'triangle';
-
+      const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+      let dur = 0.05, startFreq = basePitch, wave = 'triangle';
       if (soundType === 'bass') { wave = 'sine'; startFreq = basePitch * 0.3; dur = 0.08; }
       else if (soundType === 'wood') { wave = 'triangle'; startFreq = basePitch; dur = 0.04; }
       else if (soundType === 'beep') { wave = 'sine'; startFreq = basePitch; dur = 0.06; }
       else { wave = 'square'; startFreq = basePitch; dur = 0.02; }
 
-      osc.type = wave;
-      osc.frequency.setValueAtTime(startFreq, now);
-      gain.gain.setValueAtTime(vol * 0.8, now);
-      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now);
-      osc.stop(now + dur);
+      osc.type = wave; osc.frequency.setValueAtTime(startFreq, now);
+      gain.gain.setValueAtTime(vol * 0.8, now); gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+      osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + dur);
     }
 
     function shouldPlaySoundInPattern(beatIdx) {
@@ -1426,27 +558,16 @@
       return activeMeter.pattern[beatIdx % 4] === 1;
     }
 
-    function updateStepIndicator(activeIdx, isSounding) {
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(`ind-${i}`);
-        if (!el) continue;
-        el.className = 'watch-ind-step';
-        if (i === activeIdx && isSounding) el.classList.add('active');
-      }
-    }
-
     function triggerStep() {
       if (!isRunning || isAutoPausedNow) return;
       const stepInCycle = currentBeatIndex % 4;
       const playSound = shouldPlaySoundInPattern(stepInCycle);
       if (playSound) playBeep();
-      updateStepIndicator(stepInCycle, playSound);
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`ind-${i}`);
+        if (el) { el.className = 'watch-ind-step'; if (i === stepInCycle && playSound) el.classList.add('active'); }
+      }
       currentBeatIndex = (currentBeatIndex + 1) % 4;
-    }
-
-    function clearAllTimers() {
-      if (beatTimer) { clearInterval(beatTimer); beatTimer = null; }
-      if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
     }
 
     function syncBpmTimer() {
@@ -1466,307 +587,89 @@
 
     function evaluateRoutine(currentSec) {
       if (!routine || routine.length === 0) return;
-
       let accumulatedSec = 0;
       for (let i = 0; i < routine.length; i++) {
         accumulatedSec += routine[i].durationSec;
-
         if (currentSec < accumulatedSec) {
           const remainingSec = accumulatedSec - currentSec;
           stepRemainingText.textContent = `${i + 1}구간 진행 중 (${formatSecToMinSec(remainingSec)} 남음)`;
-
-          if (remainingSec <= 3 && remainingSec > 0 && currentSec !== lastSecondReported) {
-            playCueSound('countdown');
-            lastSecondReported = currentSec;
-          }
-
+          if (remainingSec <= 3 && remainingSec > 0 && currentSec !== lastSecondReported) { playCueSound('countdown'); lastSecondReported = currentSec; }
           if (currentStepIndex !== i) {
-            currentStepIndex = i;
-            applyCurrentStepToView(routine[i], i);
-            playCueSound('next_step');
-            syncBpmTimer();
+            currentStepIndex = i; applyCurrentStepToView(routine[i], i); playCueSound('next_step'); syncBpmTimer();
           }
           return;
         }
       }
-
       playCueSound('complete');
       onFinishTriggered();
     }
 
-    function pauseTimingAndBeats() {
+    // ----------------------------------------------------
+    // 6. 상태 전환 헬퍼 함수
+    // ----------------------------------------------------
+    function pauseRoutineTimers() {
       baseOffsetMs = elapsedMs;
-      clearAllTimers();
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(`ind-${i}`);
-        if (el) el.className = 'watch-ind-step';
-      }
+      if (beatTimer) { clearInterval(beatTimer); beatTimer = null; }
+      if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+      for (let i = 0; i < 4; i++) { const el = document.getElementById(`ind-${i}`); if (el) el.className = 'watch-ind-step'; }
     }
 
-    function resumeTimingAndBeats() {
+    function resumeRoutineTimers() {
       if (!isRunning || isAutoPausedNow) return;
       startTimeMs = performance.now();
-
       clockTimer = setInterval(() => {
         const now = performance.now();
         elapsedMs = baseOffsetMs + (now - startTimeMs);
         runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
         evaluateRoutine(Math.floor(elapsedMs / 1000));
-        
-        // [새로 추가] 1초 단위가 바뀔 때마다 상태를 백업
-        if (Math.floor(elapsedMs / 100) % 10 === 0) { 
-          saveTempRunState();
-        }
       }, 50);
-
       syncBpmTimer();
     }
 
-    async function requestWakeLock() {
-      if (!('wakeLock' in navigator) || document.hidden) return;
-      try {
-        wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', () => { wakeLock = null; });
-      } catch (e) {
-        wakeLock = null;
-      }
-    }
+    function showRunningControlsUI() { runningBar.style.display = 'flex'; pausedSplitBar.style.display = 'none'; }
+    function showPausedControlsUI() { runningBar.style.display = 'none'; pausedSplitBar.style.display = 'flex'; }
 
-    async function releaseWakeLock() {
-      if (!wakeLock) return;
-      try { await wakeLock.release(); } catch (e) {}
-      wakeLock = null;
-    }
-
-    function showRunningControlsUI() {
-      runningBar.style.display = 'flex';
-      pausedSplitBar.style.display = 'none';
-    }
-
-    function showPausedControlsUI() {
-      runningBar.style.display = 'none';
-      pausedSplitBar.style.display = 'flex';
-    }
-
-    function startRunLoop() {
-      initAudio();
-      startSilentAudio();
-      initMotionSensor();
-      initGeolocation();
-
+    function resumeRunUI() {
+      initAudio(); startSilentAudio();
       isRunning = true;
-      isSystemInterrupted = false;
       isAutoPausedNow = false;
       autoPauseStatusPill.style.display = 'none';
-
-      if (!runSessionStartTime) {
-        runSessionStartTime = new Date();
-      }
-
       showRunningControlsUI();
-      requestWakeLock();
-
-      const now = performance.now();
-      startTimeMs = now;
-
-      clockTimer = setInterval(() => {
-        const currentNow = performance.now();
-        elapsedMs = baseOffsetMs + (currentNow - startTimeMs);
-        runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
-        evaluateRoutine(Math.floor(elapsedMs / 1000));
-        
-        // [새로 추가] 1초 단위가 바뀔 때마다 상태를 백업
-        if (Math.floor(elapsedMs / 100) % 10 === 0) { 
-          saveTempRunState();
-        }
-      }, 50);
-
-      syncBpmTimer();
+      resumeRoutineTimers();
     }
 
-    function pauseRun() {
+    function pauseRunUI() {
       isRunning = false;
-      baseOffsetMs = elapsedMs;
-
-      clearAllTimers();
-      stopSilentAudio();
-      stopGeolocation();
-      releaseWakeLock();
-
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(`ind-${i}`);
-        if (el) el.className = 'watch-ind-step';
-      }
-
-      if (audioCtx && audioCtx.state === 'running') {
-        audioCtx.suspend().catch(() => {});
-      }
-
+      pauseRoutineTimers();
+      silentAudioEl.pause();
+      if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
       showPausedControlsUI();
     }
 
-    function onSingleTapPause() {
-      triggerHaptic(20);
-      pauseRun();
-    }
-
-    function onQuickResume() {
-      triggerHaptic(20);
-      startRunLoop();
-    }
-
-    // 1.25초 롱프레스 완료 시 모달 띄움
-    function onFinishTriggered() {
-      pauseRun();
-      deleteConfirmModal.style.display = 'flex';
-      triggerHaptic([30, 50, 40]);
-    }
-
-    // 취소 클릭 시: 정상 기록 저장 후 report.html로 이동
-    function onCancelDelete() {
-      triggerHaptic(20);
-      deleteConfirmModal.style.display = 'none';
-      saveAndGoToReport();
-    }
-
-    // 확인 클릭 시: 기록 저장 없이 main.html로 이동
-    function onConfirmDelete() {
-      clearTempRunState(); // [새로 추가] 삭제 시 임시저장 비우기
-      triggerHaptic(30);
-      deleteConfirmModal.style.display = 'none';
-      window.location.href = 'main.html';
-    }
-
-    function saveAndGoToReport() {
-      clearTempRunState(); // [새로 추가] 리포트 저장 시 임시저장 비우기
-
-      const remainingDistM = totalDistanceMeters - lastSplitDistanceM;
-      if (remainingDistM > 50) {
-        const splitTimeMs = elapsedMs - lastSplitTimeMs;
-        const splitSec = splitTimeMs / 1000;
-        const splitPaceSec = splitSec / (remainingDistM / 1000);
-
-        splits.push({
-          km: (totalDistanceMeters / 1000).toFixed(2),
-          splitDistanceM: Math.round(remainingDistM),
-          splitTimeSec: Math.round(splitSec),
-          paceFormatted: formatPace(splitPaceSec),
-          avgSpm: currentCalculatedSpm || targetBpmDisplay.textContent,
-          isFinalPartial: true
-        });
-      }
-
-      const totalKm = totalDistanceMeters / 1000;
-      const totalElapsedSec = elapsedMs / 1000;
-      const avgPaceSec = totalKm > 0 ? totalElapsedSec / totalKm : 0;
-
-      const now = runSessionStartTime || new Date();
-      const runRecord = {
-        id: 'run_' + Date.now(),
-        date: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
-        startTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
-        routineTitle: runRoutineTitle.textContent,
-        totalDistanceKm: (totalDistanceMeters / 1000).toFixed(2),
-        totalElapsedMs: elapsedMs,
-        totalDurationFormatted: runTimerDisplay.textContent,
-        avgPaceFormatted: formatPace(avgPaceSec),
-        routineZones: routine.length,
-        splits: splits
-      };
-
-      try {
-        const existing = localStorage.getItem('matempa_run_history');
-        const history = existing ? JSON.parse(existing) : [];
-        history.unshift(runRecord);
-        localStorage.setItem('matempa_run_history', JSON.stringify(history));
-        localStorage.setItem('matempa_last_completed_id', runRecord.id);
-      } catch (e) {
-        console.error('데이터 저장 실패', e);
-      }
-
-      window.location.href = 'report.html';
-    }
-
-    // 1.25초 홀드 바인딩
+    // ----------------------------------------------------
+    // 7. Finish (롱프레스) 바인딩
+    // ----------------------------------------------------
     const FINISH_CIRCUMFERENCE = 2 * Math.PI * 30;
     const FINISH_HOLD_DURATION_MS = 1250;
-
     function setupFinishHoldButton(buttonEl, progressEl, onCompleteCallback) {
-      let holdTimer = null;
-      let holdStartTime = 0;
-
-      const setProgress = (percent) => {
-        const offset = FINISH_CIRCUMFERENCE - (percent / 100) * FINISH_CIRCUMFERENCE;
-        progressEl.style.strokeDashoffset = offset;
-      };
-
-      const cancelHold = () => {
-        if (holdTimer) {
-          cancelAnimationFrame(holdTimer);
-          holdTimer = null;
-        }
-        setProgress(0);
-      };
-
+      let holdTimer = null, holdStartTime = 0;
+      const setProgress = (percent) => { progressEl.style.strokeDashoffset = FINISH_CIRCUMFERENCE - (percent / 100) * FINISH_CIRCUMFERENCE; };
+      const cancelHold = () => { if (holdTimer) cancelAnimationFrame(holdTimer); holdTimer = null; setProgress(0); };
       const updateProgress = (timestamp) => {
-        const elapsed = timestamp - holdStartTime;
-        const percent = Math.min((elapsed / FINISH_HOLD_DURATION_MS) * 100, 100);
+        const percent = Math.min(((timestamp - holdStartTime) / FINISH_HOLD_DURATION_MS) * 100, 100);
         setProgress(percent);
-
-        if (percent < 100) {
-          holdTimer = requestAnimationFrame(updateProgress);
-        } else {
-          cancelHold();
-          onCompleteCallback();
-        }
+        if (percent < 100) holdTimer = requestAnimationFrame(updateProgress); else { cancelHold(); onCompleteCallback(); }
       };
-
-      const startHold = (e) => {
-        e.preventDefault();
-        triggerHaptic(15);
-        holdStartTime = performance.now();
-        holdTimer = requestAnimationFrame(updateProgress);
-      };
-
-      buttonEl.addEventListener('pointerdown', startHold);
-      buttonEl.addEventListener('pointerup', cancelHold);
-      buttonEl.addEventListener('pointerleave', cancelHold);
-      buttonEl.addEventListener('pointercancel', cancelHold);
+      const startHold = (e) => { e.preventDefault(); triggerHaptic(15); holdStartTime = performance.now(); holdTimer = requestAnimationFrame(updateProgress); };
+      buttonEl.addEventListener('pointerdown', startHold); buttonEl.addEventListener('pointerup', cancelHold); buttonEl.addEventListener('pointerleave', cancelHold); buttonEl.addEventListener('pointercancel', cancelHold);
     }
+    setupFinishHoldButton(finishHoldBtn, finishHoldProgress, onFinishTriggered);
 
-    setupFinishHoldButton(finishHoldBtn, finishHoldProgress, () => {
-      onFinishTriggered();
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        // [새로 추가] 화면이 가려지면 즉시 임시 저장
-        if (isRunning) saveTempRunState(); 
-      } else {
-        // 화면으로 돌아왔을 때
-        if (isRunning) {
-          requestWakeLock();
-          if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().then(() => { isSystemInterrupted = false; }).catch(() => {});
-          }
-          startSilentAudio();
-        }
-      }
-    });
-
-    window.addEventListener('pageshow', () => {
-      if (isRunning) {
-        requestWakeLock();
-        startSilentAudio();
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume().catch(() => {});
-        }
-      }
-    });
-
+    // ----------------------------------------------------
+    // 8. 초기 설정 (onload)
+    // ----------------------------------------------------
     window.onload = () => {
       loadSavedSoundSettings();
-
       try {
         const slot = localStorage.getItem('matempa_active_slot');
         if (slot !== null) activeSlot = parseInt(slot);
@@ -1774,9 +677,7 @@
         runRoutineTitle.textContent = customTitle ? customTitle : `ROUTINE #${activeSlot + 1}`;
         const saved = localStorage.getItem(`matempa_routine_slot_${activeSlot}`);
         routine = saved ? JSON.parse(saved) : [];
-      } catch (e) {
-        routine = [];
-      }
+      } catch (e) { routine = []; }
 
       if (!routine || routine.length === 0) {
         alert('등록된 구간 데이터가 없습니다. 설정 화면으로 돌아갑니다.');
@@ -1784,67 +685,15 @@
         return;
       }
 
-      // --- [새로 추가] 강제 종료된 기록 복구 로직 ---
-      const ongoingRunRaw = localStorage.getItem('matempa_ongoing_run');
-      if (ongoingRunRaw) {
-        try {
-          const ongoingRun = JSON.parse(ongoingRunRaw);
-          if (confirm('비정상 종료된 러닝 기록이 있습니다. 이어서 달리시겠습니까?')) {
-            currentStepIndex = ongoingRun.currentStepIndex || 0;
-            elapsedMs = ongoingRun.elapsedMs || 0;
-            baseOffsetMs = elapsedMs; // 일시정지 상태로 시작하기 위함
-            totalDistanceMeters = ongoingRun.totalDistanceMeters || 0;
-            lastSplitDistanceM = ongoingRun.lastSplitDistanceM || 0;
-            lastSplitTimeMs = ongoingRun.lastSplitTimeMs || 0;
-            splits = ongoingRun.splits || [];
-            runSessionStartTime = ongoingRun.runSessionStartTime ? new Date(ongoingRun.runSessionStartTime) : null;
-            
-            // 화면 UI 복구
-            updateDistanceUI();
-            runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
-            applyCurrentStepToView(routine[currentStepIndex], currentStepIndex);
-            evaluateRoutine(Math.floor(elapsedMs / 1000));
-            
-            // 데이터 복구 후 '일시정지' 상태로 둡니다. (사용자가 RESUME을 눌러야 다시 시작)
-            isSystemInterrupted = false;
-            pauseRun(); 
-            return; // 복구 완료 후 종료 (startRunLoop 자동 실행 방지)
-          } else {
-            clearTempRunState(); // 새로 시작한다고 하면 기존 임시 데이터 삭제
-          }
-        } catch(e) {
-          clearTempRunState();
-        }
-      }
-      // ---------------------------------------------
-
-      currentStepIndex = 0;
-      currentBeatIndex = 0;
-      elapsedMs = 0;
-      baseOffsetMs = 0;
-      totalDistanceMeters = 0;
-      lastSplitDistanceM = 0;
-      lastSplitTimeMs = 0;
-      splits = [];
-      runSessionStartTime = null;
-      lastSecondReported = -1;
-
-      // 새 러닝 세션에서는 GPS 필터 기준점도 초기화합니다.
-      recentSpeeds = [];
-      lastGpsPosition = null;
-      acceptedGpsPosition = null;
-      acceptedGpsTime = 0;
-      pauseAnchorCoords = null;
-      lastGpsPositionTime = 0;
-      lastGpsSpeed = 0;
-      gpsDistanceSpeed = 0;
-      gpsMovingConfidence = 0;
-
-      updateDistanceUI();
+      // 초기화
+      currentStepIndex = 0; currentBeatIndex = 0; elapsedMs = 0; baseOffsetMs = 0; lastSecondReported = -1;
       runTimerDisplay.textContent = formatPrecisionTimer(0);
       applyCurrentStepToView(routine[0], 0);
+      
+      // 앱 구동 즉시 Flutter에 준비 완료 및 시작 알림
+      sendToFlutter('START_RUN');
       playCueSound('next_step');
-      startRunLoop();
+      resumeRunUI();
     };
   </script>
 </body>
