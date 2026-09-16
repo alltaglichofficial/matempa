@@ -628,10 +628,16 @@
     let pauseAnchorCoords = null;
     let lastStepDetectTime = 0;
 
-    const MIN_VALID_RUN_SPEED = 0.7; 
-    const MIN_GPS_DISTANCE_M = 1.2;
-    const MAX_GPS_DISTANCE_M = 60.0;
-    const GPS_MAX_ACCURACY_M = 25.0;
+    // GPS 거리 필터 정책
+    const MIN_VALID_RUN_SPEED = 0.7;
+    const MAX_VALID_RUN_SPEED = 8.5;       // 30.6 km/h
+    const MIN_GPS_DISTANCE_M = 1.5;
+    const GPS_MAX_ACCURACY_M = 35.0;
+    const GPS_GOOD_ACCURACY_M = 15.0;
+    const GPS_JUMP_SPEED_MPS = 12.0;       // 순간 튐 판정용
+    const GPS_MAX_LOOKBACK_MS = 10000;
+    const GPS_STATIONARY_SPEED_MPS = 0.7;
+    const GPS_DISTANCE_CONFIRM_M = 2.0;
 
     let currentStepIndex = 0;
     let currentBeatIndex = 0;
@@ -670,7 +676,33 @@
     let lastGpsSpeed = 0;
     let gpsUpdateCounter = 0; // GPS 수신 횟수 카운터
 
+    // GPS 거리 필터 상태
+    let acceptedGpsPosition = null;
+    let acceptedGpsTime = 0;
+    let gpsDistanceSpeed = 0;
+    let gpsMovingConfidence = 0;
+
     let wakeLock = null;
+
+    // --- [새로 추가] 러닝 상태 임시 저장 로직 ---
+    function saveTempRunState() {
+      if (!isRunning && elapsedMs === 0) return; // 시작 전이면 저장 안 함
+      const tempState = {
+        activeSlot,
+        currentStepIndex,
+        elapsedMs,
+        totalDistanceMeters,
+        lastSplitDistanceM,
+        lastSplitTimeMs,
+        splits,
+        runSessionStartTime: runSessionStartTime ? runSessionStartTime.toISOString() : null
+      };
+      localStorage.setItem('matempa_ongoing_run', JSON.stringify(tempState));
+    }
+
+    function clearTempRunState() {
+      localStorage.removeItem('matempa_ongoing_run');
+    }
 
     const METERS = {
       'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
@@ -867,6 +899,173 @@
     }
 
     // --- GPS 모듈 및 실시간 진단 로직 ---
+    function getPositionTime(position) {
+      const t = Number(position.timestamp);
+      return Number.isFinite(t) && t > 0 ? t : Date.now();
+    }
+
+    function isFiniteCoordinate(coords) {
+      return coords &&
+        Number.isFinite(Number(coords.latitude)) &&
+        Number.isFinite(Number(coords.longitude));
+    }
+
+    // GPS 1회 수신값의 신뢰도를 계산합니다.
+    function getGpsQuality(accuracy) {
+      if (!Number.isFinite(accuracy) || accuracy <= 0) return 0;
+      if (accuracy <= GPS_GOOD_ACCURACY_M) return 1;
+      if (accuracy <= GPS_MAX_ACCURACY_M) {
+        return 1 - ((accuracy - GPS_GOOD_ACCURACY_M) /
+          (GPS_MAX_ACCURACY_M - GPS_GOOD_ACCURACY_M)) * 0.5;
+      }
+      return 0;
+    }
+
+    // 현재 GPS 좌표에서 실제 거리 누적에 사용할 값만 선택합니다.
+    function filterAndAccumulateGpsDistance(position) {
+      const coords = position.coords;
+      const accuracy = Number(coords.accuracy);
+      const now = getPositionTime(position);
+
+      if (!isFiniteCoordinate(coords)) return;
+
+      // 최초 유효 위치는 기준점으로만 사용합니다.
+      if (!acceptedGpsPosition) {
+        acceptedGpsPosition = {
+          latitude: Number(coords.latitude),
+          longitude: Number(coords.longitude)
+        };
+        acceptedGpsTime = now;
+        gpsDistanceSpeed = 0;
+        gpsMovingConfidence = 0;
+        return;
+      }
+
+      let dtMs = now - acceptedGpsTime;
+      if (!Number.isFinite(dtMs) || dtMs <= 0) return;
+
+      // 너무 오래 끊겼다가 들어온 좌표는 한 번에 거리로 더하지 않습니다.
+      if (dtMs > GPS_MAX_LOOKBACK_MS) {
+        acceptedGpsPosition = {
+          latitude: Number(coords.latitude),
+          longitude: Number(coords.longitude)
+        };
+        acceptedGpsTime = now;
+        gpsDistanceSpeed = 0;
+        gpsMovingConfidence = 0;
+        return;
+      }
+
+      const movedMeters = calculateDistanceMeters(
+        acceptedGpsPosition.latitude,
+        acceptedGpsPosition.longitude,
+        Number(coords.latitude),
+        Number(coords.longitude)
+      );
+
+      const dtSec = dtMs / 1000;
+      const derivedSpeed = movedMeters / dtSec;
+      const reportedSpeed =
+        coords.speed !== null && Number.isFinite(Number(coords.speed)) && Number(coords.speed) >= 0
+          ? Number(coords.speed)
+          : null;
+
+      // 허용 가능한 순간 최고속도. 시간이 길수록 최대 이동거리도 비례해서 늘립니다.
+      const maxPlausibleDistance = Math.max(
+        25,
+        GPS_JUMP_SPEED_MPS * dtSec,
+        (MAX_VALID_RUN_SPEED + 2) * dtSec
+      );
+
+      // GPS가 정확하지 않은 상태에서 작은 움직임은 대부분 좌표 흔들림일 수 있습니다.
+      // 정확도가 좋으면 1.5~2m 정도부터, 나쁘면 조금 더 큰 이동만 인정합니다.
+      const noiseThreshold = Math.max(
+        MIN_GPS_DISTANCE_M,
+        Math.min(accuracy * 0.22, 6.0)
+      );
+
+      // ① 너무 큰 순간 이동 → GPS 튐으로 처리
+      if (movedMeters > maxPlausibleDistance) {
+        gpsMovingConfidence = Math.max(0, gpsMovingConfidence - 1);
+        // 튄 좌표를 기준점으로 삼지 않고, 다음 수신값에서 다시 이어붙입니다.
+        return;
+      }
+
+      // ② 거의 제자리인 작은 이동 → 누적하지 않음
+      if (movedMeters < noiseThreshold) {
+        gpsMovingConfidence = Math.max(0, gpsMovingConfidence - 0.5);
+        // 정지 중에는 기준점을 최신 좌표로 천천히 따라가 GPS 드리프트를 줄입니다.
+        if (reportedSpeed === null || reportedSpeed < GPS_STATIONARY_SPEED_MPS) {
+          acceptedGpsPosition = {
+            latitude: Number(coords.latitude),
+            longitude: Number(coords.longitude)
+          };
+          acceptedGpsTime = now;
+        }
+        gpsDistanceSpeed = 0;
+        return;
+      }
+
+      // ③ GPS 속도와 좌표로 계산한 속도가 크게 다르면 신뢰도를 낮춤
+      let speedAgreement = 1;
+      if (reportedSpeed !== null && reportedSpeed <= MAX_VALID_RUN_SPEED + 2) {
+        const speedRatioBase = Math.max(reportedSpeed, 0.8);
+        const speedRatio = derivedSpeed / speedRatioBase;
+
+        // GPS 거리로 계산한 속도가 기기 GPS 속도와 과하게 다르면 한 번 더 보수적으로 판단
+        if (speedRatio > 2.2 || speedRatio < 0.35) {
+          speedAgreement = 0.4;
+        } else if (speedRatio > 1.7 || speedRatio < 0.55) {
+          speedAgreement = 0.7;
+        }
+      }
+
+      // ④ 러닝 속도 범위를 벗어난 좌표는 거리 누적하지 않음
+      // 단, 천천히 달리는 구간은 0.7m/s까지 허용합니다.
+      const effectiveSpeed = reportedSpeed !== null ? reportedSpeed : derivedSpeed;
+      const speedIsPlausible =
+        effectiveSpeed >= MIN_VALID_RUN_SPEED &&
+        effectiveSpeed <= MAX_VALID_RUN_SPEED;
+
+      if (!speedIsPlausible && gpsMovingConfidence === 0) {
+        // GPS speed가 0으로 들어오는 기종도 있어서,
+        // 거리 기반 속도가 현실적인 경우에는 첫 1~2회 정도만 보류합니다.
+        if (derivedSpeed < MIN_VALID_RUN_SPEED) return;
+      }
+
+      // ⑤ 이동으로 확인되는 연속 좌표가 쌓일수록 신뢰도 상승
+      gpsMovingConfidence = Math.min(
+        5,
+        gpsMovingConfidence + (speedAgreement >= 0.7 ? 1 : 0.5)
+      );
+
+      // 실제 거리로 인정
+      if (
+        movedMeters >= GPS_DISTANCE_CONFIRM_M &&
+        (gpsMovingConfidence >= 1 || speedIsPlausible)
+      ) {
+        // 현재 구간 속도를 GPS 거리 기반으로 계산하고 부드럽게 평균냅니다.
+        gpsDistanceSpeed = derivedSpeed;
+
+        // 정확도가 좋고 GPS 속도가 정상이라면 기기 speed를 보정 참고값으로 사용
+        if (reportedSpeed !== null && reportedSpeed >= MIN_VALID_RUN_SPEED && reportedSpeed <= MAX_VALID_RUN_SPEED) {
+          gpsDistanceSpeed = (derivedSpeed * 0.55) + (reportedSpeed * 0.45);
+        }
+
+        addDistance(movedMeters);
+
+        acceptedGpsPosition = {
+          latitude: Number(coords.latitude),
+          longitude: Number(coords.longitude)
+        };
+        acceptedGpsTime = now;
+      } else {
+        // 아직 충분히 확실하지 않은 움직임은 기준점도 이동시키지 않아
+        // 다음 좌표에서 연속적인 방향/거리 변화를 확인할 수 있게 합니다.
+        return;
+      }
+    }
+
     function initGeolocation() {
       if (!('geolocation' in navigator)) {
         gpsDot.className = 'gps-dot bad';
@@ -886,76 +1085,119 @@
           gpsUpdateCounter++;
 
           const accuracy = Number(coords.accuracy);
-          const speed = coords.speed !== null && !isNaN(coords.speed) && coords.speed >= 0 ? coords.speed : 0;
+          const speed =
+            coords.speed !== null &&
+            !isNaN(coords.speed) &&
+            coords.speed >= 0
+              ? coords.speed
+              : 0;
+
           const speedKmh = (speed * 3.6).toFixed(1);
 
           // 진단 패널 갱신
           gpsTickCount.textContent = `수신 ${gpsUpdateCounter}회`;
-          gpsCoordsText.textContent = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
-          gpsAccSpeed.textContent = `±${accuracy.toFixed(1)}m / ${speedKmh} km/h`;
+          gpsCoordsText.textContent =
+            `${Number(coords.latitude).toFixed(5)}, ${Number(coords.longitude).toFixed(5)}`;
+          gpsAccSpeed.textContent =
+            `±${Number.isFinite(accuracy) ? accuracy.toFixed(1) : '--'}m / ${speedKmh} km/h`;
 
-          // 오차 25m 이내면 정상(초록색), 초과하면 불량(빨간색)
-          if (accuracy <= GPS_MAX_ACCURACY_M) {
+          if (Number.isFinite(accuracy) && accuracy <= GPS_GOOD_ACCURACY_M) {
             gpsDot.className = 'gps-dot ok';
-            gpsStateText.textContent = 'GPS 정상 수신 중 (양호)';
+            gpsStateText.textContent = 'GPS 정상 수신 중 (정확)';
+          } else if (Number.isFinite(accuracy) && accuracy <= GPS_MAX_ACCURACY_M) {
+            gpsDot.className = 'gps-dot ok';
+            gpsStateText.textContent = 'GPS 수신 중 (보통)';
           } else {
             gpsDot.className = 'gps-dot bad';
             gpsStateText.textContent = '신호 불안정 (오차 큼)';
-            return; // 오차 25m 이상 좌표는 거리 계산 배제
+            // 부정확한 좌표는 거리 누적에 사용하지 않음
+            return;
           }
 
-          let movedMeters = 0;
-          if (lastGpsPosition) {
-            movedMeters = calculateDistanceMeters(
-              lastGpsPosition.latitude,
-              lastGpsPosition.longitude,
-              coords.latitude,
-              coords.longitude
-            );
-          }
-
-          lastGpsSpeed = speed;
-
-          // 오토포즈 해제 조건 검증: 케이던스 80 이상 & 2m 이상 이동
+          // 오토포즈 상태에서는 거리 누적을 하지 않고 재출발만 검사
           if (isAutoPausedNow) {
             let anchorMoved = 0;
+
             if (pauseAnchorCoords) {
               anchorMoved = calculateDistanceMeters(
                 pauseAnchorCoords.latitude,
                 pauseAnchorCoords.longitude,
-                coords.latitude,
-                coords.longitude
+                Number(coords.latitude),
+                Number(coords.longitude)
               );
-            } else {
-              anchorMoved = movedMeters;
             }
 
-            if (currentCalculatedSpm >= RESUME_SPM_TRIGGER && anchorMoved >= RESUME_DISTANCE_M) {
+            const reportedSpeed =
+              coords.speed !== null &&
+              !isNaN(coords.speed) &&
+              coords.speed >= 0
+                ? coords.speed
+                : 0;
+
+            // 케이던스 + GPS 속도 + 실제 이동을 함께 확인해야 재개
+            const hasMovement =
+              reportedSpeed >= MIN_VALID_RUN_SPEED ||
+              anchorMoved >= RESUME_DISTANCE_M;
+
+            if (
+              currentCalculatedSpm >= RESUME_SPM_TRIGGER &&
+              anchorMoved >= RESUME_DISTANCE_M &&
+              hasMovement
+            ) {
               resumeFromAutoPause();
+
+              // 재개 직후 현재 좌표를 새 기준점으로 잡아 순간 점프를 방지
+              acceptedGpsPosition = {
+                latitude: Number(coords.latitude),
+                longitude: Number(coords.longitude)
+              };
+              acceptedGpsTime = getPositionTime(position);
+              gpsMovingConfidence = 1;
             }
 
-            lastGpsPosition = { latitude: coords.latitude, longitude: coords.longitude };
+            lastGpsPosition = {
+              latitude: Number(coords.latitude),
+              longitude: Number(coords.longitude)
+            };
             lastGpsPositionTime = now;
+            lastGpsSpeed = speed;
             return;
           }
 
-          // 정상 누적
-          if (lastGpsPosition && movedMeters >= MIN_GPS_DISTANCE_M && movedMeters <= MAX_GPS_DISTANCE_M) {
-            addDistance(movedMeters);
-          }
+          filterAndAccumulateGpsDistance(position);
 
-          if (speed >= MIN_VALID_RUN_SPEED && speed <= 8.5) {
-            recentSpeeds.push(speed);
-            if (recentSpeeds.length > 5) recentSpeeds.shift();
-            currentCalculatedSpeed = recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+          lastGpsSpeed = speed;
+
+          // 속도는 GPS speed + 최근 수신값 평균으로 부드럽게 표시
+          const displaySpeed =
+            gpsDistanceSpeed >= MIN_VALID_RUN_SPEED
+              ? gpsDistanceSpeed
+              : speed;
+
+          if (
+            displaySpeed >= MIN_VALID_RUN_SPEED &&
+            displaySpeed <= MAX_VALID_RUN_SPEED
+          ) {
+            recentSpeeds.push(displaySpeed);
+            if (recentSpeeds.length > 6) recentSpeeds.shift();
+
+            currentCalculatedSpeed =
+              recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+
             updatePaceFromSpeed(currentCalculatedSpeed);
           } else {
-            currentCalculatedSpeed = 0;
-            recentSpeeds = [];
-            livePaceDisplay.textContent = `--'--"`;
+            // GPS 한 번의 0 또는 이상치 때문에 즉시 pace를 지우지 않음
+            if (recentSpeeds.length > 0) {
+              currentCalculatedSpeed =
+                recentSpeeds.reduce((a, b) => a + b, 0) / recentSpeeds.length;
+              updatePaceFromSpeed(currentCalculatedSpeed);
+            }
           }
 
-          lastGpsPosition = { latitude: coords.latitude, longitude: coords.longitude };
+          lastGpsPosition = {
+            latitude: Number(coords.latitude),
+            longitude: Number(coords.longitude)
+          };
           lastGpsPositionTime = now;
         },
         (err) => {
@@ -968,7 +1210,11 @@
             gpsStateText.textContent = '수신 타임아웃';
           }
         },
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 8000 }
+        {
+          enableHighAccuracy: true,
+          maximumAge: 1000,
+          timeout: 8000
+        }
       );
     }
 
@@ -977,11 +1223,16 @@
         navigator.geolocation.clearWatch(geoWatchId);
         geoWatchId = null;
       }
+
       recentSpeeds = [];
       lastGpsPosition = null;
+      acceptedGpsPosition = null;
+      acceptedGpsTime = 0;
       pauseAnchorCoords = null;
       lastGpsPositionTime = 0;
       lastGpsSpeed = 0;
+      gpsDistanceSpeed = 0;
+      gpsMovingConfidence = 0;
     }
 
     // 모션 센서
@@ -1261,6 +1512,11 @@
         elapsedMs = baseOffsetMs + (now - startTimeMs);
         runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
         evaluateRoutine(Math.floor(elapsedMs / 1000));
+        
+        // [새로 추가] 1초 단위가 바뀔 때마다 상태를 백업
+        if (Math.floor(elapsedMs / 100) % 10 === 0) { 
+          saveTempRunState();
+        }
       }, 50);
 
       syncBpmTimer();
@@ -1318,6 +1574,11 @@
         elapsedMs = baseOffsetMs + (currentNow - startTimeMs);
         runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
         evaluateRoutine(Math.floor(elapsedMs / 1000));
+        
+        // [새로 추가] 1초 단위가 바뀔 때마다 상태를 백업
+        if (Math.floor(elapsedMs / 100) % 10 === 0) { 
+          saveTempRunState();
+        }
       }, 50);
 
       syncBpmTimer();
@@ -1370,12 +1631,15 @@
 
     // 확인 클릭 시: 기록 저장 없이 main.html로 이동
     function onConfirmDelete() {
+      clearTempRunState(); // [새로 추가] 삭제 시 임시저장 비우기
       triggerHaptic(30);
       deleteConfirmModal.style.display = 'none';
       window.location.href = 'main.html';
     }
 
     function saveAndGoToReport() {
+      clearTempRunState(); // [새로 추가] 리포트 저장 시 임시저장 비우기
+
       const remainingDistM = totalDistanceMeters - lastSplitDistanceM;
       if (remainingDistM > 50) {
         const splitTimeMs = elapsedMs - lastSplitTimeMs;
@@ -1475,12 +1739,18 @@
     });
 
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && isRunning) {
-        requestWakeLock();
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume().then(() => { isSystemInterrupted = false; }).catch(() => {});
+      if (document.hidden) {
+        // [새로 추가] 화면이 가려지면 즉시 임시 저장
+        if (isRunning) saveTempRunState(); 
+      } else {
+        // 화면으로 돌아왔을 때
+        if (isRunning) {
+          requestWakeLock();
+          if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().then(() => { isSystemInterrupted = false; }).catch(() => {});
+          }
+          startSilentAudio();
         }
-        startSilentAudio();
       }
     });
 
@@ -1514,6 +1784,40 @@
         return;
       }
 
+      // --- [새로 추가] 강제 종료된 기록 복구 로직 ---
+      const ongoingRunRaw = localStorage.getItem('matempa_ongoing_run');
+      if (ongoingRunRaw) {
+        try {
+          const ongoingRun = JSON.parse(ongoingRunRaw);
+          if (confirm('비정상 종료된 러닝 기록이 있습니다. 이어서 달리시겠습니까?')) {
+            currentStepIndex = ongoingRun.currentStepIndex || 0;
+            elapsedMs = ongoingRun.elapsedMs || 0;
+            baseOffsetMs = elapsedMs; // 일시정지 상태로 시작하기 위함
+            totalDistanceMeters = ongoingRun.totalDistanceMeters || 0;
+            lastSplitDistanceM = ongoingRun.lastSplitDistanceM || 0;
+            lastSplitTimeMs = ongoingRun.lastSplitTimeMs || 0;
+            splits = ongoingRun.splits || [];
+            runSessionStartTime = ongoingRun.runSessionStartTime ? new Date(ongoingRun.runSessionStartTime) : null;
+            
+            // 화면 UI 복구
+            updateDistanceUI();
+            runTimerDisplay.textContent = formatPrecisionTimer(elapsedMs);
+            applyCurrentStepToView(routine[currentStepIndex], currentStepIndex);
+            evaluateRoutine(Math.floor(elapsedMs / 1000));
+            
+            // 데이터 복구 후 '일시정지' 상태로 둡니다. (사용자가 RESUME을 눌러야 다시 시작)
+            isSystemInterrupted = false;
+            pauseRun(); 
+            return; // 복구 완료 후 종료 (startRunLoop 자동 실행 방지)
+          } else {
+            clearTempRunState(); // 새로 시작한다고 하면 기존 임시 데이터 삭제
+          }
+        } catch(e) {
+          clearTempRunState();
+        }
+      }
+      // ---------------------------------------------
+
       currentStepIndex = 0;
       currentBeatIndex = 0;
       elapsedMs = 0;
@@ -1524,6 +1828,17 @@
       splits = [];
       runSessionStartTime = null;
       lastSecondReported = -1;
+
+      // 새 러닝 세션에서는 GPS 필터 기준점도 초기화합니다.
+      recentSpeeds = [];
+      lastGpsPosition = null;
+      acceptedGpsPosition = null;
+      acceptedGpsTime = 0;
+      pauseAnchorCoords = null;
+      lastGpsPositionTime = 0;
+      lastGpsSpeed = 0;
+      gpsDistanceSpeed = 0;
+      gpsMovingConfidence = 0;
 
       updateDistanceUI();
       runTimerDisplay.textContent = formatPrecisionTimer(0);
