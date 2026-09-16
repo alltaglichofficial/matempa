@@ -7,7 +7,6 @@
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#dbe7ee">
 
   <style>
@@ -37,6 +36,7 @@
       max-width: 360px;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .header-nav {
@@ -410,7 +410,7 @@
     }
     .save-profile-btn:active { transform: scale(0.96); }
 
-    /* 모바일 키보드 플로팅 확인(완료) 툴바 */
+    /* 모바일 키보드 플로팅 확인 바 */
     .keyboard-done-bar {
       position: fixed;
       bottom: 0;
@@ -448,6 +448,67 @@
     }
     .btn-kbd-done:active {
       transform: scale(0.95);
+    }
+
+    /* 저장 확인 팝업 모달 */
+    .confirm-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .confirm-modal-box {
+      width: 100%;
+      max-width: 300px;
+      background: #1c1c1e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .confirm-modal-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+    .confirm-modal-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .modal-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .modal-btn:active { transform: scale(0.95); }
+    .btn-modal-cancel {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    .btn-modal-confirm {
+      background: #111111;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
@@ -782,12 +843,23 @@
 
     </div>
 
-    <!-- 저장 버튼 -->
-    <button class="save-profile-btn" onclick="saveProfileData()">프로필 저장하기 ▶</button>
+    <!-- 저장 버튼 (클릭 시 확인 팝업 모달 호출) -->
+    <button class="save-profile-btn" onclick="openSaveConfirmModal()">프로필 저장하기 ▶</button>
+
+    <!-- 저장 확인 팝업 모달 -->
+    <div class="confirm-modal-overlay" id="saveConfirmModal">
+      <div class="confirm-modal-box">
+        <div class="confirm-modal-title">저장하시겠습니까?</div>
+        <div class="confirm-modal-btn-group">
+          <button class="modal-btn btn-modal-cancel" onclick="closeSaveConfirmModal()">취소</button>
+          <button class="modal-btn btn-modal-confirm" onclick="executeProfileSave()">확인</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 
-  <!-- 모바일 키보드 전용 플로팅 확인(완료) 바 -->
+  <!-- 모바일 키보드 확인 바 -->
   <div class="keyboard-done-bar" id="keyboardDoneBar">
     <button class="btn-kbd-done" type="button" onclick="closeActiveKeyboard()">✓ 입력 완료</button>
   </div>
@@ -821,9 +893,6 @@
       document.getElementById('gender-female').classList.toggle('selected', gender === 'female');
     }
 
-    /* ----------------------------------------------------
-       키보드 닫기 및 툴바 제어 함수
-    ---------------------------------------------------- */
     function closeActiveKeyboard() {
       triggerHaptic(10);
       if (document.activeElement && document.activeElement.tagName === 'INPUT') {
@@ -833,9 +902,6 @@
       if (bar) bar.classList.remove('show');
     }
 
-    /* ----------------------------------------------------
-       리셋(초기화) 기능
-    ---------------------------------------------------- */
     function resetBasicProfile() {
       triggerHaptic(15);
       currentGender = null;
@@ -875,9 +941,6 @@
       document.getElementById('badge-summary-fastest').textContent = '--';
     }
 
-    /* ----------------------------------------------------
-       대회별 PB 자동 연동 (Auto-fill)
-    ---------------------------------------------------- */
     const standardDistances = [
       { key: '5k', km: 5.00 },
       { key: '10k', km: 10.00 },
@@ -905,9 +968,6 @@
       });
     }
 
-    /* ----------------------------------------------------
-       1. 최장 거리 기록 연동
-    ---------------------------------------------------- */
     function onMaxDistanceOrTimeChange(isHourChanged = false) {
       const dist = parseFloat(document.getElementById('maxDistance').value) || 0;
       const hInput = document.getElementById('tmax-h');
@@ -963,9 +1023,6 @@
       updateAllSummaries();
     }
 
-    /* ----------------------------------------------------
-       2. 최단시간 최장거리 기록 연동
-    ---------------------------------------------------- */
     function onFastestDistanceOrTimeChange(isHourChanged = false) {
       const dist = parseFloat(document.getElementById('fastestDistance').value) || 0;
       const hInput = document.getElementById('tfastest-h');
@@ -1019,9 +1076,6 @@
       updateAllSummaries();
     }
 
-    /* ----------------------------------------------------
-       3. 대회별 PB 기록 연동
-    ---------------------------------------------------- */
     function onPbTimeChange(key, distanceKm, shouldUpdateSummary = true, isHourChanged = false) {
       const hInput = document.getElementById(`t${key}-h`);
       const mInput = document.getElementById(`t${key}-m`);
@@ -1078,11 +1132,7 @@
       if (shouldUpdateSummary) updateAllSummaries();
     }
 
-    /* ----------------------------------------------------
-       4. 요약 배지 갱신
-    ---------------------------------------------------- */
     function updateAllSummaries() {
-      // 1) 최장 거리 요약
       const maxDist = parseFloat(document.getElementById('maxDistance').value) || 0;
       const mh = parseInt(document.getElementById('tmax-h').value) || 0;
       const mm = parseInt(document.getElementById('tmax-m').value) || 0;
@@ -1100,7 +1150,6 @@
       maxBadge.textContent = maxText;
       maxBlockBadge.textContent = maxText;
 
-      // 2) 최단시간 최장거리 요약
       const fastestDist = parseFloat(document.getElementById('fastestDistance').value) || 0;
       const fh = parseInt(document.getElementById('tfastest-h').value) || 0;
       const fm = parseInt(document.getElementById('tfastest-m').value) || 0;
@@ -1118,7 +1167,6 @@
       fastestBadge.textContent = fastestText;
       fastestBlockBadge.textContent = fastestText;
 
-      // 3) 대회별 PB 요약
       const pbBadge = document.getElementById('badge-summary-pb');
       const pbList = [];
 
@@ -1145,9 +1193,25 @@
     }
 
     /* ----------------------------------------------------
-       5. 저장 및 복원
+       저장 확인 모달 컨트롤
     ---------------------------------------------------- */
-    function saveProfileData() {
+    const saveConfirmModal = document.getElementById('saveConfirmModal');
+
+    function openSaveConfirmModal() {
+      triggerHaptic(20);
+      closeActiveKeyboard();
+      saveConfirmModal.style.display = 'flex';
+    }
+
+    function closeSaveConfirmModal() {
+      triggerHaptic(10);
+      saveConfirmModal.style.display = 'none';
+    }
+
+    /* ----------------------------------------------------
+       실제 프로필 데이터 저장 및 페이지 전환
+    ---------------------------------------------------- */
+    function executeProfileSave() {
       triggerHaptic(30);
 
       const profileData = {
@@ -1214,7 +1278,9 @@
 
       try {
         localStorage.setItem('matempa_user_profile', JSON.stringify(profileData));
-      } catch (e) {}
+      } catch (e) {
+        console.error("프로필 저장 실패", e);
+      }
 
       window.location.href = 'result.html';
     }
@@ -1222,7 +1288,6 @@
     window.onload = () => {
       const doneBar = document.getElementById('keyboardDoneBar');
 
-      // 인풋 포커스 시 확인(완료) 툴바 표시, 포커스 아웃 시 숨김
       document.querySelectorAll('input').forEach(input => {
         input.addEventListener('focus', () => {
           doneBar.classList.add('show');
@@ -1236,7 +1301,6 @@
           }, 100);
         });
 
-        // 엔터 키 누르면 다음 칸으로 안 가고 즉시 닫기
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -1245,9 +1309,8 @@
         });
       });
 
-      // 배경 클릭 시에도 키보드 닫기
       document.body.addEventListener('click', (e) => {
-        if (!e.target.closest('input') && !e.target.closest('button') && !e.target.closest('#keyboardDoneBar')) {
+        if (!e.target.closest('input') && !e.target.closest('button') && !e.target.closest('#keyboardDoneBar') && !e.target.closest('.confirm-modal-box')) {
           closeActiveKeyboard();
         }
       });

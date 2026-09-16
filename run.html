@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MA.TEMPA - RUN</title>
+  <title>MA.TEMPA - RUN (GPS CHECK)</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -83,10 +83,54 @@
       box-shadow: 0 0 6px rgba(52, 199, 89, 0.8);
     }
 
+    /* 실시간 GPS 진단 모니터 바 */
+    .gps-diag-banner {
+      width: 100%;
+      background: rgba(28, 28, 30, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-family: monospace;
+    }
+    .gps-diag-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+    .gps-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .gps-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff9500;
+    }
+    .gps-dot.ok { background: #34c759; box-shadow: 0 0 6px #34c759; }
+    .gps-dot.bad { background: #ff3b30; }
+
+    .gps-diag-row {
+      display: flex;
+      justify-content: space-between;
+      color: #8e8e93;
+    }
+    .gps-diag-row span:last-child {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
     /* 대형 워치 메인 페이스 */
     .watch-display-large {
       width: 100%;
-      height: 505px;
+      height: 485px;
       background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
       border-radius: 46px;
       padding: 18px 16px 16px 16px;
@@ -241,7 +285,7 @@
       box-shadow: 0 0 12px rgba(52, 199, 89, 0.9);
     }
 
-    /* 실시간 사운드 조절 */
+    /* 실시간 사운드 조절 바 */
     .inline-sound-control-card {
       width: 100%;
       background: rgba(255, 255, 255, 0.05);
@@ -296,17 +340,13 @@
     .controls-wrapper {
       width: 100%;
       height: 76px;
-      margin-top: 1rem;
+      margin-top: 0.8rem;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* 러닝 중 단일 탭 일시정지 바 */
-    .running-bar {
-      width: 100%;
-      display: flex;
-    }
+    .running-bar { width: 100%; display: flex; }
     .single-tap-pause-btn {
       width: 100%;
       height: 58px;
@@ -326,7 +366,6 @@
     }
     .single-tap-pause-btn:active { transform: scale(0.96); }
 
-    /* 일시정지 중 2분할 제어 바 */
     .paused-split-bar {
       width: 100%;
       display: none;
@@ -334,7 +373,6 @@
       justify-content: space-between;
       gap: 12px;
     }
-
     .btn-quick-resume {
       flex: 1.2;
       height: 58px;
@@ -344,7 +382,6 @@
       border-radius: 29px;
       font-size: 0.95rem;
       font-weight: 900;
-      letter-spacing: 0.5px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -372,11 +409,7 @@
       transform: rotate(-90deg);
       pointer-events: none;
     }
-    .finish-track {
-      fill: none;
-      stroke: rgba(255, 255, 255, 0.12);
-      stroke-width: 4;
-    }
+    .finish-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 4; }
     .finish-progress {
       fill: none;
       stroke: #ff3b30;
@@ -400,17 +433,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       transition: transform 0.1s ease;
     }
     .finish-core-btn:active { transform: scale(0.92); }
-    .finish-sub-text {
-      font-size: 0.5rem;
-      opacity: 0.8;
-      margin-top: 1px;
-    }
+    .finish-sub-text { font-size: 0.5rem; opacity: 0.8; margin-top: 1px; }
 
-    /* 기록 삭제 확인 다이얼로그 모달 */
+    /* 모달 */
     .confirm-modal-overlay {
       display: none;
       position: fixed;
@@ -439,16 +467,8 @@
       gap: 1.2rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
-    .confirm-modal-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1.4;
-    }
-    .confirm-modal-btn-group {
-      display: flex;
-      gap: 8px;
-    }
+    .confirm-modal-title { font-size: 1.05rem; font-weight: 800; color: #ffffff; line-height: 1.4; }
+    .confirm-modal-btn-group { display: flex; gap: 8px; }
     .modal-btn {
       flex: 1;
       height: 46px;
@@ -460,15 +480,8 @@
       transition: transform 0.1s ease;
     }
     .modal-btn:active { transform: scale(0.95); }
-    .btn-modal-cancel {
-      background: #34c759;
-      color: #ffffff;
-    }
-    .btn-modal-confirm {
-      background: rgba(255, 59, 48, 0.2);
-      color: #ff3b30;
-      border: 1px solid rgba(255, 59, 48, 0.4);
-    }
+    .btn-modal-cancel { background: #34c759; color: #ffffff; }
+    .btn-modal-confirm { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.4); }
   </style>
 </head>
 <body>
@@ -486,6 +499,25 @@
       </button>
     </div>
 
+    <!-- 실시간 GPS 진단 모니터 -->
+    <div class="gps-diag-banner" id="gpsDiagBanner">
+      <div class="gps-diag-header">
+        <div class="gps-status-indicator">
+          <span class="gps-dot" id="gpsDot"></span>
+          <span id="gpsStateText">GPS 초기화 중...</span>
+        </div>
+        <span id="gpsTickCount">수신 0회</span>
+      </div>
+      <div class="gps-diag-row">
+        <span>정확도(오차) / 속도:</span>
+        <span id="gpsAccSpeed">-- m / -- km/h</span>
+      </div>
+      <div class="gps-diag-row">
+        <span>현재 좌표:</span>
+        <span id="gpsCoordsText">위성 탐색 중</span>
+      </div>
+    </div>
+
     <!-- 대형 워치 메인 페이스 -->
     <div class="watch-display-large">
       <div class="top-stat-row">
@@ -494,7 +526,6 @@
         <span id="runSoundAndMeter">WOOD | ●●●●</span>
       </div>
 
-      <!-- 케이던스 및 페이스 3열 비교 그리드 -->
       <div class="cadence-comparison-grid">
         <div class="cadence-col">
           <div class="cadence-num target" id="targetBpmDisplay">180</div>
@@ -512,13 +543,11 @@
         </div>
       </div>
 
-      <!-- 대형 메인 이동 거리(KM) -->
       <div class="distance-hero-wrap">
         <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
         <div class="distance-hero-unit">KILOMETERS</div>
       </div>
 
-      <!-- 구간 남은 시간 및 전체 타이머 -->
       <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
       <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
 
@@ -529,7 +558,6 @@
         <div class="watch-ind-step" id="ind-3"></div>
       </div>
 
-      <!-- 실시간 사운드 조절 -->
       <div class="inline-sound-control-card">
         <div class="sound-row">
           <span class="sound-label">VOL</span>
@@ -546,15 +574,12 @@
 
     <!-- 하단 러닝 제어 인터페이스 -->
     <div class="controls-wrapper">
-      <!-- 1. 러닝 중: 원클릭 일시정지 -->
       <div class="running-bar" id="runningBar">
         <button class="single-tap-pause-btn" id="singleTapPauseBtn" onclick="onSingleTapPause()">PAUSE ||</button>
       </div>
 
-      <!-- 2. 일시정지 중: 좌(즉시 진행) / 우(1.25s 홀드 종료) -->
       <div class="paused-split-bar" id="pausedSplitBar">
         <button class="btn-quick-resume" onclick="onQuickResume()">RESUME ▶</button>
-        
         <div class="finish-hold-wrap" id="finishHoldWrap">
           <svg class="finish-svg" viewBox="0 0 68 68">
             <circle class="finish-track" cx="34" cy="34" r="30"></circle>
@@ -568,14 +593,12 @@
       </div>
     </div>
 
-    <!-- FINISH 롱프레스 확인 다이얼로그 모달 -->
+    <!-- 기록 삭제/저장 확인 다이얼로그 모달 -->
     <div class="confirm-modal-overlay" id="deleteConfirmModal">
       <div class="confirm-modal-box">
         <div class="confirm-modal-title">기록을 삭제할까요?</div>
         <div class="confirm-modal-btn-group">
-          <!-- 취소 클릭 시: 기록 저장 후 report.html로 이동 -->
           <button class="modal-btn btn-modal-cancel" onclick="onCancelDelete()">취소 (저장)</button>
-          <!-- 확인 클릭 시: 기록 폐기 후 main.html로 이동 -->
           <button class="modal-btn btn-modal-confirm" onclick="onConfirmDelete()">확인 (삭제)</button>
         </div>
       </div>
@@ -591,17 +614,16 @@
     let isRunning = false;
     let isSystemInterrupted = false;
 
-    // 실시간 사운드 계수
     let runVolumeMultiplier = 1.0;
     let runPitchMultiplier = 1.0;
 
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
-    // 케이던스 및 GPS 기반 Auto Pause 정책
-    const AUTO_PAUSE_SPM_TRIGGER = 40; // 40 미만 시 일시정지
-    const RESUME_SPM_TRIGGER = 80;     // 80 이상 시 재개 후보
-    const RESUME_DISTANCE_M = 2.0;     // 2m 이상 GPS 이동 시 재개 충족
+    // 케이던스 및 GPS 정책
+    const AUTO_PAUSE_SPM_TRIGGER = 40;
+    const RESUME_SPM_TRIGGER = 80;
+    const RESUME_DISTANCE_M = 2.0;
 
     let pauseAnchorCoords = null;
     let lastStepDetectTime = 0;
@@ -627,13 +649,12 @@
     let totalDistanceMeters = 0;
     let currentCalculatedSpeed = 0;
 
-    // 1km 스플릿 및 런 세션 데이터
     let runSessionStartTime = null;
     let splits = [];
     let lastSplitDistanceM = 0;
     let lastSplitTimeMs = 0;
 
-    // 모션 센서 / 케이던스
+    // 모션 센서
     let recentStepTimes = [];
     let lastStepTime = 0;
     let lastAccelMagnitude = 0;
@@ -641,12 +662,13 @@
     const MIN_STEP_INTERVAL_MS = 240;
     let currentCalculatedSpm = 0;
 
-    // GPS
+    // GPS & 진단 지표 변수
     let geoWatchId = null;
     let recentSpeeds = [];
     let lastGpsPosition = null;
     let lastGpsPositionTime = 0;
     let lastGpsSpeed = 0;
+    let gpsUpdateCounter = 0; // GPS 수신 횟수 카운터
 
     let wakeLock = null;
 
@@ -662,6 +684,13 @@
     const autoPauseToggleBtn = document.getElementById('autoPauseToggleBtn');
     const autoPauseText = document.getElementById('autoPauseText');
     const autoPauseStatusPill = document.getElementById('autoPauseStatusPill');
+
+    // GPS 진단 UI 엘리먼트
+    const gpsDot = document.getElementById('gpsDot');
+    const gpsStateText = document.getElementById('gpsStateText');
+    const gpsTickCount = document.getElementById('gpsTickCount');
+    const gpsAccSpeed = document.getElementById('gpsAccSpeed');
+    const gpsCoordsText = document.getElementById('gpsCoordsText');
 
     const runZoneBadge = document.getElementById('runZoneBadge');
     const liveDistanceDisplay = document.getElementById('liveDistanceDisplay');
@@ -691,10 +720,8 @@
     function updateInlineSound() {
       const vol = parseInt(inlineVolSlider.value);
       const pitch = parseInt(inlinePitchSlider.value);
-
       runVolumeMultiplier = vol / 100;
       runPitchMultiplier = pitch / 100;
-
       inlineVolText.textContent = `${vol}%`;
       inlinePitchText.textContent = `${(pitch / 100).toFixed(1)}x`;
 
@@ -708,13 +735,11 @@
       try {
         const savedVol = localStorage.getItem('matempa_run_vol');
         const savedPitch = localStorage.getItem('matempa_run_pitch');
-
         if (savedVol !== null) {
           runVolumeMultiplier = parseFloat(savedVol);
           inlineVolSlider.value = Math.round(runVolumeMultiplier * 100);
           inlineVolText.textContent = `${inlineVolSlider.value}%`;
         }
-
         if (savedPitch !== null) {
           runPitchMultiplier = parseFloat(savedPitch);
           inlinePitchSlider.value = Math.round(runPitchMultiplier * 100);
@@ -726,10 +751,8 @@
     function toggleAutoPauseOption() {
       triggerHaptic(15);
       isAutoPauseEnabled = !isAutoPauseEnabled;
-
       autoPauseToggleBtn.classList.toggle('active', isAutoPauseEnabled);
       autoPauseText.textContent = isAutoPauseEnabled ? 'AUTO PAUSE ON' : 'AUTO PAUSE OFF';
-
       if (!isAutoPauseEnabled && isAutoPausedNow) {
         resumeFromAutoPause();
       }
@@ -737,10 +760,8 @@
 
     function triggerAutoPause() {
       if (!isAutoPauseEnabled || isAutoPausedNow || !isRunning) return;
-
       isAutoPausedNow = true;
       pauseAnchorCoords = lastGpsPosition ? { ...lastGpsPosition } : null;
-
       autoPauseStatusPill.style.display = 'inline-block';
       pauseTimingAndBeats();
       showPausedControlsUI();
@@ -748,18 +769,15 @@
 
     function resumeFromAutoPause() {
       if (!isAutoPausedNow || !isRunning) return;
-
       isAutoPausedNow = false;
       pauseAnchorCoords = null;
       autoPauseStatusPill.style.display = 'none';
-
       resumeTimingAndBeats();
       showRunningControlsUI();
     }
 
     function addDistance(meters) {
       if (!Number.isFinite(meters) || meters <= 0.05) return;
-
       totalDistanceMeters += meters;
       updateDistanceUI();
 
@@ -794,21 +812,18 @@
       const R = 6371000;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
-
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(lat1 * Math.PI / 180) *
         Math.cos(lat2 * Math.PI / 180) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
     function startSilentAudio() {
       if (!silentAudioEl.src) {
-        silentAudioEl.src =
-          'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
+        silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
       }
       silentAudioEl.play().catch(() => {});
     }
@@ -821,9 +836,7 @@
       if (!audioCtx) {
         const AudioClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioClass) return;
-
         audioCtx = new AudioClass({ latencyHint: 'interactive' });
-
         audioCtx.onstatechange = () => {
           if (!isRunning || !audioCtx) return;
           if (audioCtx.state === 'running') {
@@ -834,18 +847,13 @@
           }
         };
       }
-
       if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume()
-          .then(() => { isSystemInterrupted = false; })
-          .catch(() => { isSystemInterrupted = true; });
+        audioCtx.resume().catch(() => {});
       }
     }
 
     function formatPace(secPerKm) {
-      if (!secPerKm || !isFinite(secPerKm) || secPerKm <= 0 || secPerKm > 1200) {
-        return `--'--"`;
-      }
+      if (!secPerKm || !isFinite(secPerKm) || secPerKm <= 0 || secPerKm > 1200) return `--'--"`;
       const min = Math.floor(secPerKm / 60);
       const sec = Math.round(secPerKm % 60);
       return sec === 60 ? `${min + 1}'00"` : `${min}'${String(sec).padStart(2, '0')}"`;
@@ -858,8 +866,16 @@
       }
     }
 
+    // --- GPS 모듈 및 실시간 진단 로직 ---
     function initGeolocation() {
-      if (!('geolocation' in navigator) || geoWatchId !== null) return;
+      if (!('geolocation' in navigator)) {
+        gpsDot.className = 'gps-dot bad';
+        gpsStateText.textContent = 'GPS 미지원 브라우저';
+        return;
+      }
+      if (geoWatchId !== null) return;
+
+      gpsStateText.textContent = '위성 신호 탐색 중...';
 
       geoWatchId = navigator.geolocation.watchPosition(
         (position) => {
@@ -867,13 +883,28 @@
 
           const coords = position.coords;
           const now = performance.now();
+          gpsUpdateCounter++;
 
           const accuracy = Number(coords.accuracy);
-          if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > GPS_MAX_ACCURACY_M) return;
-
           const speed = coords.speed !== null && !isNaN(coords.speed) && coords.speed >= 0 ? coords.speed : 0;
-          let movedMeters = 0;
+          const speedKmh = (speed * 3.6).toFixed(1);
 
+          // 진단 패널 갱신
+          gpsTickCount.textContent = `수신 ${gpsUpdateCounter}회`;
+          gpsCoordsText.textContent = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
+          gpsAccSpeed.textContent = `±${accuracy.toFixed(1)}m / ${speedKmh} km/h`;
+
+          // 오차 25m 이내면 정상(초록색), 초과하면 불량(빨간색)
+          if (accuracy <= GPS_MAX_ACCURACY_M) {
+            gpsDot.className = 'gps-dot ok';
+            gpsStateText.textContent = 'GPS 정상 수신 중 (양호)';
+          } else {
+            gpsDot.className = 'gps-dot bad';
+            gpsStateText.textContent = '신호 불안정 (오차 큼)';
+            return; // 오차 25m 이상 좌표는 거리 계산 배제
+          }
+
+          let movedMeters = 0;
           if (lastGpsPosition) {
             movedMeters = calculateDistanceMeters(
               lastGpsPosition.latitude,
@@ -885,6 +916,7 @@
 
           lastGpsSpeed = speed;
 
+          // 오토포즈 해제 조건 검증: 케이던스 80 이상 & 2m 이상 이동
           if (isAutoPausedNow) {
             let anchorMoved = 0;
             if (pauseAnchorCoords) {
@@ -907,6 +939,7 @@
             return;
           }
 
+          // 정상 누적
           if (lastGpsPosition && movedMeters >= MIN_GPS_DISTANCE_M && movedMeters <= MAX_GPS_DISTANCE_M) {
             addDistance(movedMeters);
           }
@@ -925,7 +958,16 @@
           lastGpsPosition = { latitude: coords.latitude, longitude: coords.longitude };
           lastGpsPositionTime = now;
         },
-        (err) => {},
+        (err) => {
+          gpsDot.className = 'gps-dot bad';
+          if (err.code === 1) {
+            gpsStateText.textContent = '위치 권한 거부됨';
+          } else if (err.code === 2) {
+            gpsStateText.textContent = '위치 확인 불가 (실내 등)';
+          } else {
+            gpsStateText.textContent = '수신 타임아웃';
+          }
+        },
         { enableHighAccuracy: true, maximumAge: 1000, timeout: 8000 }
       );
     }
@@ -942,9 +984,9 @@
       lastGpsSpeed = 0;
     }
 
+    // 모션 센서
     function initMotionSensor() {
       if (typeof DeviceMotionEvent === 'undefined') return;
-
       if (typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission()
           .then(response => {
@@ -960,7 +1002,6 @@
 
     function handleDeviceMotion(event) {
       if (!isRunning) return;
-
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null || acc.y === null || acc.z === null) return;
 
@@ -1028,7 +1069,6 @@
     function playCueSound(type) {
       initAudio();
       if (!audioCtx || isAutoPausedNow || audioCtx.state !== 'running') return;
-
       const now = audioCtx.currentTime;
       const vol = (currentStepData ? currentStepData.vol : 0.8) * runVolumeMultiplier;
       const pitchFactor = runPitchMultiplier;
@@ -1076,7 +1116,6 @@
     function playBeep() {
       initAudio();
       if (!audioCtx || !currentStepData || isAutoPausedNow || audioCtx.state !== 'running') return;
-
       const now = audioCtx.currentTime;
       const vol = currentStepData.vol * runVolumeMultiplier;
       const basePitch = currentStepData.pitch * runPitchMultiplier;
@@ -1115,15 +1154,10 @@
       let startFreq = basePitch;
       let wave = 'triangle';
 
-      if (soundType === 'bass') {
-        wave = 'sine'; startFreq = basePitch * 0.3; dur = 0.08;
-      } else if (soundType === 'wood') {
-        wave = 'triangle'; startFreq = basePitch; dur = 0.04;
-      } else if (soundType === 'beep') {
-        wave = 'sine'; startFreq = basePitch; dur = 0.06;
-      } else {
-        wave = 'square'; startFreq = basePitch; dur = 0.02;
-      }
+      if (soundType === 'bass') { wave = 'sine'; startFreq = basePitch * 0.3; dur = 0.08; }
+      else if (soundType === 'wood') { wave = 'triangle'; startFreq = basePitch; dur = 0.04; }
+      else if (soundType === 'beep') { wave = 'sine'; startFreq = basePitch; dur = 0.06; }
+      else { wave = 'square'; startFreq = basePitch; dur = 0.02; }
 
       osc.type = wave;
       osc.frequency.setValueAtTime(startFreq, now);
@@ -1220,7 +1254,6 @@
 
     function resumeTimingAndBeats() {
       if (!isRunning || isAutoPausedNow) return;
-
       startTimeMs = performance.now();
 
       clockTimer = setInterval(() => {
@@ -1321,28 +1354,27 @@
       startRunLoop();
     }
 
-    // FINISH 1.25초 롱프레스 완료 시: "기록을 삭제할까요?" 모달 띄우기
+    // 1.25초 롱프레스 완료 시 모달 띄움
     function onFinishTriggered() {
       pauseRun();
       deleteConfirmModal.style.display = 'flex';
       triggerHaptic([30, 50, 40]);
     }
 
-    // --- [수정] 모달 [취소] 클릭 시: 기록 저장 후 report.html로 이동 ---
+    // 취소 클릭 시: 정상 기록 저장 후 report.html로 이동
     function onCancelDelete() {
       triggerHaptic(20);
       deleteConfirmModal.style.display = 'none';
       saveAndGoToReport();
     }
 
-    // 모달 [확인] 클릭 시: 기록 저장 없이 폐기하고 main.html로 이동
+    // 확인 클릭 시: 기록 저장 없이 main.html로 이동
     function onConfirmDelete() {
       triggerHaptic(30);
       deleteConfirmModal.style.display = 'none';
       window.location.href = 'main.html';
     }
 
-    // 기록 저장 및 report.html 이동 처리 함수
     function saveAndGoToReport() {
       const remainingDistM = totalDistanceMeters - lastSplitDistanceM;
       if (remainingDistM > 50) {
@@ -1391,7 +1423,7 @@
       window.location.href = 'report.html';
     }
 
-    // FINISH 1.25초 홀드 설정
+    // 1.25초 홀드 바인딩
     const FINISH_CIRCUMFERENCE = 2 * Math.PI * 30;
     const FINISH_HOLD_DURATION_MS = 1250;
 
@@ -1438,21 +1470,15 @@
       buttonEl.addEventListener('pointercancel', cancelHold);
     }
 
-    setupFinishHoldButton(
-      finishHoldBtn,
-      finishHoldProgress,
-      () => {
-        onFinishTriggered();
-      }
-    );
+    setupFinishHoldButton(finishHoldBtn, finishHoldProgress, () => {
+      onFinishTriggered();
+    });
 
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && isRunning) {
         requestWakeLock();
         if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume()
-            .then(() => { isSystemInterrupted = false; })
-            .catch(() => {});
+          audioCtx.resume().then(() => { isSystemInterrupted = false; }).catch(() => {});
         }
         startSilentAudio();
       }
@@ -1474,10 +1500,8 @@
       try {
         const slot = localStorage.getItem('matempa_active_slot');
         if (slot !== null) activeSlot = parseInt(slot);
-
         const customTitle = localStorage.getItem(`matempa_routine_name_${activeSlot}`);
         runRoutineTitle.textContent = customTitle ? customTitle : `ROUTINE #${activeSlot + 1}`;
-
         const saved = localStorage.getItem(`matempa_routine_slot_${activeSlot}`);
         routine = saved ? JSON.parse(saved) : [];
       } catch (e) {
@@ -1503,7 +1527,6 @@
 
       updateDistanceUI();
       runTimerDisplay.textContent = formatPrecisionTimer(0);
-
       applyCurrentStepToView(routine[0], 0);
       playCueSound('next_step');
       startRunLoop();
