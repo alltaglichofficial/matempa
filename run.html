@@ -38,34 +38,21 @@
       position: relative;
     }
 
-    .run-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
-    .routine-name-badge { font-size: 0.85rem; font-weight: 800; color: #8e8e93; letter-spacing: 0.5px; }
+    .run-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .routine-name-badge { font-size: 0.95rem; font-weight: 800; color: #8e8e93; letter-spacing: 0.5px; }
 
     .auto-pause-toggle-btn {
       background: rgba(255, 255, 255, 0.08); color: #8e8e93; border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 6px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; cursor: pointer;
-      display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;
+      padding: 6px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
     }
     .auto-pause-toggle-btn.active { background: rgba(52, 199, 89, 0.16); color: #34c759; border-color: rgba(52, 199, 89, 0.35); }
     .auto-pause-dot { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; }
     .auto-pause-toggle-btn.active .auto-pause-dot { background: #34c759; box-shadow: 0 0 6px rgba(52, 199, 89, 0.8); }
 
-    .gps-diag-banner {
-      width: 100%; background: rgba(28, 28, 30, 0.95); border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px; padding: 8px 12px; margin-bottom: 8px; display: flex; flex-direction: column;
-      gap: 4px; font-size: 0.68rem; font-family: monospace;
-    }
-    .gps-diag-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-    .gps-status-indicator { display: flex; align-items: center; gap: 5px; }
-    .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff9500; }
-    .gps-dot.ok { background: #34c759; box-shadow: 0 0 6px #34c759; }
-    .gps-dot.bad { background: #ff3b30; }
-    .gps-diag-row { display: flex; justify-content: space-between; color: #8e8e93; }
-    .gps-diag-row span:last-child { color: #ffffff; font-weight: 700; }
-
     .watch-display-large {
-      width: 100%; height: 485px; background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
-      border-radius: 46px; padding: 18px 16px 16px 16px; display: flex; flex-direction: column;
+      width: 100%; height: 500px; background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
+      border-radius: 46px; padding: 20px 18px 18px 18px; display: flex; flex-direction: column;
       justify-content: space-between; align-items: center; box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       position: relative;
     }
@@ -78,7 +65,7 @@
     }
     @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
 
-    .cadence-comparison-grid { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 0.1rem; padding: 0 4px; }
+    .cadence-comparison-grid { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; padding: 0 4px; }
     .cadence-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
     .cadence-num { font-size: 2.6rem; font-weight: 900; line-height: 0.95; font-variant-numeric: tabular-nums; letter-spacing: -1.5px; }
     .cadence-num.target { color: #ffffff; filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1)); }
@@ -87,23 +74,23 @@
     .cadence-col-label { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.8px; margin-top: 4px; color: #8e8e93; white-space: nowrap; }
     .cadence-divider { width: 1px; height: 42px; background: rgba(255, 255, 255, 0.12); }
 
-    .distance-hero-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0.1rem 0; }
-    .distance-hero-num { font-size: 3.4rem; font-weight: 900; line-height: 0.9; color: #007aff; font-variant-numeric: tabular-nums; letter-spacing: -1.8px; filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35)); }
-    .distance-hero-unit { font-size: 0.72rem; font-weight: 900; color: #8e8e93; letter-spacing: 1.5px; margin-top: 3px; }
+    .distance-hero-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0.2rem 0; }
+    .distance-hero-num { font-size: 3.6rem; font-weight: 900; line-height: 0.9; color: #007aff; font-variant-numeric: tabular-nums; letter-spacing: -1.8px; filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35)); }
+    .distance-hero-unit { font-size: 0.75rem; font-weight: 900; color: #8e8e93; letter-spacing: 1.5px; margin-top: 4px; }
 
-    .step-progress-text { font-size: 0.76rem; color: #a0a0a5; font-weight: 600; }
+    .step-progress-text { font-size: 0.78rem; color: #a0a0a5; font-weight: 600; }
     .timer-capsule-large {
-      background: rgba(255, 255, 255, 0.06); width: 220px; height: 40px; border-radius: 20px;
-      display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.06); width: 220px; height: 42px; border-radius: 21px;
+      display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.28rem;
       font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
-    .watch-indicators { display: flex; gap: 8px; margin-bottom: 2px; }
+    .watch-indicators { display: flex; gap: 8px; margin-bottom: 4px; }
     .watch-ind-step { width: 24px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background 0.08s, box-shadow 0.08s; }
     .watch-ind-step.active { background: #34c759; box-shadow: 0 0 12px rgba(52, 199, 89, 0.9); }
 
-    .inline-sound-control-card { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .inline-sound-control-card { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
     .sound-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .sound-label { font-size: 0.65rem; font-weight: 800; color: #8e8e93; min-width: 44px; }
     .sound-value-text { font-size: 0.65rem; font-weight: 800; color: #34c759; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -149,20 +136,6 @@
         <span class="auto-pause-dot"></span>
         <span id="autoPauseText">AUTO PAUSE ON</span>
       </button>
-    </div>
-
-    <!-- 상태 모니터 배너 -->
-    <div class="gps-diag-banner" id="gpsDiagBanner">
-      <div class="gps-diag-header">
-        <div class="gps-status-indicator">
-          <span class="gps-dot" id="gpsDot"></span>
-          <span id="gpsStateText">센서 준비중...</span>
-        </div>
-      </div>
-      <div class="gps-diag-row">
-        <span>정확도 / 속도:</span>
-        <span id="gpsAccSpeed">-- m / -- km/h</span>
-      </div>
     </div>
 
     <div class="watch-display-large">
@@ -257,6 +230,7 @@
     // ==========================================
 
     let isRunning = false;
+    let isUserPaused = false; // 사용자가 수동으로 일시정지했는가?
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
@@ -265,10 +239,6 @@
     const autoPauseToggleBtn = document.getElementById('autoPauseToggleBtn');
     const autoPauseText = document.getElementById('autoPauseText');
     const autoPauseStatusPill = document.getElementById('autoPauseStatusPill');
-
-    const gpsDot = document.getElementById('gpsDot');
-    const gpsStateText = document.getElementById('gpsStateText');
-    const gpsAccSpeed = document.getElementById('gpsAccSpeed');
 
     const runZoneBadge = document.getElementById('runZoneBadge');
     const runSoundAndMeter = document.getElementById('runSoundAndMeter');
@@ -334,6 +304,13 @@
         const AudioClass = window.AudioContext || window.webkitAudioContext;
         if (AudioClass) {
           audioCtx = new AudioClass({ latencyHint: 'interactive' });
+          audioCtx.onstatechange = () => {
+            if (isRunning && !isUserPaused && !isAutoPausedNow) {
+              if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
+                audioCtx.resume().catch(() => {});
+              }
+            }
+          };
         }
       }
       if (audioCtx && audioCtx.state === 'suspended') {
@@ -343,7 +320,7 @@
 
     function playBeep() {
       initAudio();
-      if (!audioCtx || !currentStepData || isAutoPausedNow || audioCtx.state !== 'running') return;
+      if (!audioCtx || !currentStepData || isAutoPausedNow || !isRunning || isUserPaused) return;
 
       const now = audioCtx.currentTime;
       const vol = (currentStepData.vol !== undefined ? currentStepData.vol : 0.8) * runVolumeMultiplier;
@@ -392,7 +369,7 @@
 
     function playCueSound(type) {
       initAudio();
-      if (!audioCtx || isAutoPausedNow || audioCtx.state !== 'running') return;
+      if (!audioCtx || isAutoPausedNow || !isRunning || isUserPaused) return;
       const now = audioCtx.currentTime;
       const vol = 0.8 * runVolumeMultiplier;
       const pitchFactor = runPitchMultiplier;
@@ -426,7 +403,7 @@
     }
 
     function triggerStep() {
-      if (!isRunning || isAutoPausedNow) return;
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
       const stepInCycle = currentBeatIndex % 4;
       const playSound = shouldPlaySoundInPattern(stepInCycle);
       if (playSound) playBeep();
@@ -443,7 +420,7 @@
 
     function syncBpmTimer() {
       if (beatTimer) { clearInterval(beatTimer); beatTimer = null; }
-      if (isRunning && !isAutoPausedNow && currentStepData && currentStepData.bpm > 0) {
+      if (isRunning && !isAutoPausedNow && !isUserPaused && currentStepData && currentStepData.bpm > 0) {
         beatTimer = setInterval(triggerStep, (60 / currentStepData.bpm) * 1000);
       }
     }
@@ -492,7 +469,7 @@
     // 🏃 MOTION & GPS SENSORS
     // ==========================================
     window.addEventListener('devicemotion', (event) => {
-      if (!isRunning || isAutoPausedNow) return;
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x == null) return;
 
@@ -508,7 +485,7 @@
     });
 
     function handleGPSPosition(pos) {
-      if (!isRunning) return;
+      if (!isRunning || isUserPaused) return;
       const coords = pos.coords;
       const lat = coords.latitude;
       const lon = coords.longitude;
@@ -521,9 +498,6 @@
       if (accuracy <= 60) {
         gpsHasFix = true;
         currentSpeedMs = speed;
-        gpsDot.className = accuracy <= 20 ? 'gps-dot ok' : 'gps-dot';
-        gpsStateText.textContent = accuracy <= 20 ? 'GPS 양호' : 'GPS 수신중';
-        gpsAccSpeed.textContent = `±${accuracy.toFixed(0)}m / ${(speed * 3.6).toFixed(1)} km/h`;
 
         if (lastLat !== null && lastLon !== null) {
           const dist = calculateDistance(lastLat, lastLon, lat, lon);
@@ -539,9 +513,6 @@
         }
       } else {
         gpsHasFix = false;
-        gpsDot.className = 'gps-dot bad';
-        gpsStateText.textContent = '실내/센서 모드';
-        gpsAccSpeed.textContent = `±${accuracy.toFixed(0)}m / 가속도 측정`;
       }
     }
 
@@ -557,11 +528,7 @@
       if (!navigator.geolocation) return;
       gpsWatchId = navigator.geolocation.watchPosition(
         handleGPSPosition,
-        (err) => {
-          gpsHasFix = false;
-          gpsDot.className = 'gps-dot bad';
-          gpsStateText.textContent = '실내 모드';
-        },
+        (err) => { gpsHasFix = false; },
         { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
       );
     }
@@ -570,7 +537,7 @@
     // ⏱️ 1초 메인 업데이트 루프
     // ==========================================
     setInterval(() => {
-      if (!isRunning) return;
+      if (!isRunning || isUserPaused) return;
       const now = Date.now();
 
       // SPM 계산
@@ -641,8 +608,15 @@
       }
     }
 
-    function onSingleTapPause() { pauseRunUI(); }
-    function onQuickResume() { resumeRunUI(); }
+    function onSingleTapPause() {
+      isUserPaused = true;
+      pauseRunUI();
+    }
+
+    function onQuickResume() {
+      isUserPaused = false;
+      resumeRunUI();
+    }
 
     function pauseRunUI() {
       isRunning = false;
@@ -657,6 +631,7 @@
     function resumeRunUI() {
       initAudio();
       isRunning = true;
+      isUserPaused = false;
       isAutoPausedNow = false;
       autoPauseStatusPill.style.display = 'none';
       lastLat = null; lastLon = null;
@@ -681,7 +656,7 @@
     }
 
     function resumeRoutineTimers() {
-      if (!isRunning || isAutoPausedNow) return;
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
       startTimeMs = performance.now();
       clockTimer = setInterval(() => {
         elapsedMs = baseOffsetMs + (performance.now() - startTimeMs);
@@ -695,6 +670,27 @@
       }, 50);
       syncBpmTimer();
     }
+
+    // ==========================================
+    // 🛡️ 전화/백그라운드 복귀 시 자동 재개 핸들러
+    // ==========================================
+    function handleAppResume() {
+      if (!isUserPaused && isRunning) {
+        initAudio();
+        if (silentAudioEl) silentAudioEl.play().catch(() => {});
+        syncBpmTimer();
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        handleAppResume();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      handleAppResume();
+    });
 
     // 종료 롱프레스
     const finishHoldBtn = document.getElementById('finishHoldBtn');
@@ -721,7 +717,7 @@
         holdTimer = requestAnimationFrame(updateHold);
       } else {
         cancelHold();
-        pauseRunUI();
+        onSingleTapPause();
         deleteConfirmModal.style.display = 'flex';
       }
     }
@@ -778,7 +774,6 @@
         routine = saved ? JSON.parse(saved) : [];
       } catch (e) { routine = []; }
 
-      // 기본 테스트용 루틴 (저장된 값이 없을 때 자동 대체)
       if (!routine || routine.length === 0) {
         routine = [
           { bpm: 180, durationSec: 300, sound: 'wood', meter: 'p1', vol: 0.9, pitch: 800 },
@@ -794,7 +789,6 @@
 
       applyCurrentStepToView(routine[0], 0);
 
-      // 사용자 상호작용 트리거(화면 터치 시 오디오 완전 잠금 해제)
       const unlockAudio = () => {
         initAudio();
         document.removeEventListener('pointerdown', unlockAudio);
