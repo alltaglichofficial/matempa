@@ -328,19 +328,28 @@
     let totalSteps = 0;
     let stepsInLastSec = 0;
 
-    let currentSPM = 0;
+    // ------------------------------------------
+    // CADENCE STATE
+    // ------------------------------------------
+    let currentSPM = 0;          // 화면에 표시할 안정화 값
+    let measuredSPM = 0;         // 센서가 최근 걸음으로 계산한 실제 추정값
     let cadenceIntervals = [];
 
-    // 240 SPM = 250ms 간격. 실제 검출 안정성을 위해 약간 여유를 둠.
+    // 240 SPM = 250ms. 너무 빠른 중복 피크만 제거.
     const MIN_STEP_INTERVAL = 250;
     const MAX_STEP_INTERVAL = 1100;
 
-    // 최근 3개 interval의 median을 사용하되, EMA는 사용하지 않음.
-    // 그래서 180 SPM에 도달하면 점진적으로 올라가지 않고 바로 180 근처로 표시됨.
-    const CADENCE_SAMPLE_COUNT = 3;
+    // 최근 5개의 step interval을 사용한다.
+    // 3개보다 안정적이지만 5초 전체 평균보다는 반응이 빠르다.
+    const CADENCE_SAMPLE_COUNT = 5;
 
-    // 마지막 걸음 후 이 시간이 지나면 화면을 0으로 처리
-    const CADENCE_TIMEOUT_MS = 1600;
+    // 최근 실제 걸음이 없으면 표시를 -- 로 전환
+    const CADENCE_TIMEOUT_MS = 1800;
+
+    // 실제 러닝 앱처럼 숫자 흔들림을 억제
+    // 처음 측정값은 즉시 표시하고, 이후에는 부드럽게 따라간다.
+    const CADENCE_SMOOTHING = 0.35;
+    const CADENCE_DEADBAND = 3;
 
     // 센서별 오차를 고려한 발구름 검출 기준
     const BASE_PEAK_THRESHOLD = 0.75;
@@ -597,47 +606,82 @@
       return sorted[mid];
     }
 
-    function calculateCadenceFromIntervals() {
+    function calculateStableCadence() {
       if (cadenceIntervals.length === 0) return 0;
 
-      // 1개만 잡혀도 바로 표시해서 0 → 목표 케이던스 전환 지연을 없앰
-      const representativeInterval = median(cadenceIntervals);
+      const validIntervals = cadenceIntervals.filter(
+        value =>
+          Number.isFinite(value) &&
+          value >= MIN_STEP_INTERVAL &&
+          value <= MAX_STEP_INTERVAL
+      );
 
-      if (
-        representativeInterval < MIN_STEP_INTERVAL ||
-        representativeInterval > MAX_STEP_INTERVAL
-      ) {
-        return 0;
-      }
+      if (validIntervals.length === 0) return 0;
+
+      // 최근 구간에서 크게 튄 interval은 제외한다.
+      // 한 발을 놓치거나 센서가 중복 검출한 경우의 영향을 줄인다.
+      const center = median(validIntervals);
+
+      const filtered = validIntervals.filter(interval => {
+        if (validIntervals.length <= 2) return true;
+        return interval >= center * 0.72 && interval <= center * 1.38;
+      });
+
+      const representative = median(
+        filtered.length > 0 ? filtered : validIntervals
+      );
+
+      if (!representative) return 0;
 
       return Math.max(
         40,
-        Math.min(240, 60000 / representativeInterval)
+        Math.min(240, 60000 / representative)
       );
     }
 
-    function updateCadenceDisplay() {
+    function updateCadenceDisplay(forceImmediate = false) {
       const now = Date.now();
 
       if (
         !lastValidStepTime ||
         now - lastValidStepTime > CADENCE_TIMEOUT_MS ||
-        isAutoPausedNow ||
         isUserPaused
       ) {
         currentSPM = 0;
+        measuredSPM = 0;
         liveCadenceDisplay.textContent = '--';
         return;
       }
 
-      const calculated = calculateCadenceFromIntervals();
+      const nextSPM = calculateStableCadence();
 
-      if (calculated > 0) {
-        currentSPM = calculated;
-        liveCadenceDisplay.textContent = Math.round(calculated);
-      } else {
+      if (!nextSPM) {
         liveCadenceDisplay.textContent = '--';
+        return;
       }
+
+      measuredSPM = nextSPM;
+
+      // 첫 유효한 케이던스는 바로 표시.
+      // 0 → 180을 애니메이션처럼 천천히 올리지 않는다.
+      if (currentSPM === 0 || forceImmediate) {
+        currentSPM = nextSPM;
+      } else {
+        const diff = nextSPM - currentSPM;
+
+        // ±3 SPM 안에서는 화면을 고정해서 잔떨림을 없앤다.
+        if (Math.abs(diff) >= CADENCE_DEADBAND) {
+          currentSPM += diff * CADENCE_SMOOTHING;
+        }
+      }
+
+      currentSPM = Math.max(
+        40,
+        Math.min(240, currentSPM)
+      );
+
+      liveCadenceDisplay.textContent =
+        Math.round(currentSPM);
     }
 
     function resetCadenceReference() {
@@ -645,6 +689,7 @@
       lastValidStepTime = 0;
       cadenceIntervals = [];
       currentSPM = 0;
+      measuredSPM = 0;
       liveCadenceDisplay.textContent = '--';
     }
 
@@ -662,24 +707,26 @@
         return;
       }
 
-      if (
-        interval < MIN_STEP_INTERVAL ||
-        interval > MAX_STEP_INTERVAL
-      ) {
-        // 너무 빠른 중복 피크는 무시.
-        // 너무 긴 공백 뒤에는 새 기준점으로만 사용.
-        if (interval > MAX_STEP_INTERVAL) {
-          cadenceIntervals = [];
-        }
+      if (interval < MIN_STEP_INTERVAL) {
+        // 너무 빠른 중복 피크는 완전히 무시한다.
+        return;
+      }
 
+      if (interval > MAX_STEP_INTERVAL) {
+        // 긴 공백은 새로운 리듬의 시작으로 취급한다.
+        cadenceIntervals = [];
         lastStepTime = timestamp;
         lastValidStepTime = timestamp;
         totalSteps++;
         stepsInLastSec++;
+        currentSPM = 0;
+        measuredSPM = 0;
+        liveCadenceDisplay.textContent = '--';
         return;
       }
 
       cadenceIntervals.push(interval);
+
       if (cadenceIntervals.length > CADENCE_SAMPLE_COUNT) {
         cadenceIntervals.shift();
       }
@@ -689,8 +736,9 @@
       totalSteps++;
       stepsInLastSec++;
 
-      currentSPM = calculateCadenceFromIntervals();
-      updateCadenceDisplay();
+      // 새 발걸음이 들어오는 순간 계산.
+      // 첫 유효 측정은 즉시 표시하고 그 이후만 안정화한다.
+      updateCadenceDisplay(cadenceIntervals.length <= 1);
     }
 
     // ==========================================
@@ -700,14 +748,11 @@
     window.addEventListener('devicemotion', (event) => {
       if (!isRunning || isUserPaused) return;
 
-      // 가능하면 중력 제거가 끝난 acceleration을 우선 사용.
-      // 일부 WebView에서는 acceleration이 비어 있으므로 그 경우
-      // accelerationIncludingGravity를 사용해 중력 성분을 제거한다.
       const linearAcc = event.acceleration;
       const gravityAcc = event.accelerationIncludingGravity;
 
       let rawMagnitude = null;
-      let highPassSignal = null;
+      let signal = null;
 
       if (
         linearAcc &&
@@ -721,9 +766,11 @@
           linearAcc.z * linearAcc.z
         );
 
-        // 이미 선형가속도인 경우 별도의 중력 보정이 필요 없다.
-        highPassSignal = rawMagnitude;
+        // 이미 중력이 제거된 선형가속도
+        signal = rawMagnitude;
+
       } else {
+
         if (
           !gravityAcc ||
           gravityAcc.x == null ||
@@ -741,47 +788,61 @@
           dynamicGravity * 0.90 +
           rawMagnitude * 0.10;
 
-        highPassSignal =
-          Math.abs(rawMagnitude - dynamicGravity);
+        signal = Math.abs(
+          rawMagnitude - dynamicGravity
+        );
       }
 
-      // 센서 잔떨림은 최소한만 줄여 반응 지연을 막는다.
+      // 아주 약한 저역 필터.
+      // 너무 강하게 걸면 실제 발걸음이 늦게 검출된다.
       smoothedAccSignal =
-        smoothedAccSignal * 0.55 +
-        highPassSignal * 0.45;
+        smoothedAccSignal * 0.65 +
+        signal * 0.35;
 
-      const signal = smoothedAccSignal;
       const now = Date.now();
 
-      // 현재 신호가 상승 중인지 기록
-      if (signal > prevAccSignal) {
+      // 파형의 꼭대기(상승 → 하강) 검출
+      if (smoothedAccSignal > prevAccSignal) {
+
         isSignalRising = true;
-      } else if (isSignalRising && signal < prevAccSignal) {
+
+      } else if (
+        isSignalRising &&
+        smoothedAccSignal < prevAccSignal
+      ) {
+
         isSignalRising = false;
 
-        // 너무 작은 잔떨림만 제외. 실제 발구름은 바로 반영한다.
-        const adaptiveThreshold = Math.min(
-          MAX_PEAK_THRESHOLD,
-          Math.max(BASE_PEAK_THRESHOLD, dynamicGravity > 0 ? BASE_PEAK_THRESHOLD : 0)
-        );
+        const adaptiveThreshold =
+          Math.max(
+            BASE_PEAK_THRESHOLD,
+            Math.min(
+              MAX_PEAK_THRESHOLD,
+              0.75 + smoothedAccSignal * 0.05
+            )
+          );
 
         if (
-          signal >= adaptiveThreshold &&
-          (now - lastStepTime >= MIN_STEP_INTERVAL || lastStepTime === 0)
+          smoothedAccSignal >= adaptiveThreshold &&
+          (
+            lastStepTime === 0 ||
+            now - lastStepTime >= MIN_STEP_INTERVAL
+          )
         ) {
-          // 자동 일시정지 중에도 센서 이벤트는 받아서 재개 조건으로 사용
-          if (isAutoPausedNow) {
-            lastValidStepTime = now;
 
-            // 실제 발구름이 다시 들어오면 자동 재개
+          // 자동 일시정지 중이면 실제 발구름을 재개 신호로 사용
+          if (isAutoPausedNow) {
+
             resumeFromAutoPauseByMotion(now);
+
           } else {
+
             registerStep(now);
           }
         }
       }
 
-      prevAccSignal = signal;
+      prevAccSignal = smoothedAccSignal;
     });
 
     // ==========================================
@@ -982,10 +1043,12 @@
       const now = Date.now();
 
       // ----------------------------------------
-      // 1. CADENCE TIMEOUT
+      // 1. CADENCE
+      // 발걸음 검출 이벤트에서 값을 갱신하고,
+      // 여기서는 정지 여부만 확인한다.
       // ----------------------------------------
 
-      updateCadenceDisplay();
+      updateCadenceDisplay(false);
 
       // ----------------------------------------
       // 2. DISTANCE FALLBACK
