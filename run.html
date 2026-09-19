@@ -541,12 +541,13 @@
     }
 
     // ==========================================
-    // ⏱️ 1초 메인 업데이트 루프
+    // ⏱️ 1초 메인 업데이트 루프 (케이던스 기반 정밀 오토스탑)
     // ==========================================
     setInterval(() => {
       if (!isRunning || isUserPaused) return;
       const now = Date.now();
 
+      // 1. SPM 케이던스 계산
       const validThreshold = now - 4000;
       stepTimesQueue = stepTimesQueue.filter(t => t >= validThreshold);
       const rawSpm = (stepTimesQueue.length / 4) * 60;
@@ -559,6 +560,7 @@
       }
       liveCadenceDisplay.textContent = currentSPM > 20 ? Math.round(currentSPM) : '--';
 
+      // 2. 거리 누적 (발걸음 + 보정)
       let stepIncrement = stepsInLastSec * STRIDE_LENGTH;
       stepsInLastSec = 0;
 
@@ -569,12 +571,8 @@
       distanceMeters = stepDerivedDistance * correctionFactor;
       liveDistanceDisplay.textContent = (distanceMeters / 1000).toFixed(2);
 
-      let effectiveSpeed = 0;
-      if (currentSpeedMs > 0.5) {
-        effectiveSpeed = currentSpeedMs;
-      } else {
-        effectiveSpeed = stepIncrement;
-      }
+      // 3. 페이스 계산
+      let effectiveSpeed = currentSpeedMs > 0.5 ? currentSpeedMs : stepIncrement;
 
       if (!isAutoPausedNow && effectiveSpeed >= 0.7) {
         const secPerKm = 1000 / effectiveSpeed;
@@ -585,17 +583,29 @@
         livePaceDisplay.textContent = "--'--\"";
       }
 
+      // ★ 4. [요청 반영] 케이던스 기반 오토스탑 & 오토재개 로직
       if (isAutoPauseEnabled) {
-        const isMoving = effectiveSpeed >= 0.7 || stepTimesQueue.length > 0;
-        if (!isMoving && !isAutoPausedNow) {
-          isAutoPausedNow = true;
-          autoPauseStatusPill.style.display = 'inline-block';
-          pauseRoutineTimers();
-        } else if (isMoving && isAutoPausedNow) {
-          isAutoPausedNow = false;
-          autoPauseStatusPill.style.display = 'none';
-          lastLat = null; lastLon = null;
-          resumeRoutineTimers();
+        const calculatedSpm = Math.round(currentSPM);
+
+        // 케이던스가 60 이하로 떨어지거나 4초간 걸음이 없으면 정지
+        if (calculatedSpm < 60 || stepTimesQueue.length === 0) {
+          if (!isAutoPausedNow) {
+            isAutoPausedNow = true;
+            autoPauseStatusPill.style.display = 'inline-block';
+            pauseRoutineTimers();
+            if (navigator.vibrate) navigator.vibrate(30);
+          }
+        } 
+        // 다시 발을 굴러 케이던스가 80 이상으로 올라오면 자동 재개
+        else if (calculatedSpm >= 80) {
+          if (isAutoPausedNow) {
+            isAutoPausedNow = false;
+            autoPauseStatusPill.style.display = 'none';
+            lastLat = null;
+            lastLon = null;
+            resumeRoutineTimers();
+            if (navigator.vibrate) navigator.vibrate(20);
+          }
         }
       }
     }, 1000);
@@ -724,7 +734,7 @@
     }
 
     // ==========================================
-    // 💾 저장 및 폐기 핸들러 (데이터 로컬스토리지 저장 적용)
+    // 💾 저장 및 폐기 핸들러
     // ==========================================
     function onDiscardRun() {
       if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
