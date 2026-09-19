@@ -226,11 +226,11 @@
 
   <script>
     // ==========================================
-    // MA.TEMPA ENGINE (SYNTHESIZER & SENSOR)
+    // MA.TEMPA ENGINE (PRO HYBRID SENSOR FUSION)
     // ==========================================
 
     let isRunning = false;
-    let isUserPaused = false; // 사용자가 수동으로 일시정지했는가?
+    let isUserPaused = false;
     let isAutoPauseEnabled = true;
     let isAutoPausedNow = false;
 
@@ -280,13 +280,16 @@
       'p5': { label: '●●●○', pattern: [1, 1, 1, 0] }
     };
 
-    // 센서 상태
-    let distanceMeters = 0;
+    // [핵심] 프로급 하이브리드 센서 & 보정 상태 변수
+    let distanceMeters = 0;          // 최종 누적 거리 (스무딩 적용)
+    let stepDerivedDistance = 0;     // 발걸음 기반 누적 거리
+    let gpsDerivedDistance = 0;      // GPS 기반 누적 검증 거리
+    let correctionFactor = 1.0;      // GPS 보정 계수
+
     let lastLat = null;
     let lastLon = null;
     let lastGpsTime = null;
     let gpsWatchId = null;
-    let gpsHasFix = false;
     let currentSpeedMs = 0;
 
     let smoothedAcc = 9.8;
@@ -294,7 +297,7 @@
     let stepTimesQueue = [];
     let currentSPM = 0;
     let stepsInLastSec = 0;
-    const STRIDE_LENGTH = 0.75;
+    const STRIDE_LENGTH = 0.75; // 기본 보폭 75cm
 
     // ==========================================
     // 🔊 AUDIO ENGINE (SYNTHESIZER)
@@ -466,7 +469,7 @@
     }
 
     // ==========================================
-    // 🏃 MOTION & GPS SENSORS
+    // 🏃 MOTION & GPS SENSORS (하이브리드 융합)
     // ==========================================
     window.addEventListener('devicemotion', (event) => {
       if (!isRunning || isAutoPausedNow || isUserPaused) return;
@@ -495,8 +498,8 @@
       let speed = Number(coords.speed);
       if (!Number.isFinite(speed) || speed < 0) speed = 0;
 
-      if (accuracy <= 60) {
-        gpsHasFix = true;
+      // 정확도가 우수한(25m 이하) 신호일 때만 GPS 검증 데이터로 채택
+      if (accuracy <= 25) {
         currentSpeedMs = speed;
 
         if (lastLat !== null && lastLon !== null) {
@@ -504,15 +507,24 @@
           const elapsed = Math.max((now - lastGpsTime) / 1000, 0.1);
           const calcSpeed = dist / elapsed;
 
+          // 튐 현상 방지 필터 (2m 이상 이동 & 30km/h 이하 속도)
           if (dist >= 2.0 && calcSpeed <= 8.5) {
-            if (!isAutoPausedNow) distanceMeters += dist;
-            lastLat = lat; lastLon = lon; lastGpsTime = now;
+            if (!isAutoPausedNow) {
+              gpsDerivedDistance += dist;
+              
+              // ★ [핵심 보정 엔진] 발걸음 누적 거리와 정기적 GPS 거리 간의 오차 비율을 계산하여 보정 계수 조정
+              if (stepDerivedDistance > 15.0 && gpsDerivedDistance > 15.0) {
+                let rawFactor = gpsDerivedDistance / stepDerivedDistance;
+                // 급격한 변화를 막고 스르륵 반영되도록 스무딩 (계수 제한: 0.8 ~ 1.2 사이)
+                rawFactor = Math.max(0.8, Math.min(1.2, rawFactor));
+                correctionFactor = correctionFactor * 0.9 + rawFactor * 0.1;
+              }
+            }
           }
-        } else {
-          lastLat = lat; lastLon = lon; lastGpsTime = now;
         }
-      } else {
-        gpsHasFix = false;
+        lastLat = lat;
+        lastLon = lon;
+        lastGpsTime = now;
       }
     }
 
@@ -528,19 +540,19 @@
       if (!navigator.geolocation) return;
       gpsWatchId = navigator.geolocation.watchPosition(
         handleGPSPosition,
-        (err) => { gpsHasFix = false; },
+        (err) => {},
         { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
       );
     }
 
     // ==========================================
-    // ⏱️ 1초 메인 업데이트 루프
+    // ⏱️ 1초 메인 업데이트 루프 (스무스 디스플레이)
     // ==========================================
     setInterval(() => {
       if (!isRunning || isUserPaused) return;
       const now = Date.now();
 
-      // SPM 계산
+      // 1. SPM 케이던스 정밀 계산
       const validThreshold = now - 4000;
       stepTimesQueue = stepTimesQueue.filter(t => t >= validThreshold);
       const rawSpm = (stepTimesQueue.length / 4) * 60;
@@ -553,22 +565,26 @@
       }
       liveCadenceDisplay.textContent = currentSPM > 20 ? Math.round(currentSPM) : '--';
 
-      // 거리 및 속도 하이브리드 연산
-      let effectiveSpeed = 0;
-      if (gpsHasFix && currentSpeedMs > 0.5) {
-        effectiveSpeed = currentSpeedMs;
-      } else {
-        const indoorDist = stepsInLastSec * STRIDE_LENGTH;
-        if (indoorDist > 0 && !isAutoPausedNow) {
-          distanceMeters += indoorDist;
-        }
-        effectiveSpeed = indoorDist;
-      }
-      stepsInLastSec = 0;
+      // 2. [핵심] 걸음 수 기본 누적 + GPS 정기 보정 계수 적용
+      let stepIncrement = stepsInLastSec * STRIDE_LENGTH;
+      stepsInLastSec = 0; // 초기화
 
+      if (stepIncrement > 0 && !isAutoPausedNow) {
+        stepDerivedDistance += stepIncrement;
+      }
+
+      // 최종 거리는 발걸음 누적치에 GPS가 검증해 준 보정 계수를 곱하여 산출
+      distanceMeters = stepDerivedDistance * correctionFactor;
       liveDistanceDisplay.textContent = (distanceMeters / 1000).toFixed(2);
 
-      // 페이스 표시
+      // 3. 페이스 계산 (GPS 속도 우선, 없을 경우 최근 발걸음 속도 활용)
+      let effectiveSpeed = 0;
+      if (currentSpeedMs > 0.5) {
+        effectiveSpeed = currentSpeedMs;
+      } else {
+        effectiveSpeed = stepIncrement; // m/s
+      }
+
       if (!isAutoPausedNow && effectiveSpeed >= 0.7) {
         const secPerKm = 1000 / effectiveSpeed;
         const min = Math.floor(secPerKm / 60);
@@ -578,9 +594,9 @@
         livePaceDisplay.textContent = "--'--\"";
       }
 
-      // 오토포즈 판정
+      // 4. 오토포즈 판정
       if (isAutoPauseEnabled) {
-        const isMoving = effectiveSpeed >= 0.7;
+        const isMoving = effectiveSpeed >= 0.7 || stepTimesQueue.length > 0;
         if (!isMoving && !isAutoPausedNow) {
           isAutoPausedNow = true;
           autoPauseStatusPill.style.display = 'inline-block';
@@ -671,9 +687,7 @@
       syncBpmTimer();
     }
 
-    // ==========================================
-    // 🛡️ 전화/백그라운드 복귀 시 자동 재개 핸들러
-    // ==========================================
+    // 전화/백그라운드 복귀 핸들러
     function handleAppResume() {
       if (!isUserPaused && isRunning) {
         initAudio();
@@ -683,9 +697,7 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        handleAppResume();
-      }
+      if (document.visibilityState === 'visible') handleAppResume();
     });
 
     window.addEventListener('focus', () => {
