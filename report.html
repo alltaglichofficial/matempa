@@ -479,6 +479,75 @@
       return monthMap;
     }
 
+    // RUN 페이지의 새 저장 방식(matema_run_history)과
+    // 이전 버전(matema_latest_run)도 함께 호환
+    function normalizeLegacyLatestRun() {
+      try {
+        const raw = localStorage.getItem('matempa_latest_run');
+        if (!raw) return;
+
+        const latest = JSON.parse(raw);
+        if (!latest || typeof latest !== 'object') return;
+
+        let history = [];
+        const savedHistory = localStorage.getItem('matempa_run_history');
+        if (savedHistory) {
+          try {
+            history = JSON.parse(savedHistory);
+            if (!Array.isArray(history)) history = [];
+          } catch (e) {
+            history = [];
+          }
+        }
+
+        // 이미 새 저장 형식으로 들어온 기록이면 건너뜀
+        if (latest.id && history.some(item => item.id === latest.id)) return;
+
+        // 최신 RUN 파일이 저장한 새 형식이면 그대로 사용
+        if (latest.id && latest.totalDistanceKm !== undefined) return;
+
+        const sourceDate = latest.date ? new Date(latest.date) : new Date();
+        const validDate = Number.isNaN(sourceDate.getTime()) ? new Date() : sourceDate;
+
+        const date = `${validDate.getFullYear()}.${String(validDate.getMonth() + 1).padStart(2, '0')}.${String(validDate.getDate()).padStart(2, '0')}`;
+        const startTime = `${String(validDate.getHours()).padStart(2, '0')}:${String(validDate.getMinutes()).padStart(2, '0')}`;
+        const distanceKm = Number.parseFloat(latest.distanceKm) || 0;
+        const durationMs = Number(latest.durationMs) || 0;
+        const durationSeconds = Math.floor(durationMs / 1000);
+
+        let avgPaceFormatted = "--'--\"";
+        if (distanceKm > 0 && durationSeconds > 0) {
+          const secPerKm = durationSeconds / distanceKm;
+          const paceMin = Math.floor(secPerKm / 60);
+          const paceSec = Math.round(secPerKm % 60);
+          avgPaceFormatted = `${paceMin}'${String(paceSec).padStart(2, '0')}\"`;
+        }
+
+        const legacyId = `legacy_${validDate.getTime()}_${distanceKm.toFixed(2)}`;
+
+        if (history.some(item => item.id === legacyId)) return;
+
+        history.unshift({
+          id: legacyId,
+          date,
+          startTime,
+          routineTitle: latest.routineTitle || 'ROUTINE #1',
+          totalDistanceKm: distanceKm.toFixed(2),
+          totalDurationMs: durationMs,
+          totalDurationFormatted: latest.durationFormatted || '0:00:00',
+          avgPaceFormatted,
+          avgSpm: Number(latest.avgSpm) || 0,
+          totalSteps: Number(latest.totalSteps) || 0,
+          splits: []
+        });
+
+        localStorage.setItem('matempa_run_history', JSON.stringify(history));
+        localStorage.setItem('matempa_last_completed_id', legacyId);
+      } catch (e) {
+        console.error('기존 러닝 기록 변환 실패:', e);
+      }
+    }
+
     function renderHistory() {
       const container = document.getElementById('historyList');
       container.innerHTML = '';
@@ -629,6 +698,7 @@
     }
 
     window.onload = () => {
+      normalizeLegacyLatestRun();
       renderHistory();
     };
   </script>

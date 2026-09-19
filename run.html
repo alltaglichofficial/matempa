@@ -1370,19 +1370,68 @@
       stopGPS();
 
       try {
-        const runResult = {
-          date: new Date().toISOString(),
-          distanceKm: (distanceMeters / 1000).toFixed(2),
-          durationMs: elapsedMs,
-          durationFormatted: runTimerDisplay.textContent,
-          avgSpm: Math.round(currentSPM),
-          totalSteps: totalSteps
+        const now = new Date();
+        const distanceKm = Number((distanceMeters / 1000).toFixed(2));
+        const durationMs = Math.max(0, elapsedMs);
+        const durationSeconds = Math.floor(durationMs / 1000);
+
+        const hours = Math.floor(durationSeconds / 3600);
+        const minutes = Math.floor((durationSeconds % 3600) / 60);
+        const seconds = durationSeconds % 60;
+
+        const durationFormatted =
+          `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        let avgPaceFormatted = "--'--\"";
+        if (distanceKm > 0) {
+          const secPerKm = durationSeconds / distanceKm;
+          const paceMin = Math.floor(secPerKm / 60);
+          const paceSec = Math.round(secPerKm % 60);
+          avgPaceFormatted = `${paceMin}'${String(paceSec).padStart(2, '0')}\"`;
+        }
+
+        // report.html이 사용하는 날짜 포맷: YYYY.MM.DD
+        const date = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+        const startClock = new Date(now.getTime() - durationMs);
+        const startTime = `${String(startClock.getHours()).padStart(2, '0')}:${String(startClock.getMinutes()).padStart(2, '0')}`;
+
+        const record = {
+          id: `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          date,
+          startTime,
+          routineTitle: runRoutineTitle ? runRoutineTitle.textContent : `ROUTINE #${activeSlot + 1}`,
+          totalDistanceKm: distanceKm.toFixed(2),
+          totalDurationMs: durationMs,
+          totalDurationFormatted: durationFormatted,
+          avgPaceFormatted,
+          avgSpm: Math.round(currentSPM || 0),
+          totalSteps,
+          splits: []
         };
 
-        localStorage.setItem(
-          'matempa_latest_run',
-          JSON.stringify(runResult)
-        );
+        // report.html이 읽는 정식 러닝 히스토리에 추가
+        const savedHistory = localStorage.getItem('matempa_run_history');
+        let history = [];
+
+        try {
+          history = savedHistory ? JSON.parse(savedHistory) : [];
+          if (!Array.isArray(history)) history = [];
+        } catch (e) {
+          history = [];
+        }
+
+        history.unshift(record);
+        localStorage.setItem('matempa_run_history', JSON.stringify(history));
+        localStorage.setItem('matempa_last_completed_id', record.id);
+
+        // 기존 호환용 최신 기록도 함께 보관
+        localStorage.setItem('matempa_latest_run', JSON.stringify({
+          ...record,
+          distanceKm: record.totalDistanceKm,
+          durationMs: record.totalDurationMs,
+          durationFormatted: record.totalDurationFormatted
+        }));
+
       } catch (e) {
         console.error('러닝 결과 저장 오류:', e);
       }
