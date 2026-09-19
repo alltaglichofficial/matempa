@@ -1,5 +1,730 @@
-// ==========================================
-    // 15. SAVE / DISCARD (데이터 저장 로직 추가)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MA.TEMPA - RUN</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0b0b0c">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: #0b0b0c;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+      padding: 1.2rem 1.2rem 2.2rem 1.2rem;
+      user-select: none;
+      -webkit-user-select: none;
+      letter-spacing: -0.3px;
+    }
+
+    .app-screen {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .run-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .routine-name-badge { font-size: 0.95rem; font-weight: 800; color: #8e8e93; letter-spacing: 0.5px; }
+
+    .auto-pause-toggle-btn {
+      background: rgba(255, 255, 255, 0.08); color: #8e8e93; border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .auto-pause-toggle-btn.active { background: rgba(52, 199, 89, 0.16); color: #34c759; border-color: rgba(52, 199, 89, 0.35); }
+    .auto-pause-dot { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; }
+    .auto-pause-toggle-btn.active .auto-pause-dot { background: #34c759; box-shadow: 0 0 6px rgba(52, 199, 89, 0.8); }
+
+    .watch-display-large {
+      width: 100%; height: 500px; background: linear-gradient(180deg, #161618 0%, #0d0d0e 100%);
+      border-radius: 46px; padding: 20px 18px 18px 18px; display: flex; flex-direction: column;
+      justify-content: space-between; align-items: center; box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      position: relative;
+    }
+
+    .top-stat-row { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #8e8e93; font-weight: 700; padding: 0 4px; }
+    .zone-indicator-pill { background: rgba(52, 199, 89, 0.15); color: #34c759; padding: 3px 10px; border-radius: 8px; font-weight: 800; }
+    .auto-pause-status-pill {
+      display: none; background: rgba(255, 149, 0, 0.18); color: #ff9500; padding: 3px 10px;
+      border-radius: 8px; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.5px; animation: blink 1s infinite alternate;
+    }
+    @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
+
+    .cadence-comparison-grid { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; padding: 0 4px; }
+    .cadence-col { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .cadence-num { font-size: 2.6rem; font-weight: 900; line-height: 0.95; font-variant-numeric: tabular-nums; letter-spacing: -1.5px; }
+    .cadence-num.target { color: #ffffff; filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1)); }
+    .cadence-num.live { color: #34c759; filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.25)); }
+    .cadence-num.pace { color: #ff9f0a; font-size: 2.35rem; letter-spacing: -1px; filter: drop-shadow(0 4px 12px rgba(255, 159, 10, 0.25)); }
+    .cadence-col-label { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.8px; margin-top: 4px; color: #8e8e93; white-space: nowrap; }
+    .cadence-divider { width: 1px; height: 42px; background: rgba(255, 255, 255, 0.12); }
+
+    .distance-hero-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0.2rem 0; }
+    .distance-hero-num { font-size: 3.6rem; font-weight: 900; line-height: 0.9; color: #007aff; font-variant-numeric: tabular-nums; letter-spacing: -1.8px; filter: drop-shadow(0 6px 16px rgba(0, 122, 255, 0.35)); }
+    .distance-hero-unit { font-size: 0.75rem; font-weight: 900; color: #8e8e93; letter-spacing: 1.5px; margin-top: 4px; }
+
+    .step-progress-text { font-size: 0.78rem; color: #a0a0a5; font-weight: 600; }
+    .timer-capsule-large {
+      background: rgba(255, 255, 255, 0.06); width: 220px; height: 42px; border-radius: 21px;
+      display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.28rem;
+      font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .watch-indicators { display: flex; gap: 8px; margin-bottom: 4px; }
+    .watch-ind-step { width: 24px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background 0.08s, box-shadow 0.08s; }
+    .watch-ind-step.active { background: #34c759; box-shadow: 0 0 12px rgba(52, 199, 89, 0.9); }
+
+    .inline-sound-control-card { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .sound-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sound-label { font-size: 0.65rem; font-weight: 800; color: #8e8e93; min-width: 44px; }
+    .sound-value-text { font-size: 0.65rem; font-weight: 800; color: #34c759; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+    .inline-slider { -webkit-appearance: none; flex: 1; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); outline: none; }
+    .inline-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #ffffff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+    .controls-wrapper { width: 100%; height: 76px; margin-top: 0.8rem; display: flex; align-items: center; justify-content: center; }
+    .running-bar { width: 100%; display: flex; }
+    .single-tap-pause-btn { width: 100%; height: 58px; background: #ffffff; color: #111111; border: none; border-radius: 29px; font-size: 1.05rem; font-weight: 900; letter-spacing: 0.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(255, 255, 255, 0.12); transition: transform 0.12s ease; }
+    .single-tap-pause-btn:active { transform: scale(0.96); }
+
+    .paused-split-bar { width: 100%; display: none; align-items: center; justify-content: space-between; gap: 12px; }
+    .btn-quick-resume { flex: 1.2; height: 58px; background: #34c759; color: #ffffff; border: none; border-radius: 29px; font-size: 0.95rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(52, 199, 89, 0.25); transition: transform 0.12s ease; }
+    .btn-quick-resume:active { transform: scale(0.95); }
+
+    .finish-hold-wrap { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+    .finish-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); pointer-events: none; }
+    .finish-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 4; }
+    .finish-progress { fill: none; stroke: #ff3b30; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 188.49; stroke-dashoffset: 188.49; transition: stroke-dashoffset 0.04s linear; }
+    .finish-core-btn { width: 56px; height: 56px; border-radius: 50%; border: 1px solid rgba(255, 59, 48, 0.4); background: rgba(255, 59, 48, 0.18); color: #ff3b30; font-size: 0.72rem; font-weight: 900; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s ease; }
+    .finish-core-btn:active { transform: scale(0.92); }
+    .finish-sub-text { font-size: 0.5rem; opacity: 0.8; margin-top: 1px; }
+
+    .confirm-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 1.5rem; }
+    .confirm-modal-box { width: 100%; max-width: 310px; background: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 1.5rem 1.2rem 1.2rem 1.2rem; text-align: center; display: flex; flex-direction: column; gap: 1.2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
+    .confirm-modal-title { font-size: 1.05rem; font-weight: 800; color: #ffffff; line-height: 1.4; }
+    .confirm-modal-btn-group { display: flex; gap: 8px; }
+    .modal-btn { flex: 1; height: 46px; border-radius: 23px; border: none; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: transform 0.1s ease; }
+    .modal-btn:active { transform: scale(0.95); }
+    .btn-modal-cancel { background: #34c759; color: #ffffff; }
+    .btn-modal-confirm { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.4); }
+  </style>
+</head>
+<body>
+
+  <div class="app-screen">
+
+    <div class="run-header">
+      <div class="header-left-wrap">
+        <span class="routine-name-badge" id="runRoutineTitle">ROUTINE #1</span>
+      </div>
+      <button class="auto-pause-toggle-btn active" id="autoPauseToggleBtn" onclick="toggleAutoPauseOption()">
+        <span class="auto-pause-dot"></span>
+        <span id="autoPauseText">AUTO PAUSE ON</span>
+      </button>
+    </div>
+
+    <div class="watch-display-large">
+      <div class="top-stat-row">
+        <span class="zone-indicator-pill" id="runZoneBadge">ZONE.1</span>
+        <span class="auto-pause-status-pill" id="autoPauseStatusPill">⏸ AUTO PAUSED</span>
+        <span id="runSoundAndMeter">WOOD | ●●●●</span>
+      </div>
+
+      <div class="cadence-comparison-grid">
+        <div class="cadence-col">
+          <div class="cadence-num target" id="targetBpmDisplay">180</div>
+          <span class="cadence-col-label">TARGET</span>
+        </div>
+        <div class="cadence-divider"></div>
+        <div class="cadence-col">
+          <div class="cadence-num live" id="liveCadenceDisplay">--</div>
+          <span class="cadence-col-label">SPM</span>
+        </div>
+        <div class="cadence-divider"></div>
+        <div class="cadence-col">
+          <div class="cadence-num pace" id="livePaceDisplay">--'--"</div>
+          <span class="cadence-col-label">PACE /KM</span>
+        </div>
+      </div>
+
+      <div class="distance-hero-wrap">
+        <div class="distance-hero-num" id="liveDistanceDisplay">0.00</div>
+        <div class="distance-hero-unit">KILOMETERS</div>
+      </div>
+
+      <div class="step-progress-text" id="stepRemainingText">남은 시간 계산 중...</div>
+      <div class="timer-capsule-large" id="runTimerDisplay">0:00:00:00</div>
+
+      <div class="watch-indicators">
+        <div class="watch-ind-step" id="ind-0"></div>
+        <div class="watch-ind-step" id="ind-1"></div>
+        <div class="watch-ind-step" id="ind-2"></div>
+        <div class="watch-ind-step" id="ind-3"></div>
+      </div>
+
+      <div class="inline-sound-control-card">
+        <div class="sound-row">
+          <span class="sound-label">VOL</span>
+          <input type="range" class="inline-slider" id="inlineVolSlider" min="0" max="100" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlineVolText">100%</span>
+        </div>
+        <div class="sound-row">
+          <span class="sound-label">PITCH</span>
+          <input type="range" class="inline-slider" id="inlinePitchSlider" min="50" max="150" value="100" oninput="updateInlineSound()">
+          <span class="sound-value-text" id="inlinePitchText">1.0x</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-wrapper">
+      <div class="running-bar" id="runningBar">
+        <button class="single-tap-pause-btn" id="singleTapPauseBtn" onclick="onSingleTapPause()">PAUSE ||</button>
+      </div>
+      <div class="paused-split-bar" id="pausedSplitBar">
+        <button class="btn-quick-resume" onclick="onQuickResume()">RESUME ▶</button>
+        <div class="finish-hold-wrap" id="finishHoldWrap">
+          <svg class="finish-svg" viewBox="0 0 68 68">
+            <circle class="finish-track" cx="34" cy="34" r="30"></circle>
+            <circle class="finish-progress" id="finishHoldProgress" cx="34" cy="34" r="30"></circle>
+          </svg>
+          <button class="finish-core-btn" id="finishHoldBtn">
+            <span>FINISH</span>
+            <span class="finish-sub-text">1.25s</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-modal-overlay" id="deleteConfirmModal">
+      <div class="confirm-modal-box">
+        <div class="confirm-modal-title">기록을 어떻게 할까요?</div>
+        <div class="confirm-modal-btn-group">
+          <button class="modal-btn btn-modal-confirm" onclick="onDiscardRun()">취소 (삭제)</button>
+          <button class="modal-btn btn-modal-cancel" onclick="onSaveRun()">확인 (저장)</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <audio id="silentBackgroundAudio" loop playsinline style="display: none;"></audio>
+
+  <script>
+    // ==========================================
+    // MA.TEMPA ENGINE (PRO HYBRID SENSOR FUSION)
+    // ==========================================
+
+    let isRunning = false;
+    let isUserPaused = false;
+    let isAutoPauseEnabled = true;
+    let isAutoPausedNow = false;
+
+    // DOM 참조
+    const runRoutineTitle = document.getElementById('runRoutineTitle');
+    const autoPauseToggleBtn = document.getElementById('autoPauseToggleBtn');
+    const autoPauseText = document.getElementById('autoPauseText');
+    const autoPauseStatusPill = document.getElementById('autoPauseStatusPill');
+
+    const runZoneBadge = document.getElementById('runZoneBadge');
+    const runSoundAndMeter = document.getElementById('runSoundAndMeter');
+    const targetBpmDisplay = document.getElementById('targetBpmDisplay');
+    const liveCadenceDisplay = document.getElementById('liveCadenceDisplay');
+    const livePaceDisplay = document.getElementById('livePaceDisplay');
+    const liveDistanceDisplay = document.getElementById('liveDistanceDisplay');
+    const stepRemainingText = document.getElementById('stepRemainingText');
+    const runTimerDisplay = document.getElementById('runTimerDisplay');
+    const silentAudioEl = document.getElementById('silentBackgroundAudio');
+
+    const inlineVolSlider = document.getElementById('inlineVolSlider');
+    const inlinePitchSlider = document.getElementById('inlinePitchSlider');
+    const inlineVolText = document.getElementById('inlineVolText');
+    const inlinePitchText = document.getElementById('inlinePitchText');
+
+    // 루틴 및 오디오 상태
+    let activeSlot = 0;
+    let routine = [];
+    let currentStepIndex = 0;
+    let currentBeatIndex = 0;
+    let currentStepData = null;
+    let runVolumeMultiplier = 1.0;
+    let runPitchMultiplier = 1.0;
+    let lastSecondReported = -1;
+
+    let audioCtx = null;
+    let beatTimer = null;
+    let clockTimer = null;
+    let startTimeMs = 0;
+    let baseOffsetMs = 0;
+    let elapsedMs = 0;
+
+    const METERS = {
+      'p1': { label: '●●●●', pattern: [1, 1, 1, 1] },
+      'p2': { label: '●○●○', pattern: [1, 0, 1, 0] },
+      'p3': { label: '●○●●', pattern: [1, 0, 1, 1] },
+      'p4': { label: '●●○●', pattern: [1, 1, 0, 1] },
+      'p5': { label: '●●●○', pattern: [1, 1, 1, 0] }
+    };
+
+    // 센서 & 보정 상태 변수
+    let distanceMeters = 0;
+    let stepDerivedDistance = 0;
+    let gpsDerivedDistance = 0;
+    let correctionFactor = 1.0;
+
+    let lastLat = null;
+    let lastLon = null;
+    let lastGpsTime = null;
+    let gpsWatchId = null;
+    let currentSpeedMs = 0;
+
+    let smoothedAcc = 9.8;
+    let lastPeakTime = 0;
+    let stepTimesQueue = [];
+    let currentSPM = 0;
+    let stepsInLastSec = 0;
+    const STRIDE_LENGTH = 0.75;
+
+    // ==========================================
+    // 🔊 AUDIO ENGINE (SYNTHESIZER)
+    // ==========================================
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) {
+          audioCtx = new AudioClass({ latencyHint: 'interactive' });
+          audioCtx.onstatechange = () => {
+            if (isRunning && !isUserPaused && !isAutoPausedNow) {
+              if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
+                audioCtx.resume().catch(() => {});
+              }
+            }
+          };
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    }
+
+    function playBeep() {
+      initAudio();
+      if (!audioCtx || !currentStepData || isAutoPausedNow || !isRunning || isUserPaused) return;
+
+      const now = audioCtx.currentTime;
+      const vol = (currentStepData.vol !== undefined ? currentStepData.vol : 0.8) * runVolumeMultiplier;
+      const basePitch = (currentStepData.pitch !== undefined ? currentStepData.pitch : 440) * runPitchMultiplier;
+      const soundType = currentStepData.sound || 'wood';
+
+      if (soundType === 'drum') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(Math.max(basePitch * 0.35, 120), now);
+        osc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
+        gain.gain.setValueAtTime(vol * 1.2, now);
+        gain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.09);
+
+        const clickOsc = audioCtx.createOscillator();
+        const clickGain = audioCtx.createGain();
+        clickOsc.type = 'triangle';
+        clickOsc.frequency.setValueAtTime(800 * runPitchMultiplier, now);
+        clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
+        clickGain.gain.setValueAtTime(vol * 0.7, now);
+        clickGain.gain.linearRampToValueAtTime(0.0001, now + 0.02);
+        clickOsc.connect(clickGain); clickGain.connect(audioCtx.destination);
+        clickOsc.start(now); clickOsc.stop(now + 0.02);
+        return;
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      let dur = 0.05, startFreq = basePitch, wave = 'triangle';
+
+      if (soundType === 'bass') { wave = 'sine'; startFreq = basePitch * 0.3; dur = 0.08; }
+      else if (soundType === 'wood') { wave = 'triangle'; startFreq = basePitch; dur = 0.04; }
+      else if (soundType === 'beep') { wave = 'sine'; startFreq = basePitch; dur = 0.06; }
+      else { wave = 'square'; startFreq = basePitch; dur = 0.02; }
+
+      osc.type = wave;
+      osc.frequency.setValueAtTime(startFreq, now);
+      gain.gain.setValueAtTime(vol * 0.8, now);
+      gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + dur);
+    }
+
+    function playCueSound(type) {
+      initAudio();
+      if (!audioCtx || isAutoPausedNow || !isRunning || isUserPaused) return;
+      const now = audioCtx.currentTime;
+      const vol = 0.8 * runVolumeMultiplier;
+      const pitchFactor = runPitchMultiplier;
+
+      if (type === 'countdown') {
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(900 * pitchFactor, now);
+        gain.gain.setValueAtTime(vol * 0.9, now); gain.gain.linearRampToValueAtTime(0.0001, now + 0.08);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'next_step') {
+        [{ f: 880, t: 0 }, { f: 1320, t: 0.12 }].forEach(tone => {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
+          gain.gain.setValueAtTime(vol * 0.9, now + tone.t); gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.22);
+          osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + tone.t); osc.stop(now + tone.t + 0.22);
+        });
+      } else if (type === 'complete') {
+        [{ f: 659.25, t: 0 }, { f: 880, t: 0.15 }, { f: 1318.5, t: 0.3 }].forEach(tone => {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(tone.f * pitchFactor, now + tone.t);
+          gain.gain.setValueAtTime(vol, now + tone.t); gain.gain.linearRampToValueAtTime(0.0001, now + tone.t + 0.4);
+          osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + tone.t); osc.stop(now + tone.t + 0.4);
+        });
+      }
+    }
+
+    function shouldPlaySoundInPattern(beatIdx) {
+      if (!currentStepData) return true;
+      const activeMeter = METERS[currentStepData.meter] || METERS['p1'];
+      return activeMeter.pattern[beatIdx % 4] === 1;
+    }
+
+    function triggerStep() {
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
+      const stepInCycle = currentBeatIndex % 4;
+      const playSound = shouldPlaySoundInPattern(stepInCycle);
+      if (playSound) playBeep();
+
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`ind-${i}`);
+        if (el) {
+          el.className = 'watch-ind-step';
+          if (i === stepInCycle && playSound) el.classList.add('active');
+        }
+      }
+      currentBeatIndex = (currentBeatIndex + 1) % 4;
+    }
+
+    function syncBpmTimer() {
+      if (beatTimer) { clearInterval(beatTimer); beatTimer = null; }
+      if (isRunning && !isAutoPausedNow && !isUserPaused && currentStepData && currentStepData.bpm > 0) {
+        beatTimer = setInterval(triggerStep, (60 / currentStepData.bpm) * 1000);
+      }
+    }
+
+    function applyCurrentStepToView(step, stepIdx) {
+      currentStepData = step;
+      targetBpmDisplay.textContent = step.bpm;
+      runZoneBadge.textContent = `ZONE.${stepIdx + 1}`;
+      const meterInfo = METERS[step.meter] || METERS['p1'];
+      runSoundAndMeter.textContent = `${(step.sound || 'wood').toUpperCase()} | ${meterInfo.label}`;
+    }
+
+    function formatSecToMinSec(totalSec) {
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return m > 0 && s > 0 ? `${m}분 ${s}초` : (m > 0 ? `${m}분` : `${s}초`);
+    }
+
+    function evaluateRoutine(currentSec) {
+      if (!routine || routine.length === 0) return;
+      let accumulatedSec = 0;
+      for (let i = 0; i < routine.length; i++) {
+        accumulatedSec += routine[i].durationSec;
+        if (currentSec < accumulatedSec) {
+          const remainingSec = accumulatedSec - currentSec;
+          stepRemainingText.textContent = `${i + 1}구간 진행 중 (${formatSecToMinSec(remainingSec)} 남음)`;
+          if (remainingSec <= 3 && remainingSec > 0 && currentSec !== lastSecondReported) {
+            playCueSound('countdown');
+            lastSecondReported = currentSec;
+          }
+          if (currentStepIndex !== i) {
+            currentStepIndex = i;
+            applyCurrentStepToView(routine[i], i);
+            playCueSound('next_step');
+            syncBpmTimer();
+          }
+          return;
+        }
+      }
+      playCueSound('complete');
+      onSingleTapPause();
+      document.getElementById('deleteConfirmModal').style.display = 'flex';
+    }
+
+    // ==========================================
+    // 🏃 MOTION & GPS SENSORS
+    // ==========================================
+    window.addEventListener('devicemotion', (event) => {
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
+      const acc = event.accelerationIncludingGravity;
+      if (!acc || acc.x == null) return;
+
+      const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+      smoothedAcc = smoothedAcc * 0.8 + magnitude * 0.2;
+
+      const now = Date.now();
+      if (smoothedAcc > 11.2 && (now - lastPeakTime) > 260) {
+        lastPeakTime = now;
+        stepTimesQueue.push(now);
+        stepsInLastSec++;
+      }
+    });
+
+    function handleGPSPosition(pos) {
+      if (!isRunning || isUserPaused) return;
+      const coords = pos.coords;
+      const lat = coords.latitude;
+      const lon = coords.longitude;
+      const accuracy = Number(coords.accuracy) || 999;
+      const now = Date.now();
+
+      let speed = Number(coords.speed);
+      if (!Number.isFinite(speed) || speed < 0) speed = 0;
+
+      if (accuracy <= 25) {
+        currentSpeedMs = speed;
+
+        if (lastLat !== null && lastLon !== null) {
+          const dist = calculateDistance(lastLat, lastLon, lat, lon);
+          const elapsed = Math.max((now - lastGpsTime) / 1000, 0.1);
+          const calcSpeed = dist / elapsed;
+
+          if (dist >= 2.0 && calcSpeed <= 8.5) {
+            if (!isAutoPausedNow) {
+              gpsDerivedDistance += dist;
+              if (stepDerivedDistance > 15.0 && gpsDerivedDistance > 15.0) {
+                let rawFactor = gpsDerivedDistance / stepDerivedDistance;
+                rawFactor = Math.max(0.8, Math.min(1.2, rawFactor));
+                correctionFactor = correctionFactor * 0.9 + rawFactor * 0.1;
+              }
+            }
+          }
+        }
+        lastLat = lat;
+        lastLon = lon;
+        lastGpsTime = now;
+      }
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const rLat1 = lat1 * Math.PI / 180, rLat2 = lat2 * Math.PI / 180;
+      const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(rLat1) * Math.cos(rLat2) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function startGPS() {
+      if (!navigator.geolocation) return;
+      gpsWatchId = navigator.geolocation.watchPosition(
+        handleGPSPosition,
+        (err) => {},
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+      );
+    }
+
+    // ==========================================
+    // ⏱️ 1초 메인 업데이트 루프
+    // ==========================================
+    setInterval(() => {
+      if (!isRunning || isUserPaused) return;
+      const now = Date.now();
+
+      const validThreshold = now - 4000;
+      stepTimesQueue = stepTimesQueue.filter(t => t >= validThreshold);
+      const rawSpm = (stepTimesQueue.length / 4) * 60;
+
+      if (isAutoPausedNow || stepTimesQueue.length === 0) {
+        currentSPM = currentSPM * 0.5;
+        if (currentSPM < 15) currentSPM = 0;
+      } else {
+        currentSPM = currentSPM === 0 ? rawSpm : (currentSPM * 0.65 + rawSpm * 0.35);
+      }
+      liveCadenceDisplay.textContent = currentSPM > 20 ? Math.round(currentSPM) : '--';
+
+      let stepIncrement = stepsInLastSec * STRIDE_LENGTH;
+      stepsInLastSec = 0;
+
+      if (stepIncrement > 0 && !isAutoPausedNow) {
+        stepDerivedDistance += stepIncrement;
+      }
+
+      distanceMeters = stepDerivedDistance * correctionFactor;
+      liveDistanceDisplay.textContent = (distanceMeters / 1000).toFixed(2);
+
+      let effectiveSpeed = 0;
+      if (currentSpeedMs > 0.5) {
+        effectiveSpeed = currentSpeedMs;
+      } else {
+        effectiveSpeed = stepIncrement;
+      }
+
+      if (!isAutoPausedNow && effectiveSpeed >= 0.7) {
+        const secPerKm = 1000 / effectiveSpeed;
+        const min = Math.floor(secPerKm / 60);
+        const sec = Math.round(secPerKm % 60);
+        livePaceDisplay.textContent = `${min}'${sec.toString().padStart(2, '0')}"`;
+      } else {
+        livePaceDisplay.textContent = "--'--\"";
+      }
+
+      if (isAutoPauseEnabled) {
+        const isMoving = effectiveSpeed >= 0.7 || stepTimesQueue.length > 0;
+        if (!isMoving && !isAutoPausedNow) {
+          isAutoPausedNow = true;
+          autoPauseStatusPill.style.display = 'inline-block';
+          pauseRoutineTimers();
+        } else if (isMoving && isAutoPausedNow) {
+          isAutoPausedNow = false;
+          autoPauseStatusPill.style.display = 'none';
+          lastLat = null; lastLon = null;
+          resumeRoutineTimers();
+        }
+      }
+    }, 1000);
+
+    // ==========================================
+    // 🎛️ CONTROLS & TIMERS
+    // ==========================================
+    function toggleAutoPauseOption() {
+      isAutoPauseEnabled = !isAutoPauseEnabled;
+      autoPauseToggleBtn.classList.toggle('active', isAutoPauseEnabled);
+      autoPauseText.textContent = isAutoPauseEnabled ? 'AUTO PAUSE ON' : 'AUTO PAUSE OFF';
+      if (!isAutoPauseEnabled && isAutoPausedNow) {
+        isAutoPausedNow = false;
+        autoPauseStatusPill.style.display = 'none';
+        resumeRoutineTimers();
+      }
+    }
+
+    function onSingleTapPause() {
+      isUserPaused = true;
+      pauseRunUI();
+    }
+
+    function onQuickResume() {
+      isUserPaused = false;
+      resumeRunUI();
+    }
+
+    function pauseRunUI() {
+      isRunning = false;
+      pauseRoutineTimers();
+      document.getElementById('runningBar').style.display = 'none';
+      document.getElementById('pausedSplitBar').style.display = 'flex';
+      lastLat = null; lastLon = null;
+      if (silentAudioEl) silentAudioEl.pause();
+      if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+    }
+
+    function resumeRunUI() {
+      initAudio();
+      isRunning = true;
+      isUserPaused = false;
+      isAutoPausedNow = false;
+      autoPauseStatusPill.style.display = 'none';
+      lastLat = null; lastLon = null;
+      document.getElementById('runningBar').style.display = 'flex';
+      document.getElementById('pausedSplitBar').style.display = 'none';
+      resumeRoutineTimers();
+
+      if (silentAudioEl && !silentAudioEl.src) {
+        silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
+      }
+      if (silentAudioEl) silentAudioEl.play().catch(() => {});
+    }
+
+    function pauseRoutineTimers() {
+      baseOffsetMs = elapsedMs;
+      if (beatTimer) { clearInterval(beatTimer); beatTimer = null; }
+      if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`ind-${i}`);
+        if (el) el.className = 'watch-ind-step';
+      }
+    }
+
+    function resumeRoutineTimers() {
+      if (!isRunning || isAutoPausedNow || isUserPaused) return;
+      startTimeMs = performance.now();
+      clockTimer = setInterval(() => {
+        elapsedMs = baseOffsetMs + (performance.now() - startTimeMs);
+        const cs = String(Math.floor(elapsedMs / 10) % 100).padStart(2, '0');
+        const ts = Math.floor(elapsedMs / 1000);
+        const s = String(ts % 60).padStart(2, '0');
+        const m = String(Math.floor(ts / 60) % 60).padStart(2, '0');
+        const h = Math.floor(ts / 3600);
+        runTimerDisplay.textContent = `${h}:${m}:${s}:${cs}`;
+        evaluateRoutine(ts);
+      }, 50);
+      syncBpmTimer();
+    }
+
+    function handleAppResume() {
+      if (!isUserPaused && isRunning) {
+        initAudio();
+        if (silentAudioEl) silentAudioEl.play().catch(() => {});
+        syncBpmTimer();
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') handleAppResume();
+    });
+
+    window.addEventListener('focus', () => {
+      handleAppResume();
+    });
+
+    // 종료 롱프레스
+    const finishHoldBtn = document.getElementById('finishHoldBtn');
+    const finishHoldProgress = document.getElementById('finishHoldProgress');
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    let holdTimer = null, holdStartTime = 0;
+
+    finishHoldBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      holdStartTime = performance.now();
+      holdTimer = requestAnimationFrame(updateHold);
+    });
+
+    const cancelHold = () => {
+      if (holdTimer) cancelAnimationFrame(holdTimer);
+      finishHoldProgress.style.strokeDashoffset = 188.49;
+    };
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(evt => finishHoldBtn.addEventListener(evt, cancelHold));
+
+    function updateHold(timestamp) {
+      const pct = Math.min(((timestamp - holdStartTime) / 1250) * 100, 100);
+      finishHoldProgress.style.strokeDashoffset = 188.49 - (pct / 100) * 188.49;
+      if (pct < 100) {
+        holdTimer = requestAnimationFrame(updateHold);
+      } else {
+        cancelHold();
+        onSingleTapPause();
+        deleteConfirmModal.style.display = 'flex';
+      }
+    }
+
+    // ==========================================
+    // 💾 저장 및 폐기 핸들러 (데이터 로컬스토리지 저장 적용)
     // ==========================================
     function onDiscardRun() {
       if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
@@ -9,20 +734,89 @@
     function onSaveRun() {
       if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
 
-      // ★ 핵심: 이번 러닝 결과 데이터를 로컬 스토리지에 저장하여 report.html이 읽을 수 있게 함
       try {
         const runResult = {
           date: new Date().toISOString(),
           distanceKm: (distanceMeters / 1000).toFixed(2),
           durationMs: elapsedMs,
           durationFormatted: runTimerDisplay.textContent,
-          avgSpm: Math.round(currentSPM),
-          totalSteps: stepTimesQueue.length // 또는 누적 걸음 변수
+          avgSpm: Math.round(currentSPM)
         };
         localStorage.setItem('matempa_latest_run', JSON.stringify(runResult));
       } catch (e) {
-        console.error("러닝 결과 저장 실패:", e);
+        console.error("러닝 결과 저장 오류:", e);
       }
 
       window.location.href = 'report.html';
     }
+
+    function updateInlineSound() {
+      const vol = document.getElementById('inlineVolSlider').value;
+      const pitch = document.getElementById('inlinePitchSlider').value;
+      runVolumeMultiplier = parseInt(vol) / 100;
+      runPitchMultiplier = parseInt(pitch) / 100;
+      document.getElementById('inlineVolText').textContent = `${vol}%`;
+      document.getElementById('inlinePitchText').textContent = `${(parseInt(pitch) / 100).toFixed(1)}x`;
+      try {
+        localStorage.setItem('matempa_run_vol', runVolumeMultiplier);
+        localStorage.setItem('matempa_run_pitch', runPitchMultiplier);
+      } catch (e) {}
+    }
+
+    function loadSavedSoundSettings() {
+      try {
+        const savedVol = localStorage.getItem('matempa_run_vol');
+        const savedPitch = localStorage.getItem('matempa_run_pitch');
+        if (savedVol !== null) {
+          runVolumeMultiplier = parseFloat(savedVol);
+          inlineVolSlider.value = Math.round(runVolumeMultiplier * 100);
+          inlineVolText.textContent = `${inlineVolSlider.value}%`;
+        }
+        if (savedPitch !== null) {
+          runPitchMultiplier = parseFloat(savedPitch);
+          inlinePitchSlider.value = Math.round(runPitchMultiplier * 100);
+          inlinePitchText.textContent = `${runPitchMultiplier.toFixed(1)}x`;
+        }
+      } catch (e) {}
+    }
+
+    window.onload = () => {
+      loadSavedSoundSettings();
+
+      try {
+        const slot = localStorage.getItem('matempa_active_slot');
+        if (slot !== null) activeSlot = parseInt(slot);
+        const customTitle = localStorage.getItem(`matempa_routine_name_${activeSlot}`);
+        runRoutineTitle.textContent = customTitle ? customTitle : `ROUTINE #${activeSlot + 1}`;
+        const saved = localStorage.getItem(`matempa_routine_slot_${activeSlot}`);
+        routine = saved ? JSON.parse(saved) : [];
+      } catch (e) { routine = []; }
+
+      if (!routine || routine.length === 0) {
+        routine = [
+          { bpm: 180, durationSec: 300, sound: 'wood', meter: 'p1', vol: 0.9, pitch: 800 },
+          { bpm: 165, durationSec: 300, sound: 'wood', meter: 'p1', vol: 0.9, pitch: 800 }
+        ];
+      }
+
+      currentStepIndex = 0;
+      currentBeatIndex = 0;
+      elapsedMs = 0;
+      baseOffsetMs = 0;
+      lastSecondReported = -1;
+
+      applyCurrentStepToView(routine[0], 0);
+
+      const unlockAudio = () => {
+        initAudio();
+        document.removeEventListener('pointerdown', unlockAudio);
+      };
+      document.addEventListener('pointerdown', unlockAudio, { once: true });
+
+      startGPS();
+      resumeRunUI();
+      playCueSound('next_step');
+    };
+  </script>
+</body>
+</html>
