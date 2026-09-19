@@ -226,7 +226,7 @@
 
   <script>
     // ==========================================
-    // MA.TEMPA ENGINE (PRO HYBRID SENSOR FUSION)
+    // MA.TEMPA RUN ENGINE (PRECISION SENSOR FIX)
     // ==========================================
 
     let isRunning = false;
@@ -280,7 +280,7 @@
       'p5': { label: '●●●○', pattern: [1, 1, 1, 0] }
     };
 
-    // 센서 & 보정 상태 변수
+    // 거리 & 센서 융합 변수
     let distanceMeters = 0;
     let stepDerivedDistance = 0;
     let gpsDerivedDistance = 0;
@@ -292,12 +292,15 @@
     let gpsWatchId = null;
     let currentSpeedMs = 0;
 
-    let smoothedAcc = 9.8;
+    // ★ 정밀 가속도 & 케이던스 알고리즘 변수
+    let dynamicGravity = 9.8;
+    let prevAccDelta = 0;
+    let isRising = false;
     let lastPeakTime = 0;
     let stepTimesQueue = [];
     let currentSPM = 0;
     let stepsInLastSec = 0;
-    const STRIDE_LENGTH = 0.75;
+    const STRIDE_LENGTH = 0.75; // 75cm
 
     // ==========================================
     // 🔊 AUDIO ENGINE (SYNTHESIZER)
@@ -469,24 +472,47 @@
     }
 
     // ==========================================
-    // 🏃 MOTION & GPS SENSORS
+    // 🏃 MOTION SENSOR (정밀 발구름 피크 감지 알고리즘)
     // ==========================================
     window.addEventListener('devicemotion', (event) => {
-      if (!isRunning || isAutoPausedNow || isUserPaused) return;
+      // ★ 핵심 수정: isAutoPausedNow일 때도 모션 감지를 중단하지 않아야 다시 달릴 때 오토재개가 가능함!
+      if (!isRunning || isUserPaused) return;
+
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x == null) return;
 
-      const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-      smoothedAcc = smoothedAcc * 0.8 + magnitude * 0.2;
+      const rawMag = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+
+      // 동적 중력 필터 (기기 자세/기울기 자동 보정)
+      dynamicGravity = dynamicGravity * 0.92 + rawMag * 0.08;
+      const accDelta = rawMag - dynamicGravity; // 순수 발구름 충격량
 
       const now = Date.now();
-      if (smoothedAcc > 11.2 && (now - lastPeakTime) > 260) {
-        lastPeakTime = now;
-        stepTimesQueue.push(now);
-        stepsInLastSec++;
+
+      // 파동의 상승/하강 변곡점(Peak)을 감지하는 고성능 스텝 판정
+      if (accDelta > prevAccDelta) {
+        isRising = true;
+      } else if (isRising && accDelta < prevAccDelta) {
+        // 꼭대기(Peak)를 찍고 하강하는 순간
+        isRising = false;
+        
+        // 최소 충격량(1.4G 이상) & 최소 간격(240ms 이상: 최대 250 SPM) 조건 충족 시 걸음 인정
+        if (prevAccDelta > 1.4 && (now - lastPeakTime) > 240) {
+          lastPeakTime = now;
+          stepTimesQueue.push(now);
+
+          // 일시정지 상태가 아닐 때만 거리 누적에 반영
+          if (!isAutoPausedNow) {
+            stepsInLastSec++;
+          }
+        }
       }
+      prevAccDelta = accDelta;
     });
 
+    // ==========================================
+    // 🛰️ GPS SENSOR
+    // ==========================================
     function handleGPSPosition(pos) {
       if (!isRunning || isUserPaused) return;
       const coords = pos.coords;
@@ -541,26 +567,41 @@
     }
 
     // ==========================================
-    // ⏱️ 1초 메인 업데이트 루프 (케이던스 기반 정밀 오토스탑)
+    // ⏱️ 1초 메인 업데이트 루프 (정밀 케이던스 계산)
     // ==========================================
     setInterval(() => {
       if (!isRunning || isUserPaused) return;
       const now = Date.now();
 
-      // 1. SPM 케이던스 계산
-      const validThreshold = now - 4000;
-      stepTimesQueue = stepTimesQueue.filter(t => t >= validThreshold);
-      const rawSpm = (stepTimesQueue.length / 4) * 60;
+      // ★ 1. 최근 3.5초 이내 걸음 데이터 필터링
+      stepTimesQueue = stepTimesQueue.filter(t => (now - t) <= 3500);
 
-      if (isAutoPausedNow || stepTimesQueue.length === 0) {
-        currentSPM = currentSPM * 0.5;
-        if (currentSPM < 15) currentSPM = 0;
-      } else {
-        currentSPM = currentSPM === 0 ? rawSpm : (currentSPM * 0.65 + rawSpm * 0.35);
+      let instantSpm = 0;
+      const qLen = stepTimesQueue.length;
+
+      // 마지막 걸음 발생 후 2.0초 넘게 다음 걸음이 없으면 즉시 감속 처리
+      const timeSinceLastStep = stepTimesQueue.length > 0 ? (now - stepTimesQueue[qLen - 1]) : 9999;
+
+      if (qLen >= 2 && timeSinceLastStep < 2000) {
+        // [수정] 실제 걸음 간격(Time-Interval) 기반 정밀 계산 (1단위 부드러운 계산)
+        const timeSpanSec = (stepTimesQueue[qLen - 1] - stepTimesQueue[0]) / 1000;
+        if (timeSpanSec > 0.3) {
+          instantSpm = ((qLen - 1) / timeSpanSec) * 60;
+        }
       }
-      liveCadenceDisplay.textContent = currentSPM > 20 ? Math.round(currentSPM) : '--';
 
-      // 2. 거리 누적 (발걸음 + 보정)
+      // 지수 이동 평균(EMA)으로 자연스러운 속도계 연출
+      if (instantSpm > 40) {
+        currentSPM = currentSPM === 0 ? instantSpm : (currentSPM * 0.55 + instantSpm * 0.45);
+      } else {
+        currentSPM = currentSPM * 0.4;
+        if (currentSPM < 15) currentSPM = 0;
+      }
+
+      const displaySpm = Math.round(currentSPM);
+      liveCadenceDisplay.textContent = displaySpm > 25 ? displaySpm : '--';
+
+      // 2. 거리 누적 (발걸음 + GPS 보정)
       let stepIncrement = stepsInLastSec * STRIDE_LENGTH;
       stepsInLastSec = 0;
 
@@ -572,7 +613,7 @@
       liveDistanceDisplay.textContent = (distanceMeters / 1000).toFixed(2);
 
       // 3. 페이스 계산
-      let effectiveSpeed = currentSpeedMs > 0.5 ? currentSpeedMs : stepIncrement;
+      let effectiveSpeed = currentSpeedMs > 0.5 ? currentSpeedMs : (displaySpm > 0 ? (displaySpm / 60) * STRIDE_LENGTH : 0);
 
       if (!isAutoPausedNow && effectiveSpeed >= 0.7) {
         const secPerKm = 1000 / effectiveSpeed;
@@ -583,12 +624,10 @@
         livePaceDisplay.textContent = "--'--\"";
       }
 
-      // ★ 4. [요청 반영] 케이던스 기반 오토스탑 & 오토재개 로직
+      // ★ 4. 케이던스 기반 정밀 오토포즈 & 오토재개
       if (isAutoPauseEnabled) {
-        const calculatedSpm = Math.round(currentSPM);
-
-        // 케이던스가 60 이하로 떨어지거나 4초간 걸음이 없으면 정지
-        if (calculatedSpm < 60 || stepTimesQueue.length === 0) {
+        // 케이던스가 60 이하로 떨어지거나 걸음이 멈춘 경우
+        if (displaySpm < 60) {
           if (!isAutoPausedNow) {
             isAutoPausedNow = true;
             autoPauseStatusPill.style.display = 'inline-block';
@@ -596,8 +635,8 @@
             if (navigator.vibrate) navigator.vibrate(30);
           }
         } 
-        // 다시 발을 굴러 케이던스가 80 이상으로 올라오면 자동 재개
-        else if (calculatedSpm >= 80) {
+        // 발을 굴러 케이던스가 75 이상으로 올라온 경우 즉시 재개
+        else if (displaySpm >= 75) {
           if (isAutoPausedNow) {
             isAutoPausedNow = false;
             autoPauseStatusPill.style.display = 'none';
